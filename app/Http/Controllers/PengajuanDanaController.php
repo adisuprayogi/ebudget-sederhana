@@ -77,6 +77,30 @@ class PengajuanDanaController extends Controller
             ->paginate($request->per_page ?? 15)
             ->withQueryString();
 
+        // Calculate statistics based on user's access
+        $statsQuery = PengajuanDana::query();
+
+        // Apply same permission filter to stats
+        if (!$user->hasPermission('pengajuan_dana.view_all')) {
+            if ($user->hasPermission('pengajuan_dana.view_divisi')) {
+                $accessibleDivisionIds = $user->divisionIds();
+                if (!empty($accessibleDivisionIds)) {
+                    $statsQuery->whereIn('divisi_id', $accessibleDivisionIds);
+                } else {
+                    $statsQuery->where('created_by', $user->id);
+                }
+            } else {
+                $statsQuery->where('created_by', $user->id);
+            }
+        }
+
+        $statistics = [
+            'total' => $statsQuery->count(),
+            'menunggu_approval' => (clone $statsQuery)->where('status', 'menunggu_approval')->count(),
+            'disetujui' => (clone $statsQuery)->whereIn('status', ['approved', 'disetujui'])->count(),
+            'total_nilai' => $statsQuery->sum('total_pengajuan'),
+        ];
+
         // Get filter options
         $statuses = PengajuanDana::select('status')->distinct()->pluck('status');
         $jenisPengajuans = PengajuanDana::select('jenis_pengajuan')->distinct()->pluck('jenis_pengajuan');
@@ -84,6 +108,7 @@ class PengajuanDanaController extends Controller
 
         return view('pengajuan-dana.index', [
             'pengajuans' => $pengajuans,
+            'statistics' => $statistics,
             'filters' => $request->only(['search', 'status', 'jenis_pengajuan', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai']),
             'filterOptions' => [
                 'statuses' => $statuses,
@@ -101,9 +126,9 @@ class PengajuanDanaController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show form to select jenis pengajuan.
      */
-    public function create()
+    public function selectJenis()
     {
         $user = Auth::user();
 
@@ -111,22 +136,42 @@ class PengajuanDanaController extends Controller
             abort(403);
         }
 
-        // Get available program kerja based on user's divisi
-        $programKerjas = ProgramKerja::where('divisi_id', $user->divisi_id)
-            ->where('is_active', true)
+        return view('pengajuan-dana.select-jenis');
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user->hasPermission('pengajuan_dana.create')) {
+            abort(403);
+        }
+
+        // Get jenis pengajuan from query parameter
+        $jenisPengajuan = $request->query('jenis');
+
+        // Validate jenis pengajuan
+        $validJenis = ['kegiatan', 'pengadaan', 'pembayaran', 'honorarium', 'sewa', 'konsumi', 'reimbursement', 'lainnya'];
+        if (!$jenisPengajuan || !in_array($jenisPengajuan, $validJenis)) {
+            return redirect()->route('pengajuan-dana.select-jenis');
+        }
+
+        // Get all program kerjas for user's divisions
+        $programKerjas = ProgramKerja::whereIn('divisi_id', $user->divisionIds())
+            ->where('status', 'active')
             ->orderBy('nama_program')
             ->get();
 
-        // Get divisi options
-        $divisis = Divisi::orderBy('nama_divisi')->get();
-
-        // Get penerima manfaat options
-        $penerimaOptions = PenerimaManfaatService::getPenerimaManfaatOptions('');
+        // Get users for karyawan dropdown
+        $users = \App\Models\User::orderBy('name')->get();
 
         return view('pengajuan-dana.create', [
             'programKerjas' => $programKerjas,
-            'divisis' => $divisis,
-            'penerimaOptions' => $penerimaOptions,
+            'users' => $users,
+            'jenisPengajuan' => $jenisPengajuan,
             'user' => $user,
         ]);
     }
@@ -149,12 +194,12 @@ class PengajuanDanaController extends Controller
                 'program_kerja_id' => $request->program_kerja_id,
                 'divisi_id' => $request->divisi_id,
                 'created_by' => Auth::id(),
-                'tanggal_pengajuan' => $request->tanggal_pengajuan,
+                'tanggal_pengajuan' => $request->tanggal_pengajuan ?? now()->toDateString(),
                 'periode_mulai' => $request->periode_mulai,
                 'periode_selesai' => $request->periode_selesai,
                 'total_pengajuan' => $request->total_pengajuan,
                 'deskripsi' => $request->deskripsi,
-                'penerima_manfaat_type' => $request->penerima_manfaat_type,
+                'penerima_manfaat_type' => $request->jenis_penerima,
                 'penerima_manfaat_id' => $request->penerima_manfaat_id,
                 'penerima_manfaat_name' => $request->penerima_manfaat_name,
                 'penerima_manfaat_detail' => $request->penerima_manfaat_detail,
@@ -166,14 +211,19 @@ class PengajuanDanaController extends Controller
 
             // Create detail pengajuan
             foreach ($request->details as $detail) {
+                $volume = (float) ($detail['volume'] ?? 0);
+                $hargaSatuan = (float) ($detail['harga_satuan'] ?? 0);
+                $subtotal = $volume * $hargaSatuan;
+
                 DetailPengajuan::create([
                     'pengajuan_dana_id' => $pengajuan->id,
-                    'sub_program_id' => $detail['sub_program_id'] ?? null,
+                    'sub_program_id' => $detail['sub_program_id'] ?? $request->sub_program_id,
+                    'detail_anggaran_id' => $detail['detail_anggaran_id'] ?? null,
                     'uraian' => $detail['uraian'],
-                    'volume' => $detail['volume'],
+                    'volume' => $volume,
                     'satuan' => $detail['satuan'],
-                    'harga_satuan' => $detail['harga_satuan'],
-                    'subtotal' => $detail['subtotal'],
+                    'harga_satuan' => $hargaSatuan,
+                    'subtotal' => $subtotal,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -224,17 +274,27 @@ class PengajuanDanaController extends Controller
             abort(403);
         }
 
-        $pengajuanDana->load([
-            'divisi',
-            'programKerja',
-            'createdBy',
-            'detailPengajuan.subProgram',
-            'approvals.approver',
-            'pencairanDana',
-            'laporanPertanggungJawaban',
-            'refunds',
-            'attachments',
-        ]);
+        // Load relationships that exist
+        $relationships = ['divisi', 'programKerja', 'createdBy', 'details.subProgram', 'approvals.approver', 'pencairanDana'];
+        $optionalRelationships = ['attachments', 'laporanPertanggungJawaban', 'refunds'];
+
+        // Load main relationships
+        foreach ($relationships as $relation) {
+            try {
+                $pengajuanDana->load($relation);
+            } catch (\Exception $e) {
+                // Ignore if relationship doesn't exist
+            }
+        }
+
+        // Try loading optional relationships
+        foreach ($optionalRelationships as $relation) {
+            try {
+                $pengajuanDana->load($relation);
+            } catch (\Exception $e) {
+                // Ignore if relationship doesn't exist
+            }
+        }
 
         // Get approval status
         $approvalStatus = ApprovalService::getApprovalStatus($pengajuanDana->id);
@@ -273,13 +333,13 @@ class PengajuanDanaController extends Controller
         }
 
         $pengajuanDana->load([
-            'detailPengajuan.subProgram',
+            'details.subProgram',
             'attachments',
         ]);
 
         // Get available program kerja based on user's divisi
         $programKerjas = ProgramKerja::where('divisi_id', $pengajuanDana->divisi_id)
-            ->where('is_active', true)
+            ->where('status', 'active')
             ->orderBy('nama_program')
             ->get();
 
@@ -315,7 +375,7 @@ class PengajuanDanaController extends Controller
                 'periode_selesai' => $request->periode_selesai ?? $pengajuanDana->periode_selesai,
                 'total_pengajuan' => $request->total_pengajuan ?? $pengajuanDana->total_pengajuan,
                 'deskripsi' => $request->deskripsi ?? $pengajuanDana->deskripsi,
-                'penerima_manfaat_type' => $request->penerima_manfaat_type ?? $pengajuanDana->penerima_manfaat_type,
+                'penerima_manfaat_type' => $request->jenis_penerima ?? $pengajuanDana->penerima_manfaat_type,
                 'penerima_manfaat_id' => $request->penerima_manfaat_id ?? $pengajuanDana->penerima_manfaat_id,
                 'penerima_manfaat_name' => $request->penerima_manfaat_name ?? $pengajuanDana->penerima_manfaat_name,
                 'penerima_manfaat_detail' => $request->penerima_manfaat_detail ?? $pengajuanDana->penerima_manfaat_detail,
@@ -338,7 +398,8 @@ class PengajuanDanaController extends Controller
                         DetailPengajuan::where('id', $detail['id'])
                             ->where('pengajuan_dana_id', $pengajuanDana->id)
                             ->update([
-                                'sub_program_id' => $detail['sub_program_id'] ?? null,
+                                'sub_program_id' => $detail['sub_program_id'] ?? $request->sub_program_id,
+                                'detail_anggaran_id' => $detail['detail_anggaran_id'] ?? null,
                                 'uraian' => $detail['uraian'],
                                 'volume' => $detail['volume'],
                                 'satuan' => $detail['satuan'],
@@ -350,7 +411,8 @@ class PengajuanDanaController extends Controller
                         // Create new detail
                         DetailPengajuan::create([
                             'pengajuan_dana_id' => $pengajuanDana->id,
-                            'sub_program_id' => $detail['sub_program_id'] ?? null,
+                            'sub_program_id' => $detail['sub_program_id'] ?? $request->sub_program_id,
+                            'detail_anggaran_id' => $detail['detail_anggaran_id'] ?? null,
                             'uraian' => $detail['uraian'],
                             'volume' => $detail['volume'],
                             'satuan' => $detail['satuan'],
@@ -429,7 +491,7 @@ class PengajuanDanaController extends Controller
             }
 
             // Delete detail pengajuan
-            $pengajuanDana->detailPengajuan()->delete();
+            $pengajuanDana->details()->delete();
 
             // Delete pengajuan
             $pengajuanDana->delete();

@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use App\Services\PenerimaManfaatService;
 
 class UpdatePengajuanDanaRequest extends FormRequest
 {
@@ -41,19 +40,20 @@ class UpdatePengajuanDanaRequest extends FormRequest
     {
         return [
             'judul_pengajuan' => 'sometimes|required|string|max:255',
-            'jenis_pengajuan' => 'sometimes|required|in:kegiatan,pengadaan,pembayaran,honorarium,sewa,konsumsi,lainnya',
+            'jenis_pengajuan' => 'sometimes|required|in:kegiatan,pengadaan,pembayaran,honorarium,sewa,konsumi,reimbursement,lainnya',
             'program_kerja_id' => 'sometimes|required|exists:program_kerjas,id',
+            'sub_program_id' => 'required|exists:sub_programs,id',
             'divisi_id' => 'sometimes|required|exists:divisis,id',
-            'tanggal_pengajuan' => 'sometimes|required|date',
+            'tanggal_pengajuan' => 'nullable|date',
             'periode_mulai' => 'sometimes|required|date',
             'periode_selesai' => 'sometimes|required|date|after_or_equal:periode_mulai',
             'total_pengajuan' => 'sometimes|required|numeric|min:1000',
             'deskripsi' => 'nullable|string|max:1000',
 
             // Penerima manfaat validation
-            'penerima_manfaat_type' => 'sometimes|required|string',
-            'penerima_manfaat_id' => 'nullable|required_if:penerima_manfaat_type,pegawai,vendor,pic_kegiatan|integer',
-            'penerima_manfaat_name' => 'nullable|required_if:penerima_manfaat_type,pengaju,internal,external,non_pegawai|string|max:255',
+            'jenis_penerima' => 'sometimes|required|in:karyawan,vendor,lainnya',
+            'penerima_manfaat_id' => 'nullable|required_if:jenis_penerima,karyawan|integer|exists:users,id',
+            'penerima_manfaat_name' => 'nullable|required_if:jenis_penerima,vendor,lainnya|string|max:255',
             'penerima_manfaat_detail' => 'nullable|string',
 
             // Detail pengajuan validation
@@ -64,6 +64,8 @@ class UpdatePengajuanDanaRequest extends FormRequest
             'details.*.satuan' => 'required|string|max:50',
             'details.*.harga_satuan' => 'required|numeric|min:1000',
             'details.*.subtotal' => 'required|numeric|min:1000',
+            'details.*.detail_anggaran_id' => 'nullable|exists:detail_anggarans,id',
+            'details.*.sub_program_id' => 'nullable|exists:sub_programs,id',
 
             // Removed details (for soft delete)
             'removed_details' => 'nullable|array',
@@ -95,9 +97,10 @@ class UpdatePengajuanDanaRequest extends FormRequest
             'jenis_pengajuan.in' => 'Jenis pengajuan tidak valid',
             'program_kerja_id.required' => 'Program kerja wajib dipilih',
             'program_kerja_id.exists' => 'Program kerja tidak valid',
+            'sub_program_id.required' => 'Sub program wajib dipilih',
+            'sub_program_id.exists' => 'Sub program tidak valid',
             'divisi_id.required' => 'Divisi wajib dipilih',
             'divisi_id.exists' => 'Divisi tidak valid',
-            'tanggal_pengajuan.required' => 'Tanggal pengajuan wajib diisi',
             'tanggal_pengajuan.date' => 'Format tanggal tidak valid',
             'periode_mulai.required' => 'Periode mulai wajib diisi',
             'periode_mulai.date' => 'Format periode mulai tidak valid',
@@ -108,9 +111,11 @@ class UpdatePengajuanDanaRequest extends FormRequest
             'total_pengajuan.numeric' => 'Total pengajuan harus berupa angka',
             'total_pengajuan.min' => 'Total pengajuan minimal Rp 1.000',
 
-            'penerima_manfaat_type.required' => 'Tipe penerima manfaat wajib dipilih',
-            'penerima_manfaat_id.required_if' => 'Penerima manfaat wajib dipilih',
-            'penerima_manfaat_name.required_if' => 'Nama penerima manfaat wajib diisi',
+            'jenis_penerima.required' => 'Jenis penerima wajib dipilih',
+            'jenis_penerima.in' => 'Jenis penerima tidak valid',
+            'penerima_manfaat_id.required_if' => 'Nama karyawan wajib dipilih',
+            'penerima_manfaat_id.exists' => 'Karyawan tidak valid',
+            'penerima_manfaat_name.required_if' => 'Nama penerima wajib diisi',
 
             'details.required' => 'Detail pengajuan wajib diisi',
             'details.min' => 'Minimal harus ada 1 detail pengajuan',
@@ -166,29 +171,18 @@ class UpdatePengajuanDanaRequest extends FormRequest
      */
     protected function validatePenerimaManfaat($validator)
     {
-        $jenisPengajuan = $this->input('jenis_pengajuan');
-        if (!$jenisPengajuan) {
-            $jenisPengajuan = $this->route('pengajuan_dana')->jenis_pengajuan;
-        }
-
-        $penerimaType = $this->input('penerima_manfaat_type');
+        $jenisPenerima = $this->input('jenis_penerima');
         $penerimaId = $this->input('penerima_manfaat_id');
         $penerimaName = $this->input('penerima_manfaat_name');
 
-        if ($penerimaType) {
-            if (!PenerimaManfaatService::validatePenerimaManfaat($jenisPengajuan, $penerimaType, $penerimaId)) {
-                $validator->errors()->add('penerima_manfaat_type', 'Pilihan penerima manfaat tidak valid untuk jenis pengajuan ini');
+        // Only validate if jenis_penerima is being updated
+        if ($jenisPenerima) {
+            if ($jenisPenerima === 'karyawan' && empty($penerimaId)) {
+                $validator->errors()->add('penerima_manfaat_id', 'Nama karyawan wajib dipilih');
             }
 
-            // Special validation for pembayaran type
-            if ($jenisPengajuan === 'pembayaran') {
-                if (!in_array($penerimaType, ['pegawai', 'internal', 'external', 'non_pegawai'])) {
-                    $validator->errors()->add('penerima_manfaat_type', 'Untuk pembayaran, penerima harus pegawai atau user internal/external');
-                }
-
-                if ($penerimaType === 'external' && empty($penerimaName)) {
-                    $validator->errors()->add('penerima_manfaat_name', 'Nama penerima wajib diisi untuk pembayaran external');
-                }
+            if (in_array($jenisPenerima, ['vendor', 'lainnya']) && empty($penerimaName)) {
+                $validator->errors()->add('penerima_manfaat_name', 'Nama penerima wajib diisi');
             }
         }
     }
@@ -272,7 +266,7 @@ class UpdatePengajuanDanaRequest extends FormRequest
             'periode_selesai' => 'Periode Selesai',
             'total_pengajuan' => 'Total Pengajuan',
             'deskripsi' => 'Deskripsi',
-            'penerima_manfaat_type' => 'Tipe Penerima Manfaat',
+            'jenis_penerima' => 'Jenis Penerima',
             'penerima_manfaat_id' => 'Penerima Manfaat',
             'penerima_manfaat_name' => 'Nama Penerima Manfaat',
             'penerima_manfaat_detail' => 'Detail Penerima Manfaat',

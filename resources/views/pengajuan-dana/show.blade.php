@@ -154,7 +154,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-secondary-100">
-                                @foreach($pengajuan->detailPengajuan as $detail)
+                                @foreach($pengajuan->details as $detail)
                                 <tr>
                                     <td class="px-6 py-4 text-sm text-secondary-900">{{ $detail->uraian }}</td>
                                     <td class="px-6 py-4 text-sm text-secondary-700">{{ $detail->volume }}</td>
@@ -201,7 +201,7 @@
                 @endif
 
                 <!-- Lampiran -->
-                @if($pengajuan->lampiranPengajuan && $pengajuan->lampiranPengajuan->count() > 0)
+                @if($pengajuan->attachments && $pengajuan->attachments->count() > 0)
                 <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
                     <div class="px-6 py-4 border-b border-secondary-200">
                         <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
@@ -215,14 +215,26 @@
                     </div>
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            @foreach($pengajuan->lampiranPengajuan as $lampiran)
-                            <a href="{{ Storage::url($lampiran->path_dokumen) }}" target="_blank" class="flex items-center p-4 border border-secondary-200 rounded-xl hover:bg-secondary-50 hover:border-primary-300 transition-colors">
-                                <svg class="w-8 h-8 text-secondary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                </svg>
+                            @foreach($pengajuan->attachments as $attachment)
+                            <a href="{{ asset('storage/' . $attachment->path) }}" target="_blank" class="flex items-center p-4 border border-secondary-200 rounded-xl hover:bg-secondary-50 hover:border-primary-300 transition-colors">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                    @if(str_contains($attachment->mime_type, 'image'))
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    @elseif(str_contains($attachment->mime_type, 'pdf'))
+                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                    @else
+                                        <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                    @endif
+                                </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-secondary-900 truncate">{{ $lampiran->nama_dokumen }}</p>
-                                    <p class="text-xs text-secondary-500">{{ $lampiran->jenis_dokumen }}</p>
+                                    <p class="text-sm font-medium text-secondary-900 truncate">{{ $attachment->filename }}</p>
+                                    <p class="text-xs text-secondary-500">{{ formatBytes($attachment->size) }}</p>
                                 </div>
                                 <svg class="w-5 h-5 text-secondary-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -232,10 +244,31 @@
                         </div>
                     </div>
                 </div>
+                @else
+                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+                    <div class="px-6 py-4 border-b border-secondary-200">
+                        <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
+                            <span class="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                </svg>
+                            </span>
+                            Lampiran Dokumen
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="text-center py-8">
+                            <svg class="w-12 h-12 text-secondary-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            </svg>
+                            <p class="text-sm text-secondary-500">Tidak ada lampiran dokumen</p>
+                        </div>
+                    </div>
+                </div>
                 @endif
 
                 <!-- Riwayat Approval -->
-                @if($pengajuan->riwayatApproval && $pengajuan->riwayatApproval->count() > 0)
+                @if($pengajuan->approvals && $pengajuan->approvals->count() > 0)
                 <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
                     <div class="px-6 py-4 border-b border-secondary-200">
                         <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
@@ -248,25 +281,25 @@
                         </h2>
                     </div>
                     <div class="p-6">
-                        <div class="space-y-4">
-                            @foreach($pengajuan->riwayatApproval as $riwayat)
-                            <div class="flex items-start">
+                        <div class="space-y-3">
+                            @foreach($pengajuan->approvals as $riwayat)
+                            <div class="flex items-start p-4 border border-secondary-200 rounded-xl hover:bg-secondary-50 transition-colors">
                                 <div class="flex-shrink-0">
                                     @if($riwayat->status === 'approved')
-                                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                             </svg>
                                         </div>
                                     @elseif($riwayat->status === 'rejected')
-                                        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </div>
                                     @else
-                                        <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
@@ -274,12 +307,46 @@
                                 </div>
                                 <div class="ml-4 flex-1">
                                     <div class="flex items-center justify-between">
-                                        <p class="text-sm font-medium text-secondary-900">{{ $riwayat->user->name ?? 'System' }}</p>
-                                        <p class="text-xs text-secondary-500">{{ \Carbon\Carbon::parse($riwayat->created_at)->format('d/m/Y H:i') }}</p>
+                                        <div>
+                                            <p class="text-sm font-semibold text-secondary-900">{{ $riwayat->approver->name ?? 'System' }}</p>
+                                            <p class="text-xs text-secondary-500 mt-0.5">{{ ucfirst(str_replace('_', ' ', $riwayat->level)) }}</p>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            @if($riwayat->status === 'approved')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                                    Disetujui
+                                                </span>
+                                            @elseif($riwayat->status === 'rejected')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                                    Ditolak
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                                                    Menunggu
+                                                </span>
+                                            @endif
+                                        </div>
                                     </div>
-                                    <p class="text-xs text-secondary-500">{{ $riwayat->level_approval }}</p>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <p class="text-xs text-secondary-500">
+                                            @if($riwayat->approved_at)
+                                                Diproses: {{ \Carbon\Carbon::parse($riwayat->approved_at)->format('d/m/Y H:i') }}
+                                            @else
+                                                Dibuat: {{ \Carbon\Carbon::parse($riwayat->created_at)->format('d/m/Y H:i') }}
+                                            @endif
+                                        </p>
+                                        @if($riwayat->status === 'pending')
+                                            <span class="text-xs text-blue-600 font-medium">Menunggu persetujuan</span>
+                                        @elseif($riwayat->status === 'approved')
+                                            <span class="text-xs text-green-600 font-medium">✓ Telah disetujui</span>
+                                        @else
+                                            <span class="text-xs text-red-600 font-medium">✗ Ditolak</span>
+                                        @endif
+                                    </div>
                                     @if($riwayat->catatan)
-                                    <p class="text-sm text-secondary-700 mt-1">{{ $riwayat->catatan }}</p>
+                                        <div class="mt-2 p-2 bg-secondary-50 rounded-lg">
+                                            <p class="text-xs text-secondary-600"><span class="font-medium">Catatan:</span> {{ $riwayat->catatan }}</p>
+                                        </div>
                                     @endif
                                 </div>
                             </div>
@@ -323,7 +390,7 @@
                         <h3 class="text-lg font-semibold text-secondary-900">Aksi</h3>
                     </div>
                     <div class="p-6 space-y-3">
-                        @if($pengajuan->status === 'draft' && auth()->user()->can('submit', $pengajuan))
+                        @if($pengajuan->status === 'draft' && $pengajuan->created_by === auth()->user()->id)
                         <form method="POST" action="{{ route('pengajuan-dana.submit', $pengajuan) }}">
                             @csrf
                             <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">

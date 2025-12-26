@@ -41,3 +41,16 @@ if (!function_exists('statusBadge')) {
         return $badges[$status] ?? '<span class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700">' . ucfirst($status) . '</span>';
     }
 }
+
+if (!function_exists('formatBytes')) {
+    function formatBytes($bytes, $precision = 2)
+    {
+        if ($bytes === null) return '-';
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        $bytes /= pow(1024, $pow);
+        return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+}

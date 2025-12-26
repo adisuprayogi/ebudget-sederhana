@@ -12,6 +12,7 @@ class DetailPengajuan extends Model
     protected $fillable = [
         'pengajuan_dana_id',
         'sub_program_id',
+        'detail_anggaran_id',
         'uraian',
         'volume',
         'satuan',
@@ -39,6 +40,14 @@ class DetailPengajuan extends Model
     public function subProgram()
     {
         return $this->belongsTo(SubProgram::class);
+    }
+
+    /**
+     * Get the detail anggaran for the detail.
+     */
+    public function detailAnggaran()
+    {
+        return $this->belongsTo(DetailAnggaran::class);
     }
 
     /**

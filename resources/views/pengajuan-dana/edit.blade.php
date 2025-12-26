@@ -141,7 +141,7 @@
 
                 <div id="detail-container" class="space-y-3">
                     @php
-                        $details = old('details', $pengajuan->detailPengajuan->toArray() ?? []);
+                        $details = old('details', $pengajuan->details->toArray() ?? []);
                         $index = 0;
                     @endphp
                     @foreach($details as $detail)

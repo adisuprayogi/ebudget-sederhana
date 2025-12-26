@@ -6,7 +6,7 @@
                 <p class="text-secondary-600 mt-1">Kelola pengajuan dana untuk keperluan operasional</p>
             </div>
             @if(auth()->user()->hasAnyRole(['kepala_divisi', 'staff_divisi']))
-                <a href="{{ route('pengajuan-dana.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
+                <a href="{{ route('pengajuan-dana.select-jenis') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -23,7 +23,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="text-sm text-secondary-500 mb-1">Total Pengajuan</div>
-                        <div class="text-2xl font-bold text-secondary-900">24</div>
+                        <div class="text-2xl font-bold text-secondary-900">{{ $statistics['total'] ?? 0 }}</div>
                     </div>
                     <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="text-sm text-secondary-500 mb-1">Menunggu Approval</div>
-                        <div class="text-2xl font-bold text-amber-600">5</div>
+                        <div class="text-2xl font-bold text-amber-600">{{ $statistics['menunggu_approval'] ?? 0 }}</div>
                     </div>
                     <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +49,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="text-sm text-secondary-500 mb-1">Disetujui</div>
-                        <div class="text-2xl font-bold text-green-600">18</div>
+                        <div class="text-2xl font-bold text-green-600">{{ $statistics['disetujui'] ?? 0 }}</div>
                     </div>
                     <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="text-sm text-secondary-500 mb-1">Total Nilai</div>
-                        <div class="text-2xl font-bold text-primary-600">Rp 450jt</div>
+                        <div class="text-2xl font-bold text-primary-600">{{ formatRupiah($statistics['total_nilai'] ?? 0) }}</div>
                     </div>
                     <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,7 +199,7 @@
                                         </svg>
                                         <p class="text-secondary-500">Belum ada pengajuan dana</p>
                                         @if(auth()->user()->hasAnyRole(['kepala_divisi', 'staff_divisi']))
-                                            <a href="{{ route('pengajuan-dana.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
+                                            <a href="{{ route('pengajuan-dana.select-jenis') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
                                                 Buat Pengajuan Baru
                                             </a>
                                         @endif

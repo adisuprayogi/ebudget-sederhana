@@ -173,4 +173,49 @@ class SubProgramController extends Controller
         return back()
             ->with('success', 'Sub program berhasil dihapus.');
     }
+
+    /**
+     * Get detail anggarans for a sub program
+     */
+    public function detailAnggarans(Divisi $divisi, ProgramKerja $programKerja, SubProgram $subProgram)
+    {
+        $user = Auth::user();
+
+        // Check access
+        if (!$user->hasRole('superadmin') && !$user->hasRole('direktur_utama')) {
+            $accessibleDivisionIds = $user->divisionIds();
+            if (!in_array($divisi->id, $accessibleDivisionIds)) {
+                abort(403, 'Anda tidak memiliki akses ke divisi ini.');
+            }
+        }
+
+        // Verify relationships
+        if ($programKerja->divisi_id !== $divisi->id) {
+            abort(404, 'Program kerja tidak ditemukan di divisi ini.');
+        }
+
+        if ($subProgram->program_kerja_id !== $programKerja->id) {
+            abort(404, 'Sub program tidak ditemukan di program kerja ini.');
+        }
+
+        $detailAnggarans = $subProgram->detailAnggarans()->get();
+
+        // Calculate remaining for each detail anggaran
+        $detailAnggarans->each(function ($detail) {
+            // Get total used from detail pengajuan
+            $totalUsed = \App\Models\DetailPengajuan::where('detail_anggaran_id', $detail->id)
+                ->whereHas('pengajuanDana', function ($query) {
+                    $query->whereIn('status', ['disetujui', 'dicairkan', 'selesai']);
+                })
+                ->sum('subtotal');
+
+            $detail->sisa_nominal = max(0, $detail->total_nominal - $totalUsed);
+            $detail->total_used = $totalUsed;
+        });
+
+        return response()->json([
+            'sub_program' => $subProgram,
+            'detail_anggarans' => $detailAnggarans,
+        ]);
+    }
 }

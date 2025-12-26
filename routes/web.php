@@ -98,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Sub Program Routes (nested under program-kerja)
         Route::prefix('{divisi}/{programKerja}/sub-programs')->name('sub-programs.')->group(function () {
             Route::post('/', [SubProgramController::class, 'store'])->name('store');
+            Route::get('/{subProgram}/detail-anggarans', [SubProgramController::class, 'detailAnggarans'])->name('detail-anggarans');
             Route::put('/{subProgram}', [SubProgramController::class, 'update'])->name('update');
             Route::delete('/{subProgram}', [SubProgramController::class, 'destroy'])->name('destroy');
 
@@ -166,6 +167,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ============================================================
     Route::prefix('pengajuan-dana')->name('pengajuan-dana.')->group(function () {
         Route::get('/', [PengajuanDanaController::class, 'index'])->name('index');
+        Route::get('/select-jenis', [PengajuanDanaController::class, 'selectJenis'])->name('select-jenis');
         Route::get('/create', [PengajuanDanaController::class, 'create'])->name('create');
         Route::post('/', [PengajuanDanaController::class, 'store'])->name('store');
         Route::get('/{pengajuanDana}', [PengajuanDanaController::class, 'show'])->name('show');

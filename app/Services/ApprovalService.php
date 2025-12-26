@@ -18,10 +18,19 @@ class ApprovalService
     public static function createApprovalWorkflow(PengajuanDana $pengajuan)
     {
         // Get approval configuration based on jenis and nominal
+        // First try to get config for specific jenis_pengajuan
         $configs = ApprovalConfig::where('jenis_pengajuan', $pengajuan->jenis_pengajuan)
             ->where('minimal_nominal', '<=', $pengajuan->total_pengajuan)
             ->orderBy('level', 'asc')
             ->get();
+
+        // If no config found for specific jenis, use default 'pengajuan_dana' config
+        if ($configs->isEmpty()) {
+            $configs = ApprovalConfig::where('jenis_pengajuan', 'pengajuan_dana')
+                ->where('minimal_nominal', '<=', $pengajuan->total_pengajuan)
+                ->orderBy('urutan', 'asc')
+                ->get();
+        }
 
         $approvals = [];
 
@@ -145,16 +154,18 @@ class ApprovalService
         switch ($level) {
             case 'kepala_divisi':
                 // Get kepala divisi from same divisi as pengajuan
-                return User::whereHas('role', function ($query) {
+                return User::whereHas('roles', function ($query) {
                         $query->where('name', 'kepala_divisi');
                     })
-                    ->where('divisi_id', $pengajuan->divisi_id)
+                    ->whereHas('divisis', function ($query) use ($pengajuan) {
+                        $query->where('divisis.id', $pengajuan->divisi_id);
+                    })
                     ->where('is_active', true)
                     ->first()?->id;
 
             case 'direktur_keuangan':
                 // Get direktur keuangan
-                return User::whereHas('role', function ($query) {
+                return User::whereHas('roles', function ($query) {
                         $query->where('name', 'direktur_keuangan');
                     })
                     ->where('is_active', true)
@@ -162,7 +173,7 @@ class ApprovalService
 
             case 'direktur_utama':
                 // Get direktur utama
-                return User::whereHas('role', function ($query) {
+                return User::whereHas('roles', function ($query) {
                         $query->where('name', 'direktur_utama');
                     })
                     ->where('is_active', true)
@@ -183,7 +194,8 @@ class ApprovalService
             return false;
         }
 
-        $userRole = $user->role?->name;
+        // Get user's first role
+        $userRole = $user->roles()->first()?->name;
 
         $roleLevelMapping = [
             'kepala_divisi' => 'kepala_divisi',
@@ -226,7 +238,7 @@ class ApprovalService
         // Send to pengaju
         if ($pengajuan->created_by) {
             $pengaju = User::find($pengajuan->created_by);
-            if ($aju) {
+            if ($pengaju) {
                 // Mail::to($pengaju->email)->send(new PengajuanRejectedMail($pengajuan, $approval, $notes));
             }
         }
@@ -238,7 +250,7 @@ class ApprovalService
     private static function notifyStaffKeuangan($pengajuan)
     {
         // Get all staff keuangan users
-        $staffKeuangan = User::whereHas('role', function ($query) {
+        $staffKeuangan = User::whereHas('roles', function ($query) {
                 $query->where('name', 'staff_keuangan');
             })
             ->where('is_active', true)

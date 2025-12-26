@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use App\Services\PenerimaManfaatService;
 
 class StorePengajuanDanaRequest extends FormRequest
 {
@@ -25,19 +24,20 @@ class StorePengajuanDanaRequest extends FormRequest
     {
         return [
             'judul_pengajuan' => 'required|string|max:255',
-            'jenis_pengajuan' => 'required|in:kegiatan,pengadaan,pembayaran,honorarium,sewa,konsumsi,lainnya',
+            'jenis_pengajuan' => 'required|in:kegiatan,pengadaan,pembayaran,honorarium,sewa,konsumi,reimbursement,lainnya',
             'program_kerja_id' => 'required|exists:program_kerjas,id',
+            'sub_program_id' => 'required|exists:sub_programs,id',
             'divisi_id' => 'required|exists:divisis,id',
-            'tanggal_pengajuan' => 'required|date',
-            'periode_mulai' => 'required|date',
-            'periode_selesai' => 'required|date|after_or_equal:periode_mulai',
+            'tanggal_pengajuan' => 'nullable|date',
+            'periode_mulai' => 'nullable|date',
+            'periode_selesai' => 'nullable|date|after_or_equal:periode_mulai',
             'total_pengajuan' => 'required|numeric|min:1000',
-            'deskripsi' => 'nullable|string|max:1000',
+            'deskripsi' => 'required|string|max:1000',
 
             // Penerima manfaat validation
-            'penerima_manfaat_type' => 'required|string',
-            'penerima_manfaat_id' => 'nullable|required_if:penerima_manfaat_type,pegawai,vendor,pic_kegiatan|integer',
-            'penerima_manfaat_name' => 'nullable|required_if:penerima_manfaat_type,pengaju,internal,external,non_pegawai|string|max:255',
+            'jenis_penerima' => 'required|in:karyawan,vendor,lainnya',
+            'penerima_manfaat_id' => 'nullable|required_if:jenis_penerima,karyawan|integer|exists:users,id',
+            'penerima_manfaat_name' => 'nullable|required_if:jenis_penerima,vendor,lainnya|string|max:255',
             'penerima_manfaat_detail' => 'nullable|string',
 
             // Detail pengajuan validation
@@ -45,8 +45,10 @@ class StorePengajuanDanaRequest extends FormRequest
             'details.*.uraian' => 'required|string|max:500',
             'details.*.volume' => 'required|numeric|min:0.01',
             'details.*.satuan' => 'required|string|max:50',
-            'details.*.harga_satuan' => 'required|numeric|min:1000',
-            'details.*.subtotal' => 'required|numeric|min:1000',
+            'details.*.harga_satuan' => 'required|numeric|min:0',
+            'details.*.subtotal' => 'nullable|numeric|min:0',
+            'details.*.detail_anggaran_id' => 'nullable|exists:detail_anggarans,id',
+            'details.*.sub_program_id' => 'nullable|exists:sub_programs,id',
 
             // Attachments
             'attachments' => 'nullable|array|max:5',
@@ -70,9 +72,10 @@ class StorePengajuanDanaRequest extends FormRequest
             'jenis_pengajuan.in' => 'Jenis pengajuan tidak valid',
             'program_kerja_id.required' => 'Program kerja wajib dipilih',
             'program_kerja_id.exists' => 'Program kerja tidak valid',
+            'sub_program_id.required' => 'Sub program wajib dipilih',
+            'sub_program_id.exists' => 'Sub program tidak valid',
             'divisi_id.required' => 'Divisi wajib dipilih',
             'divisi_id.exists' => 'Divisi tidak valid',
-            'tanggal_pengajuan.required' => 'Tanggal pengajuan wajib diisi',
             'tanggal_pengajuan.date' => 'Format tanggal tidak valid',
             'periode_mulai.required' => 'Periode mulai wajib diisi',
             'periode_mulai.date' => 'Format periode mulai tidak valid',
@@ -83,9 +86,11 @@ class StorePengajuanDanaRequest extends FormRequest
             'total_pengajuan.numeric' => 'Total pengajuan harus berupa angka',
             'total_pengajuan.min' => 'Total pengajuan minimal Rp 1.000',
 
-            'penerima_manfaat_type.required' => 'Tipe penerima manfaat wajib dipilih',
-            'penerima_manfaat_id.required_if' => 'Penerima manfaat wajib dipilih',
-            'penerima_manfaat_name.required_if' => 'Nama penerima manfaat wajib diisi',
+            'jenis_penerima.required' => 'Jenis penerima wajib dipilih',
+            'jenis_penerima.in' => 'Jenis penerima tidak valid',
+            'penerima_manfaat_id.required_if' => 'Nama karyawan wajib dipilih',
+            'penerima_manfaat_id.exists' => 'Karyawan tidak valid',
+            'penerima_manfaat_name.required_if' => 'Nama penerima wajib diisi',
 
             'details.required' => 'Detail pengajuan wajib diisi',
             'details.min' => 'Minimal harus ada 1 detail pengajuan',
@@ -127,24 +132,17 @@ class StorePengajuanDanaRequest extends FormRequest
      */
     protected function validatePenerimaManfaat($validator)
     {
-        $jenisPengajuan = $this->input('jenis_pengajuan');
-        $penerimaType = $this->input('penerima_manfaat_type');
+        $jenisPenerima = $this->input('jenis_penerima');
         $penerimaId = $this->input('penerima_manfaat_id');
         $penerimaName = $this->input('penerima_manfaat_name');
 
-        if (!PenerimaManfaatService::validatePenerimaManfaat($jenisPengajuan, $penerimaType, $penerimaId)) {
-            $validator->errors()->add('penerima_manfaat_type', 'Pilihan penerima manfaat tidak valid untuk jenis pengajuan ini');
+        // Validate based on jenis_penerima
+        if ($jenisPenerima === 'karyawan' && empty($penerimaId)) {
+            $validator->errors()->add('penerima_manfaat_id', 'Nama karyawan wajib dipilih');
         }
 
-        // Special validation for pembayaran type
-        if ($jenisPengajuan === 'pembayaran') {
-            if (!in_array($penerimaType, ['pegawai', 'internal', 'external', 'non_pegawai'])) {
-                $validator->errors()->add('penerima_manfaat_type', 'Untuk pembayaran, penerima harus pegawai atau user internal/external');
-            }
-
-            if ($penerimaType === 'external' && empty($penerimaName)) {
-                $validator->errors()->add('penerima_manfaat_name', 'Nama penerima wajib diisi untuk pembayaran external');
-            }
+        if (in_array($jenisPenerima, ['vendor', 'lainnya']) && empty($penerimaName)) {
+            $validator->errors()->add('penerima_manfaat_name', 'Nama penerima wajib diisi');
         }
     }
 
@@ -153,14 +151,20 @@ class StorePengajuanDanaRequest extends FormRequest
      */
     protected function validateDetailsSum($validator)
     {
-        $totalPengajuan = $this->input('total_pengajuan');
+        $totalPengajuan = (float) $this->input('total_pengajuan', 0);
         $details = $this->input('details', []);
 
         if (!empty($details)) {
-            $totalDetails = array_sum(array_column($details, 'subtotal'));
+            // Calculate total from volume * harga_satuan (since subtotal may not be sent from form)
+            $totalDetails = 0;
+            foreach ($details as $detail) {
+                $volume = (float) ($detail['volume'] ?? 0);
+                $harga = (float) ($detail['harga_satuan'] ?? 0);
+                $totalDetails += ($volume * $harga);
+            }
 
             if (abs($totalPengajuan - $totalDetails) > 100) { // Allow small difference due to rounding
-                $validator->errors()->add('total_pengajuan', 'Total pengajuan tidak sesuai dengan jumlah detail pengajuan');
+                $validator->errors()->add('total_pengajuan', "Total pengajuan (Rp " . number_format($totalPengajuan, 0, ',', '.') . ") tidak sesuai dengan jumlah detail (Rp " . number_format($totalDetails, 0, ',', '.') . ")");
             }
         }
     }
@@ -174,12 +178,8 @@ class StorePengajuanDanaRequest extends FormRequest
         $programKerjaId = $this->input('program_kerja_id');
         $totalPengajuan = $this->input('total_pengajuan');
 
-        // Get pagu for this divisi and program
-        $pagu = \App\Models\PenetapanPagu::where('divisi_id', $divisiId)
-            ->whereHas('programKerjas', function ($query) use ($programKerjaId) {
-                $query->where('program_kerjas.id', $programKerjaId);
-            })
-            ->first();
+        // Get pagu for this divisi
+        $pagu = \App\Models\PenetapanPagu::where('divisi_id', $divisiId)->first();
 
         if ($pagu) {
             // Calculate total approved pengajuan for this program

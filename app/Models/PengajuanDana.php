@@ -105,6 +105,14 @@ class PengajuanDana extends Model
     }
 
     /**
+     * Get the attachments for the pengajuan.
+     */
+    public function attachments()
+    {
+        return $this->hasMany(Attachment::class);
+    }
+
+    /**
      * Scope a query to only include pengajuan with specific status.
      */
     public function scopeStatus($query, $status)
