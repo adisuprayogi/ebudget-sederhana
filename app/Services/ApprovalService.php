@@ -21,7 +21,7 @@ class ApprovalService
         // First try to get config for specific jenis_pengajuan
         $configs = ApprovalConfig::where('jenis_pengajuan', $pengajuan->jenis_pengajuan)
             ->where('minimal_nominal', '<=', $pengajuan->total_pengajuan)
-            ->orderBy('level', 'asc')
+            ->orderBy('urutan', 'asc')
             ->get();
 
         // If no config found for specific jenis, use default 'pengajuan_dana' config
@@ -33,6 +33,7 @@ class ApprovalService
         }
 
         $approvals = [];
+        $firstApproval = true;
 
         foreach ($configs as $config) {
             // Skip approval if it's the same level as the user
@@ -44,11 +45,15 @@ class ApprovalService
             $approverId = self::getApproverId($config->level, $pengajuan);
 
             if ($approverId) {
+                // Only first approval is pending, others are 'waiting'
+                $status = $firstApproval ? 'pending' : 'waiting';
+
                 $approval = Approval::create([
                     'pengajuan_dana_id' => $pengajuan->id,
                     'approver_id' => $approverId,
                     'level' => $config->level,
-                    'status' => 'pending',
+                    'urutan' => $config->urutan,
+                    'status' => $status,
                     'required' => true,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -56,8 +61,11 @@ class ApprovalService
 
                 $approvals[] = $approval;
 
-                // Send email notification to approver
-                self::sendApprovalNotification($approval, $pengajuan);
+                // Send email notification only for first (pending) approval
+                if ($firstApproval) {
+                    self::sendApprovalNotification($approval, $pengajuan);
+                    $firstApproval = false;
+                }
             }
         }
 
@@ -87,6 +95,15 @@ class ApprovalService
         $pengajuan = $approval->pengajuanDana;
         $approver = $approval->approver;
 
+        // Log before processing
+        \Log::info('Processing approval', [
+            'approval_id' => $approval->id,
+            'pengajuan_id' => $pengajuan->id,
+            'action' => $action,
+            'old_approval_status' => $approval->status,
+            'old_pengajuan_status' => $pengajuan->status,
+        ]);
+
         DB::beginTransaction();
         try {
             // Update approval status
@@ -98,26 +115,8 @@ class ApprovalService
                 'updated_at' => now(),
             ]);
 
-            // Check if this is the last approval needed
-            $remainingApprovals = Approval::where('pengajuan_dana_id', $pengajuan->id)
-                ->where('status', 'pending')
-                ->count();
-
-            if ($remainingApprovals === 0) {
-                // All approvals completed
-                $pengajuan->update([
-                    'status' => 'disetujui',
-                    'approved_at' => now(),
-                    'updated_at' => now(),
-                ]);
-
-                // Send notification to pengaju
-                self::sendApprovedNotification($pengajuan);
-
-                // Notify staff keuangan for pencairan
-                self::notifyStaffKeuangan($pengajuan);
-
-            } else if ($action === 'ditolak') {
+            // Check if rejected FIRST - this should take priority
+            if ($action === 'ditolak') {
                 // Approval rejected, cancel workflow
                 Approval::where('pengajuan_dana_id', $pengajuan->id)
                     ->where('status', 'pending')
@@ -133,8 +132,59 @@ class ApprovalService
                     'updated_at' => now(),
                 ]);
 
+                \Log::info('Pengajuan rejected', [
+                    'pengajuan_id' => $pengajuan->id,
+                    'approval_id' => $approval->id,
+                    'new_status' => 'ditolak',
+                ]);
+
                 // Send notification to pengaju
                 self::sendRejectedNotification($pengajuan, $approval, $notes);
+
+            } else {
+                // Action is 'disetujui' - activate next approval in sequence
+                // Find next approval with higher urutan that has 'waiting' status
+                $nextApproval = Approval::where('pengajuan_dana_id', $pengajuan->id)
+                    ->where('urutan', '>', $approval->urutan ?? 0)
+                    ->where('status', 'waiting')
+                    ->orderBy('urutan', 'asc')
+                    ->first();
+
+                if ($nextApproval) {
+                    // Activate next approval
+                    $nextApproval->update([
+                        'status' => 'pending',
+                        'updated_at' => now(),
+                    ]);
+
+                    \Log::info('Next approval activated', [
+                        'pengajuan_id' => $pengajuan->id,
+                        'current_approval_id' => $approval->id,
+                        'next_approval_id' => $nextApproval->id,
+                        'next_level' => $nextApproval->level,
+                    ]);
+
+                    // Send notification to next approver
+                    self::sendApprovalNotification($nextApproval, $pengajuan);
+                } else {
+                    // No more approvals, all completed - approve pengajuan
+                    $pengajuan->update([
+                        'status' => 'disetujui',
+                        'approved_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    \Log::info('Pengajuan approved - all levels completed', [
+                        'pengajuan_id' => $pengajuan->id,
+                        'new_status' => 'disetujui',
+                    ]);
+
+                    // Send notification to pengaju
+                    self::sendApprovedNotification($pengajuan);
+
+                    // Notify staff keuangan for pencairan
+                    self::notifyStaffKeuangan($pengajuan);
+                }
             }
 
             DB::commit();
@@ -142,6 +192,12 @@ class ApprovalService
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Failed to process approval', [
+                'approval_id' => $approval->id,
+                'pengajuan_id' => $pengajuan->id,
+                'action' => $action,
+                'error' => $e->getMessage(),
+            ]);
             throw $e;
         }
     }

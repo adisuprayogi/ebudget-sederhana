@@ -10,6 +10,7 @@ use App\Http\Controllers\PencairanDanaController;
 use App\Http\Controllers\LpjController;
 use App\Http\Controllers\RefundController;
 use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\HonorariumImportController;
 use App\Http\Controllers\ApprovalConfigController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
@@ -193,6 +194,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/statistics', [DetailPengajuanController::class, 'statistics'])->name('statistics');
         });
     });
+
+    // Honorarium import route (outside prefix)
+    Route::post('/honorarium-import-preview', [HonorariumImportController::class, 'importPreview'])->name('honorarium.import-preview');
 
     // ============================================================
     // PENCAIRAN DANA ROUTES

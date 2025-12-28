@@ -176,8 +176,6 @@ class PencairanDanaController extends Controller
             'detailPencairans.detailPengajuan.subProgram',
             'createdBy',
             'processedBy',
-            'pengajuanDana.laporanPertanggungJawaban',
-            'pengajuanDana.refunds',
         ]);
 
         return view('pencairan-dana.show', [

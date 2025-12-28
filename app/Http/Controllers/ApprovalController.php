@@ -93,15 +93,18 @@ class ApprovalController extends Controller
         // Check if approval is still pending
         if ($approval->status !== 'pending') {
             return redirect()
-                ->route('approval.index')
+                ->route('approvals.index')
                 ->with('error', 'Approval ini sudah diproses');
         }
 
         $approval->load([
             'pengajuanDana.divisi',
             'pengajuanDana.programKerja',
+            'pengajuanDana.subProgram',
+            'pengajuanDana.detailAnggaran',
             'pengajuanDana.createdBy',
-            'pengajuanDana.detailPengajuan.subProgram',
+            'pengajuanDana.details.subProgram',
+            'pengajuanDana.honorariumDetails.karyawan',
             'pengajuanDana.attachments',
             'pengajuanDana.approvals' => function ($query) {
                 $query->with('approver')->orderBy('level', 'asc');
@@ -143,7 +146,7 @@ class ApprovalController extends Controller
             $message = $action === 'disetujui' ? 'Pengajuan berhasil disetujui' : 'Pengajuan ditolak';
 
             return redirect()
-                ->route('approval.index')
+                ->route('approvals.index')
                 ->with('success', $message);
 
         } catch (\Exception $e) {
@@ -339,7 +342,7 @@ class ApprovalController extends Controller
             }
 
             return redirect()
-                ->route('approval.index')
+                ->route('approvals.index')
                 ->with('success', $message);
 
         } catch (\Exception $e) {

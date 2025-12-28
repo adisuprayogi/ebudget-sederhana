@@ -56,6 +56,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's full name.
+     */
+    protected function getNameAttribute(): string
+    {
+        return $this->attributes['full_name'] ?? $this->attributes['name'] ?? '';
+    }
+
+    /**
      * Get the role associated with the user (legacy, for backward compatibility).
      */
     public function role(): BelongsTo

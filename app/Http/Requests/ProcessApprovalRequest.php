@@ -111,9 +111,10 @@ class ProcessApprovalRequest extends FormRequest
             $validator->errors()->add('status', 'Pengajuan tidak dapat diproses karena status: ' . $pengajuan->status);
         }
 
-        // Check for workflow integrity
+        // Check for workflow integrity - previous approvals must be approved
+        // Using urutan instead of level for proper comparison
         $previousApprovals = \App\Models\Approval::where('pengajuan_dana_id', $pengajuan->id)
-            ->where('level', '<', $approval->level)
+            ->where('urutan', '<', $approval->urutan ?? 0)
             ->get();
 
         foreach ($previousApprovals as $prevApproval) {
@@ -192,13 +193,16 @@ class ProcessApprovalRequest extends FormRequest
     /**
      * Get validated data with proper type casting
      */
-    public function validated(): array
+    public function validated($key = null, $default = null): array
     {
-        $validated = parent::validated();
+        $validated = parent::validated($key, $default);
 
-        // Cast action to proper status
-        if (isset($validated['action'])) {
-            $validated['action'] = $validated['action'] === 'disetujui' ? 'disetujui' : 'ditolak';
+        // Only modify when getting all validated data (not when $key is specified)
+        if ($key === null && is_array($validated)) {
+            // Cast action to proper status
+            if (isset($validated['action'])) {
+                $validated['action'] = $validated['action'] === 'disetujui' ? 'disetujui' : 'ditolak';
+            }
         }
 
         return $validated;

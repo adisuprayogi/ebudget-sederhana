@@ -112,6 +112,19 @@
                             <x-input-error :messages="$errors->get('sub_program_id')" class="mt-2" />
                         </div>
 
+                        @if($jenisPengajuan === 'honorarium')
+                            <!-- Detail Anggaran untuk Honorarium -->
+                            <div>
+                                <x-input-label for="detail_anggaran_id" value="Detail Anggaran *" />
+                                <select name="detail_anggaran_id" id="detail_anggaran_id" required disabled
+                                    class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100">
+                                    <option value="">Pilih Sub Program Terlebih Dahulu</option>
+                                </select>
+                                <div id="detail-anggaran-sisa" class="mt-1 text-sm text-gray-600"></div>
+                                <x-input-error :messages="$errors->get('detail_anggaran_id')" class="mt-2" />
+                            </div>
+                        @endif
+
                         <!-- Hidden field for divisi_id - will be set based on program kerja -->
                         <input type="hidden" name="divisi_id" id="divisi_id" value="">
 
@@ -128,8 +141,170 @@
                     </div>
                 </div>
 
-                <!-- Detail Pengajuan -->
-                <div class="bg-white rounded-2xl shadow-soft p-6">
+                @if($jenisPengajuan === 'honorarium')
+                    <!-- Daftar Penerima Honorarium -->
+                    <div class="bg-white rounded-2xl shadow-soft p-6">
+                        <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mr-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </span>
+                                Daftar Penerima Honorarium
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="window.honorariumForm().openImportModal()" class="px-4 py-2 bg-green-600 text-white rounded-xl text-sm hover:bg-green-700 transition-all">
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    Import Excel/CSV
+                                </button>
+                                <button type="button" onclick="window.honorariumForm().addRecipientRow()" class="px-4 py-2 bg-primary-600 text-white rounded-xl text-sm hover:bg-primary-700 transition-all">
+                                    + Tambah Penerima
+                                </button>
+                            </div>
+                        </h2>
+
+                        <!-- Table with Inline Edit -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full" id="honorarium-table">
+                                <thead class="bg-secondary-50 border-b border-secondary-200">
+                                    <tr>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase w-10">No</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Tipe</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Nama Penerima *</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Jumlah Honor *</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">No. Rekening *</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Deskripsi</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Lampiran</th>
+                                        <th class="px-3 py-3 text-center text-xs font-semibold text-secondary-600 uppercase w-24">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-secondary-100" id="honorarium-list-body">
+                                    <tr id="empty-row">
+                                        <td colspan="8" class="px-4 py-8 text-center text-secondary-500">
+                                            Belum ada penerima. Klik "Tambah Penerima" atau "Import Excel/CSV" untuk menambahkan.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot class="bg-secondary-50 border-t border-secondary-200">
+                                    <tr>
+                                        <td colspan="7" class="px-4 py-3 text-right text-sm font-semibold text-secondary-900">Total Pengajuan:</td>
+                                        <td class="px-4 py-3 text-right">
+                                            <span id="total-honorarium" class="text-xl font-bold text-primary-600">Rp 0</span>
+                                            <input type="hidden" name="total_pengajuan" id="total_pengajuan" value="0">
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!-- Hidden container for deleted rows -->
+                        <input type="hidden" name="honorarium_row_count" id="honorarium_row_count" value="0">
+                    </div>
+
+                    <!-- Modal Import Excel/CSV -->
+                    <div id="import-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+                        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
+                            <!-- Header -->
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-semibold text-gray-900">Import Daftar Penerima</h3>
+                                    <button type="button" onclick="window.honorariumForm().closeImportModal()" class="text-gray-400 hover:text-gray-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="p-6">
+                                <!-- Download Template -->
+                                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                                    <div class="flex items-start">
+                                        <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <div>
+                                            <p class="text-sm font-medium text-blue-700">Download Template Excel</p>
+                                            <p class="text-xs text-blue-600 mt-1">Gunakan template ini untuk memastikan format data yang benar.</p>
+                                            <button type="button" onclick="window.honorariumForm().downloadTemplate()" class="mt-2 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700">
+                                                Download Template
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Download Daftar Karyawan -->
+                                <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+                                    <div class="flex items-start">
+                                        <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        <div>
+                                            <p class="text-sm font-medium text-green-700">Download Daftar Karyawan</p>
+                                            <p class="text-xs text-green-600 mt-1">Gunakan daftar ini untuk memastikan nama karyawan sesuai dengan sistem.</p>
+                                            <button type="button" onclick="window.honorariumForm().downloadEmployeeList()" class="mt-2 px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700">
+                                                Download Daftar Karyawan
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Upload File -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Upload File Excel/CSV</label>
+                                    <div class="mt-1 flex justify-center px-4 pt-5 pb-4 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50">
+                                        <div class="text-center">
+                                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                            <div class="mt-2">
+                                                <label for="import-file" class="cursor-pointer">
+                                                    <span class="mt-1 block text-sm font-medium text-gray-900">Klik untuk upload</span>
+                                                    <span class="mt-1 block text-xs text-gray-500">.xlsx, .xls, .csv</span>
+                                                </label>
+                                                <input id="import-file" name="import_file" type="file" accept=".xlsx,.xls,.csv" class="sr-only" onchange="window.honorariumForm().handleImportFileSelect(this)">
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-2">Maksimal 5MB</p>
+                                        </div>
+                                        <div id="import-file-info" class="hidden mt-2 p-3 bg-green-50 rounded-lg">
+                                            <p class="text-sm font-medium text-green-800" id="import-filename"></p>
+                                            <p class="text-xs text-green-600 mt-1" id="import-filesize"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Format Guide -->
+                                <div class="mt-4 text-xs text-gray-500">
+                                    <p class="font-medium text-gray-700 mb-1">Format Kolom Excel:</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li><strong>Tipe:</strong> karyawan / non_karyawan</li>
+                                        <li><strong>Nama Karyawan:</strong> (isi jika tipe=karyawan)</li>
+                                        <li><strong>Nama Penerima:</strong> (isi jika tipe=non_karyawan)</li>
+                                        <li><strong>Jumlah Honor:</strong> angka</li>
+                                        <li><strong>Nomor Rekening:</strong> teks</li>
+                                        <li><strong>Deskripsi:</strong> teks (opsional)</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3 rounded-b-2xl">
+                                <button type="button" onclick="window.honorariumForm().closeImportModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100">
+                                    Batal
+                                </button>
+                                <button type="button" onclick="window.honorariumForm().processImport()" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                                    Import Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <!-- Detail Pengajuan (Regular) -->
+                    <div class="bg-white rounded-2xl shadow-soft p-6">
                     <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center justify-between">
                         <div class="flex items-center">
                             <span class="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mr-3">
@@ -198,14 +373,16 @@
                                     <td colspan="5" class="px-4 py-3 text-right font-semibold text-secondary-700">Total Pengajuan:</td>
                                     <td colspan="2" class="px-4 py-3">
                                         <span id="grand-total" class="text-xl font-bold text-primary-600">Rp 0</span>
-                                        <input type="hidden" name="total_pengajuan" id="total_pengajuan" value="0">
+                                        <input type="hidden" name="total_pengajuan" id="total_pengajuan_regular" value="0">
                                     </td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
                 </div>
+                @endif
 
+                @if($jenisPengajuan !== 'honorarium')
                 <!-- Penerima Manfaat -->
                 <div class="bg-white rounded-2xl shadow-soft p-6">
                     <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
@@ -263,8 +440,9 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
-                <!-- Lampiran -->
+                <!-- Dokumen Lampiran (Global untuk seluruh pengajuan) -->
                 <div class="bg-white rounded-2xl shadow-soft p-6">
                     <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
                         <span class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mr-3">
@@ -272,18 +450,24 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.472 6.472a4 4 0 01-5.656 0L4 12m0 0l6-6m0 0l6.472 6.472a4 4 0 015.656 0L20 13m-6-6h.01" />
                             </svg>
                         </span>
-                        Dokumen Lampiran
+                        Dokumen Lampiran Pengajuan
                     </h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <x-input-label for="attachments" value="Lampiran Dokumen (Opsional)" />
-                            <input type="file" name="attachments[]" id="attachments" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple
+                            <x-input-label for="attachments" value="Lampiran Dokumen *" />
+                            <input type="file" name="attachments[]" id="attachments" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple required
                                 class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm file:mr-4 file:py-2 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-600 file:text-white hover:file:bg-primary-700">
                             <p class="mt-1 text-xs text-secondary-500">PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG (Maks 2MB per file, Maks 5 file)</p>
                             <x-input-error :messages="$errors->get('attachments')" class="mt-2" />
                         </div>
                     </div>
+
+                    @if($jenisPengajuan === 'honorarium')
+                        <p class="mt-3 text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
+                            <strong>Catatan:</strong> Lampiran per penerima honorarium diisi di tabel Daftar Penerima pada kolom "Lampiran".
+                        </p>
+                    @endif
                 </div>
             </div>
 
@@ -295,7 +479,7 @@
                 <button type="button" onclick="resetForm()" class="px-6 py-3 border border-red-300 text-red-600 rounded-xl hover:bg-red-50 transition-all duration-200">
                     Reset Form
                 </button>
-                <button type="submit" class="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
+                <button type="button" id="submit-pengajuan-btn" onclick="submitForm()" class="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
                     <span class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -306,6 +490,9 @@
             </div>
         </form>
     </div>
+
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
     <script>
         let detailAnggaranCache = [];
@@ -340,7 +527,7 @@
                     // Clear detail anggaran cache
                     detailAnggaranCache = [];
 
-                    // Reset all detail anggaran selects
+                    // Reset all detail anggaran selects (for regular pengajuan)
                     document.querySelectorAll('.detail-anggaran-select').forEach(select => {
                         select.innerHTML = '<option value="">Pilih Sub Program Terlebih Dahulu</option>';
                         select.disabled = true;
@@ -348,6 +535,17 @@
                     document.querySelectorAll('.detail-anggaran-sisa').forEach(span => {
                         span.textContent = '';
                     });
+
+                    // Reset honorarium detail anggaran
+                    const honorariumDetailSelect = document.getElementById('detail_anggaran_id');
+                    if (honorariumDetailSelect) {
+                        honorariumDetailSelect.innerHTML = '<option value="">Pilih Sub Program Terlebih Dahulu</option>';
+                        honorariumDetailSelect.disabled = true;
+                    }
+                    const honorariumSisa = document.getElementById('detail-anggaran-sisa');
+                    if (honorariumSisa) {
+                        honorariumSisa.textContent = '';
+                    }
 
                     if (!programKerjaId || !divisiId) {
                         return;
@@ -402,7 +600,7 @@
                     // Clear cache when sub program changes
                     detailAnggaranCache = [];
 
-                    // Reset all detail anggaran selects
+                    // Reset all detail anggaran selects (for regular pengajuan)
                     document.querySelectorAll('.detail-anggaran-select').forEach(select => {
                         select.innerHTML = '<option value="">Pilih Detail Anggaran</option>';
                         select.disabled = !subProgramId;
@@ -410,6 +608,17 @@
                     document.querySelectorAll('.detail-anggaran-sisa').forEach(span => {
                         span.textContent = '';
                     });
+
+                    // Reset honorarium detail anggaran
+                    const honorariumDetailSelect = document.getElementById('detail_anggaran_id');
+                    if (honorariumDetailSelect) {
+                        honorariumDetailSelect.innerHTML = '<option value="">Pilih Detail Anggaran</option>';
+                        honorariumDetailSelect.disabled = !subProgramId;
+                    }
+                    const honorariumSisa = document.getElementById('detail-anggaran-sisa');
+                    if (honorariumSisa) {
+                        honorariumSisa.textContent = '';
+                    }
 
                     if (!subProgramId || !programKerjaId || !divisiId) {
                         return;
@@ -423,7 +632,7 @@
                         // Store in cache
                         detailAnggaranCache = data.detail_anggarans || [];
 
-                        // Populate all detail anggaran selects
+                        // Populate all detail anggaran selects (for regular pengajuan)
                         document.querySelectorAll('.detail-anggaran-select').forEach(select => {
                             select.innerHTML = '<option value="">Pilih Detail Anggaran</option>';
                             detailAnggaranCache.forEach(detail => {
@@ -437,6 +646,19 @@
                             });
                             select.disabled = false;
                         });
+
+                        // Populate honorarium detail anggaran select
+                        if (honorariumDetailSelect) {
+                            honorariumDetailSelect.innerHTML = '<option value="">Pilih Detail Anggaran</option>';
+                            detailAnggaranCache.forEach(detail => {
+                                const option = document.createElement('option');
+                                option.value = detail.id;
+                                option.textContent = `${detail.nama_detail} (Sisa: Rp ${parseFloat(detail.sisa_nominal || 0).toLocaleString('id-ID')})`;
+                                option.setAttribute('data-sisa', detail.sisa_nominal);
+                                honorariumDetailSelect.appendChild(option);
+                            });
+                            honorariumDetailSelect.disabled = false;
+                        }
 
                         // Restore selected detail anggarans if restoring state
                         if (restoreState) {
@@ -579,7 +801,8 @@
                     });
 
                     document.getElementById('grand-total').textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
-                    document.getElementById('total_pengajuan').value = grandTotal;
+                    // Set total_pengajuan_regular for form submission (regular pengajuan)
+                    document.getElementById('total_pengajuan_regular').value = grandTotal;
                 },
 
                 saveFormState() {
@@ -767,6 +990,23 @@
                 jenisPenerimaSelect.addEventListener('change', () => pengajuanForm().onJenisPenerimaChange());
             }
 
+            // Honorarium detail anggaran change listener
+            const honorariumDetailSelect = document.getElementById('detail_anggaran_id');
+            if (honorariumDetailSelect) {
+                honorariumDetailSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const sisa = selectedOption?.getAttribute('data-sisa');
+                    const sisaDiv = document.getElementById('detail-anggaran-sisa');
+                    if (sisaDiv) {
+                        if (sisa && this.value) {
+                            sisaDiv.textContent = 'Sisa: Rp ' + parseFloat(sisa).toLocaleString('id-ID');
+                        } else {
+                            sisaDiv.textContent = '';
+                        }
+                    }
+                });
+            }
+
             // Restore form state on page load
             await pengajuanForm().restoreFormState();
 
@@ -785,5 +1025,454 @@
                 }
             });
         });
+
+        // Honorarium Form Handler - Singleton Pattern
+        let honorariumFormInstance = null;
+
+        window.honorariumForm = function() {
+            if (!honorariumFormInstance) {
+                honorariumFormInstance = {
+                    rowCount: 0,
+                    users: @js($users ?? []),
+
+                    addRecipientRow() {
+                        this.rowCount++;
+                        const index = this.rowCount;
+
+                        // Update row count input
+                        document.getElementById('honorarium_row_count').value = this.rowCount;
+
+                        // Hide empty row
+                        const emptyRow = document.getElementById('empty-row');
+                        if (emptyRow) emptyRow.style.display = 'none';
+
+                        const tbody = document.getElementById('honorarium-list-body');
+
+                        // Build options for karyawan select
+                        let userOptions = '<option value="">Pilih Karyawan</option>';
+                        this.users.forEach(user => {
+                            userOptions += `<option value="${user.id}">${user.name}</option>`;
+                        });
+
+                        const row = document.createElement('tr');
+                        row.id = `honorarium-row-${index}`;
+                        row.innerHTML = `
+                            <td class="px-3 py-2 text-sm text-secondary-900">${this.rowCount}</td>
+                            <td class="px-3 py-2">
+                                <select name="honorarium_details[${index}][penerima_manfaat_type]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" onchange="window.honorariumForm().togglePenerimaType(${index})">
+                                    <option value="karyawan">Karyawan</option>
+                                    <option value="non_karyawan">Non-Karyawan</option>
+                                </select>
+                            </td>
+                            <td class="px-3 py-2">
+                                <div id="karyawan-select-${index}">
+                                    <select name="honorarium_details[${index}][penerima_manfaat_id]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500">
+                                        ${userOptions}
+                                    </select>
+                                </div>
+                                <div id="manual-input-${index}" class="hidden">
+                                    <input type="text" name="honorarium_details[${index}][penerima_manfaat_name]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="Nama penerima">
+                                </div>
+                            </td>
+                            <td class="px-3 py-2">
+                                <input type="number" name="honorarium_details[${index}][jumlah_honor]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="0" min="0" required onchange="window.honorariumForm().calculateTotal()">
+                            </td>
+                            <td class="px-3 py-2">
+                                <input type="text" name="honorarium_details[${index}][nomor_rekening]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="Nomor rekening" required>
+                            </td>
+                            <td class="px-3 py-2">
+                                <textarea name="honorarium_details[${index}][deskripsi]" rows="1" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="Deskripsi"></textarea>
+                            </td>
+                            <td class="px-3 py-2">
+                                <input type="file" name="honorarium_details[${index}][lampiran]" class="w-full text-xs border border-secondary-200 rounded-lg px-2 py-1 focus:ring-2 focus:ring-primary-500" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                            </td>
+                            <td class="px-3 py-2 text-center">
+                                <button type="button" onclick="window.honorariumForm().removeRecipientRow(${index})" class="text-red-600 hover:text-red-800">
+                                    <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </td>
+                        `;
+
+                        tbody.appendChild(row);
+                    },
+
+                    removeRecipientRow(index) {
+                        const row = document.getElementById(`honorarium-row-${index}`);
+                        if (row) {
+                            row.remove();
+
+                            // Check if empty row should be shown
+                            const tbody = document.getElementById('honorarium-list-body');
+                            const remainingRows = tbody.querySelectorAll('tr[id^="honorarium-row-"]');
+
+                            if (remainingRows.length === 0) {
+                                const emptyRow = document.getElementById('empty-row');
+                                if (emptyRow) emptyRow.style.display = '';
+                            }
+
+                            this.calculateTotal();
+                        }
+                    },
+
+                    togglePenerimaType(index) {
+                        const select = document.querySelector(`select[name="honorarium_details[${index}][penerima_manfaat_type]"]`);
+                        const type = select?.value;
+                        const karyawanDiv = document.getElementById(`karyawan-select-${index}`);
+                        const manualDiv = document.getElementById(`manual-input-${index}`);
+                        const karyawanSelect = document.querySelector(`select[name="honorarium_details[${index}][penerima_manfaat_id]"]`);
+                        const manualInput = document.querySelector(`input[name="honorarium_details[${index}][penerima_manfaat_name]"]`);
+
+                        if (type === 'karyawan') {
+                            karyawanDiv?.classList.remove('hidden');
+                            manualDiv?.classList.add('hidden');
+                            if (karyawanSelect) karyawanSelect.required = true;
+                            if (manualInput) manualInput.required = false;
+                        } else {
+                            karyawanDiv?.classList.add('hidden');
+                            manualDiv?.classList.remove('hidden');
+                            if (karyawanSelect) karyawanSelect.required = false;
+                            if (manualInput) manualInput.required = true;
+                        }
+                    },
+
+                    calculateTotal() {
+                        let total = 0;
+                        const rows = document.querySelectorAll('tr[id^="honorarium-row-"]');
+
+                        rows.forEach(row => {
+                            const input = row.querySelector('input[name*="[jumlah_honor]"]');
+                            if (input) {
+                                total += parseFloat(input.value) || 0;
+                            }
+                        });
+
+                        document.getElementById('total-honorarium').textContent = 'Rp ' + total.toLocaleString('id-ID');
+                        document.getElementById('total_pengajuan').value = total;
+                    },
+
+                    prepareSubmit() {
+                        const jenisPengajuan = document.getElementById('jenis_pengajuan')?.value;
+
+                        if (jenisPengajuan === 'honorarium') {
+                            const rows = document.querySelectorAll('tr[id^="honorarium-row-"]');
+
+                            if (rows.length === 0) {
+                                alert('Mohon tambahkan minimal 1 penerima honorarium');
+                                return false;
+                            }
+
+                            // Validate each row
+                            for (const row of rows) {
+                                const type = row.querySelector('select[name*="[penerima_manfaat_type]"]')?.value;
+                                const jumlahHonor = row.querySelector('input[name*="[jumlah_honor]"]')?.value;
+                                const nomorRekening = row.querySelector('input[name*="[nomor_rekening]"]')?.value;
+
+                                if (!jumlahHonor || parseFloat(jumlahHonor) <= 0) {
+                                    alert('Semua penerima harus memiliki jumlah honor');
+                                    return false;
+                                }
+
+                                if (!nomorRekening) {
+                                    alert('Semua penerima harus memiliki nomor rekening');
+                                    return false;
+                                }
+
+                                if (type === 'karyawan') {
+                                    const karyawanId = row.querySelector('select[name*="[penerima_manfaat_id]"]')?.value;
+                                    if (!karyawanId) {
+                                        alert('Pilih karyawan untuk tipe Karyawan');
+                                        return false;
+                                    }
+                                } else {
+                                    const nama = row.querySelector('input[name*="[penerima_manfaat_name]"]')?.value;
+                                    if (!nama) {
+                                        alert('Isi nama penerima untuk tipe Non-Karyawan');
+                                        return false;
+                                    }
+                                }
+                            }
+
+                            this.calculateTotal();
+                            const total = parseFloat(document.getElementById('total_pengajuan').value) || 0;
+
+                            if (total < 1000) {
+                                alert('Total pengajuan minimal Rp 1.000');
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    },
+
+                    // Import functionality
+                    openImportModal() {
+                        document.getElementById('import-modal').classList.remove('hidden');
+                    },
+
+                    closeImportModal() {
+                        document.getElementById('import-modal').classList.add('hidden');
+                        document.getElementById('import-file').value = '';
+                        document.getElementById('import-file-info').classList.add('hidden');
+                    },
+
+                    handleImportFileSelect(input) {
+                        if (input.files && input.files[0]) {
+                            const file = input.files[0];
+                            document.getElementById('import-filename').textContent = file.name;
+                            document.getElementById('import-filesize').textContent = this.formatFileSize(file.size);
+                            document.getElementById('import-file-info').classList.remove('hidden');
+                        }
+                    },
+
+                    downloadTemplate() {
+                        // Use SheetJS to create proper Excel file
+                        const XLSX = window.XLSX;
+
+                        // Add instruction row at the top
+                        const instructions = [
+                            ['CATATAN:'],
+                            ['1. Kolom "Nama Karyawan" dapat diisi dengan NAMA KARYAWAN atau EMAIL'],
+                            ['2. Untuk karyawan dengan nama yang sama, gunakan EMAIL sebagai pembeda'],
+                            ['3. Download "Daftar Karyawan" untuk melihat daftar nama dan email yang valid'],
+                            [],
+                            ['Tipe', 'Nama Karyawan', 'Nama Penerima', 'Jumlah Honor', 'Nomor Rekening', 'Deskripsi'],
+                            ['karyawan', 'John Doe', '', '500000', '1234567890', 'Honorarium bulan Januari'],
+                            ['karyawan', 'john.doe@company.com', '', '600000', '1234567890', 'Contoh menggunakan email'],
+                            ['non_karyawan', '', 'Dr. Ahmad', '750000', '0987654321', 'Narasumber seminar'],
+                        ];
+
+                        // Create worksheet
+                        const ws = XLSX.utils.aoa_to_sheet(instructions);
+
+                        // Set column widths
+                        ws['!cols'] = [
+                            { wch: 15 }, // Tipe
+                            { wch: 35 }, // Nama Karyawan (lebar untuk email)
+                            { wch: 25 }, // Nama Penerima
+                            { wch: 15 }, // Jumlah Honor
+                            { wch: 20 }, // Nomor Rekening
+                            { wch: 40 }, // Deskripsi
+                        ];
+
+                        // Create workbook
+                        const wb = XLSX.utils.book_new();
+                        XLSX.utils.book_append_sheet(wb, ws, 'Template');
+
+                        // Download file
+                        XLSX.writeFile(wb, 'template_honorarium.xlsx');
+                    },
+
+                    downloadEmployeeList() {
+                        // Use SheetJS to create employee list Excel file
+                        const XLSX = window.XLSX;
+                        const headers = ['Nama Karyawan', 'Email'];
+
+                        // Build employee data from users array
+                        const employeeData = this.users.map(user => [
+                            user.name,
+                            user.email || ''
+                        ]);
+
+                        // Sort by name alphabetically
+                        employeeData.sort((a, b) => a[0].localeCompare(b[0]));
+
+                        // Check for duplicate names
+                        const nameCount = {};
+                        employeeData.forEach(row => {
+                            const name = row[0].toLowerCase();
+                            nameCount[name] = (nameCount[name] || 0) + 1;
+                        });
+
+                        const duplicates = Object.entries(nameCount)
+                            .filter(([_, count]) => count > 1)
+                            .map(([name, _]) => name);
+
+                        // Create worksheet
+                        const ws = XLSX.utils.aoa_to_sheet([headers, ...employeeData]);
+
+                        // Set column widths
+                        ws['!cols'] = [
+                            { wch: 40 }, // Nama Karyawan
+                            { wch: 35 }, // Email
+                        ];
+
+                        // Create workbook
+                        const wb = XLSX.utils.book_new();
+                        XLSX.utils.book_append_sheet(wb, ws, 'Daftar Karyawan');
+
+                        // Add warning sheet if duplicates found
+                        if (duplicates.length > 0) {
+                            const warningHeaders = ['Nama Karyawan Duplikat', 'Jumlah'];
+                            const warningData = duplicates.map(name => [
+                                name,
+                                nameCount[name]
+                            ]);
+
+                            const warningWs = XLSX.utils.aoa_to_sheet([warningHeaders, ...warningData]);
+                            warningWs['!cols'] = [{ wch: 40 }, { wch: 15 }];
+                            XLSX.utils.book_append_sheet(wb, warningWs, 'Duplikat');
+                        }
+
+                        // Download file
+                        XLSX.writeFile(wb, 'daftar_karyawan.xlsx');
+
+                        // Show alert if duplicates found
+                        if (duplicates.length > 0) {
+                            setTimeout(() => {
+                                alert(`PERHATIAN: Ditemukan ${duplicates.length} nama karyawan yang duplikat.\n\nCek sheet "Duplikat" di file Excel.\n\nDisarankan untuk menggunakan Email sebagai alternatif pengenal.`);
+                            }, 500);
+                        }
+                    },
+
+                    formatFileSize(bytes) {
+                        if (bytes === 0) return '0 Bytes';
+                        const k = 1024;
+                        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                        const i = Math.floor(Math.log(bytes) / Math.log(k));
+                        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+                    },
+
+                    async processImport() {
+                        const fileInput = document.getElementById('import-file');
+                        const file = fileInput.files[0];
+
+                        if (!file) {
+                            alert('Silakan pilih file Excel/CSV terlebih dahulu');
+                            return;
+                        }
+
+                        // Check file size (max 5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert('Ukuran file maksimal 5MB');
+                            return;
+                        }
+
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('users', JSON.stringify(this.users));
+
+                        try {
+                            const response = await fetch('/honorarium-import-preview', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                                }
+                            });
+
+                            // Check response status
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                            }
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                // Add rows from imported data
+                                data.data.forEach(row => {
+                                    this.rowCount++;
+                                    const index = this.rowCount;
+
+                                    document.getElementById('honorarium_row_count').value = this.rowCount;
+
+                                    const emptyRow = document.getElementById('empty-row');
+                                    if (emptyRow) emptyRow.style.display = 'none';
+
+                                    const tbody = document.getElementById('honorarium-list-body');
+
+                                    let userOptions = '<option value="">Pilih Karyawan</option>';
+                                    this.users.forEach(user => {
+                                        userOptions += `<option value="${user.id}" ${user.id == row.penerima_manfaat_id ? 'selected' : ''}>${user.name}</option>`;
+                                    });
+
+                                    const newRow = document.createElement('tr');
+                                    newRow.id = `honorarium-row-${index}`;
+                                    newRow.innerHTML = `
+                                        <td class="px-3 py-2 text-sm text-secondary-900">${this.rowCount}</td>
+                                        <td class="px-3 py-2">
+                                            <select name="honorarium_details[${index}][penerima_manfaat_type]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" onchange="window.honorariumForm().togglePenerimaType(${index})">
+                                                <option value="karyawan" ${row.penerima_manfaat_type === 'karyawan' ? 'selected' : ''}>Karyawan</option>
+                                                <option value="non_karyawan" ${row.penerima_manfaat_type === 'non_karyawan' ? 'selected' : ''}>Non-Karyawan</option>
+                                            </select>
+                                        </td>
+                                        <td class="px-3 py-2">
+                                            <div id="karyawan-select-${index}" ${row.penerima_manfaat_type === 'non_karyawan' ? 'class="hidden"' : ''}>
+                                                <select name="honorarium_details[${index}][penerima_manfaat_id]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500">
+                                                    ${userOptions}
+                                                </select>
+                                            </div>
+                                            <div id="manual-input-${index}" ${row.penerima_manfaat_type === 'karyawan' ? 'class="hidden"' : ''}>
+                                                <input type="text" name="honorarium_details[${index}][penerima_manfaat_name]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" value="${row.penerima_manfaat_name || ''}" placeholder="Nama penerima">
+                                            </div>
+                                        </td>
+                                        <td class="px-3 py-2">
+                                            <input type="number" name="honorarium_details[${index}][jumlah_honor]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="0" min="0" required onchange="window.honorariumForm().calculateTotal()" value="${row.jumlah_honor || ''}">
+                                        </td>
+                                        <td class="px-3 py-2">
+                                            <input type="text" name="honorarium_details[${index}][nomor_rekening]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="Nomor rekening" required value="${row.nomor_rekening || ''}">
+                                        </td>
+                                        <td class="px-3 py-2">
+                                            <textarea name="honorarium_details[${index}][deskripsi]" rows="1" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="Deskripsi">${row.deskripsi || ''}</textarea>
+                                        </td>
+                                        <td class="px-3 py-2">
+                                            <input type="file" name="honorarium_details[${index}][lampiran]" class="w-full text-xs border border-secondary-200 rounded-lg px-2 py-1 focus:ring-2 focus:ring-primary-500" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                        </td>
+                                        <td class="px-3 py-2 text-center">
+                                            <button type="button" onclick="window.honorariumForm().removeRecipientRow(${index})" class="text-red-600 hover:text-red-800">
+                                                <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    `;
+
+                                    tbody.appendChild(newRow);
+                                });
+
+                                this.calculateTotal();
+                                this.closeImportModal();
+
+                                alert(`Berhasil import ${data.data.length} penerima`);
+                            } else {
+                                alert('Gagal import: ' + (data.message || 'Unknown error'));
+                            }
+                        } catch (error) {
+                            console.error('Import error:', error);
+                            alert('Gagal import file: ' + error.message + '. Silakan coba lagi.');
+                        }
+                    }
+                };
+            }
+            return honorariumFormInstance;
+        };
+
+        // Helper function for formatting
+        function formatRupiah(amount) {
+            return 'Rp ' + (parseFloat(amount) || 0).toLocaleString('id-ID');
+        }
+
+        // Global submit function
+        function submitForm() {
+            const jenisPengajuan = document.getElementById('jenis_pengajuan')?.value;
+            const form = document.getElementById('pengajuan-dana-form');
+
+            if (jenisPengajuan === 'honorarium') {
+                // Use honorarium form validation
+                if (window.honorariumForm().prepareSubmit()) {
+                    form.submit();
+                }
+            } else {
+                // For regular pengajuan, just submit the form
+                // HTML5 validation will handle required fields
+                if (form.checkValidity()) {
+                    form.submit();
+                } else {
+                    // Trigger HTML5 validation UI
+                    form.reportValidity();
+                }
+            }
+        }
     </script>
 </x-app-layout>

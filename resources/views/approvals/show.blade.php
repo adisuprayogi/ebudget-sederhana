@@ -40,38 +40,119 @@
                         </h2>
                     </div>
                     <div class="p-6">
+                        <!-- Header with Nomor, Tanggal, Jenis -->
+                        <div class="flex flex-wrap items-center gap-4 mb-4 pb-4 border-b border-secondary-100">
+                            <div>
+                                <span class="text-xs text-secondary-500 uppercase tracking-wider">Nomor</span>
+                                <p class="font-mono text-sm font-semibold text-primary-600">{{ $approval->pengajuanDana->nomor_pengajuan }}</p>
+                            </div>
+                            <div class="w-px h-8 bg-secondary-200"></div>
+                            <div>
+                                <span class="text-xs text-secondary-500 uppercase tracking-wider">Tanggal</span>
+                                <p class="text-sm text-secondary-900">{{ \Carbon\Carbon::parse($approval->pengajuanDana->tanggal_pengajuan)->format('d/m/Y H:i') }}</p>
+                            </div>
+                            <div class="w-px h-8 bg-secondary-200"></div>
+                            <div>
+                                <span class="text-xs text-secondary-500 uppercase tracking-wider">Jenis</span>
+                                @php
+                                    $jenisLabels = [
+                                        'kegiatan' => 'Kegiatan',
+                                        'pengadaan' => 'Pengadaan',
+                                        'pembayaran' => 'Pembayaran',
+                                        'honorarium' => 'Honorarium',
+                                        'sewa' => 'Sewa',
+                                        'konsumsi' => 'Konsumsi',
+                                        'konsumi' => 'Konsumsi',
+                                        'reimbursement' => 'Reimbursement',
+                                        'lainnya' => 'Lainnya',
+                                    ];
+                                    $jenisColors = [
+                                        'kegiatan' => 'bg-blue-100 text-blue-700',
+                                        'pengadaan' => 'bg-green-100 text-green-700',
+                                        'pembayaran' => 'bg-yellow-100 text-yellow-700',
+                                        'honorarium' => 'bg-purple-100 text-purple-700',
+                                        'sewa' => 'bg-orange-100 text-orange-700',
+                                        'konsumsi' => 'bg-pink-100 text-pink-700',
+                                        'konsumi' => 'bg-pink-100 text-pink-700',
+                                        'reimbursement' => 'bg-teal-100 text-teal-700',
+                                        'lainnya' => 'bg-gray-100 text-gray-700',
+                                    ];
+                                    $jenis = $approval->pengajuanDana->jenis_pengajuan;
+                                    $label = $jenisLabels[$jenis] ?? ucfirst($jenis);
+                                    $colorClass = $jenisColors[$jenis] ?? 'bg-gray-100 text-gray-700';
+                                @endphp
+                                <p class="mt-1">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold {{ $colorClass }}">
+                                        {{ $label }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Judul -->
+                        <div class="mb-4">
+                            <h3 class="text-base font-semibold text-secondary-900">{{ $approval->pengajuanDana->judul_pengajuan }}</h3>
+                        </div>
+
+                        <!-- Details Grid -->
                         <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <dt class="text-sm text-secondary-500">Nomor Pengajuan</dt>
-                                <dd class="mt-1 font-mono text-sm font-semibold text-primary-600">{{ $approval->pengajuanDana->nomor_pengajuan }}</dd>
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-secondary-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <div>
+                                    <dt class="text-xs text-secondary-500 uppercase tracking-wider">Divisi</dt>
+                                    <dd class="text-sm text-secondary-900 font-medium">{{ $approval->pengajuanDana->divisi->nama_divisi ?? '-' }}</dd>
+                                </div>
                             </div>
-                            <div>
-                                <dt class="text-sm text-secondary-500">Tanggal Pengajuan</dt>
-                                <dd class="mt-1 text-sm text-secondary-900">{{ \Carbon\Carbon::parse($approval->pengajuanDana->tanggal_pengajuan)->format('d/m/Y') }}</dd>
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-secondary-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <div>
+                                    <dt class="text-xs text-secondary-500 uppercase tracking-wider">Diajukan Oleh</dt>
+                                    <dd class="text-sm text-secondary-900 font-medium">{{ $approval->pengajuanDana->createdBy->name ?? '-' }}</dd>
+                                </div>
                             </div>
-                            <div class="md:col-span-2">
-                                <dt class="text-sm text-secondary-500">Judul Pengajuan</dt>
-                                <dd class="mt-1 text-sm text-secondary-900 font-medium">{{ $approval->pengajuanDana->judul_pengajuan }}</dd>
+                            @if($approval->pengajuanDana->programKerja)
+                            <div class="flex items-start md:col-span-2">
+                                <svg class="w-5 h-5 text-secondary-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                                <div class="flex-1">
+                                    <dt class="text-xs text-secondary-500 uppercase tracking-wider">Program Kerja</dt>
+                                    <dd class="text-sm text-secondary-900 font-medium">{{ $approval->pengajuanDana->programKerja->nama_program }}</dd>
+                                </div>
                             </div>
-                            <div>
-                                <dt class="text-sm text-secondary-500">Divisi</dt>
-                                <dd class="mt-1 text-sm text-secondary-900">{{ $approval->pengajuanDana->divisi->nama_divisi ?? '-' }}</dd>
+                            @endif
+                            @if($approval->pengajuanDana->sub_program_id)
+                            <div class="flex items-start md:col-span-2">
+                                <svg class="w-5 h-5 text-secondary-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                </svg>
+                                <div class="flex-1">
+                                    <dt class="text-xs text-secondary-500 uppercase tracking-wider">Sub Program</dt>
+                                    <dd class="text-sm text-secondary-900 font-medium">{{ $approval->pengajuanDana->subProgram->nama_sub_program ?? 'Sub Program tidak ditemukan' }}</dd>
+                                </div>
                             </div>
-                            <div>
-                                <dt class="text-sm text-secondary-500">Diajukan Oleh</dt>
-                                <dd class="mt-1 text-sm text-secondary-900">{{ $approval->pengajuanDana->createdBy->name ?? '-' }}</dd>
-                            </div>
-                            @if($approval->pengajuanDana->program_kerja)
-                            <div class="md:col-span-2">
-                                <dt class="text-sm text-secondary-500">Program Kerja</dt>
-                                <dd class="mt-1 text-sm text-secondary-900">{{ $approval->pengajuanDana->programKerja->nama_program }}</dd>
+                            @endif
+                            @if($approval->pengajuanDana->jenis_pengajuan === 'honorarium')
+                            <div class="flex items-start md:col-span-2">
+                                <svg class="w-5 h-5 text-secondary-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M15 14h.01M15 17h.01M9 20h6a2 2 0 002-2V5a2 2 0 00-2-2H9a2 2 0 00-2 2v12a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                                <div class="flex-1">
+                                    <dt class="text-xs text-secondary-500 uppercase tracking-wider">Detail Anggaran</dt>
+                                    <dd class="text-sm text-secondary-900 font-medium">{{ $approval->pengajuanDana->detailAnggaran->nama_detail ?? 'Detail Anggaran tidak ditemukan' }}</dd>
+                                </div>
                             </div>
                             @endif
                         </dl>
+
                         @if($approval->pengajuanDana->deskripsi)
-                        <div class="mt-4">
-                            <dt class="text-sm text-secondary-500">Deskripsi</dt>
-                            <dd class="mt-1 text-sm text-secondary-700 whitespace-pre-line">{{ $approval->pengajuanDana->deskripsi }}</dd>
+                        <div class="mt-4 pt-4 border-t border-secondary-100">
+                            <dt class="text-xs text-secondary-500 uppercase tracking-wider mb-2">Deskripsi</dt>
+                            <dd class="text-sm text-secondary-700 whitespace-pre-line">{{ $approval->pengajuanDana->deskripsi }}</dd>
                         </div>
                         @endif
                     </div>
@@ -90,34 +171,121 @@
                         </h2>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-secondary-50 border-b border-secondary-200">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Uraian</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Volume</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Satuan</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold text-secondary-600 uppercase">Harga</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold text-secondary-600 uppercase">Jumlah</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-secondary-100">
-                                @foreach($approval->pengajuanDana->detailPengajuan ?? [] as $detail)
-                                <tr>
-                                    <td class="px-6 py-4 text-sm text-secondary-900">{{ $detail->uraian }}</td>
-                                    <td class="px-6 py-4 text-sm text-secondary-700">{{ $detail->volume }}</td>
-                                    <td class="px-6 py-4 text-sm text-secondary-700">{{ $detail->satuan }}</td>
-                                    <td class="px-6 py-4 text-sm text-secondary-700 text-right">{{ formatRupiah($detail->harga_satuan) }}</td>
-                                    <td class="px-6 py-4 text-sm font-semibold text-secondary-900 text-right">{{ formatRupiah($detail->jumlah) }}</td>
-                                </tr>
-                                @endforeach
-                                <tr class="bg-secondary-50">
-                                    <td colspan="4" class="px-6 py-4 text-right text-sm font-semibold text-secondary-900">Total Pengajuan</td>
-                                    <td class="px-6 py-4 text-right text-lg font-bold text-primary-600">{{ formatRupiah($approval->pengajuanDana->total_pengajuan) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        @if($approval->pengajuanDana->jenis_pengajuan === 'honorarium')
+                            <!-- Honorarium Table -->
+                            <table class="w-full">
+                                <thead class="bg-secondary-50 border-b border-secondary-200">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">No</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Tipe</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Nama Penerima</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold text-secondary-600 uppercase">Jumlah Honor</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">No. Rekening</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Deskripsi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-secondary-100">
+                                    @foreach($approval->pengajuanDana->honorariumDetails ?? [] as $index => $honorarium)
+                                    <tr>
+                                        <td class="px-6 py-4 text-sm text-secondary-900">{{ $index + 1 }}</td>
+                                        <td class="px-6 py-4 text-sm text-secondary-700">
+                                            @if($honorarium->penerima_manfaat_type === 'karyawan')
+                                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">Karyawan</span>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-700">Non-Karyawan</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-secondary-900 font-medium">
+                                            {{ $honorarium->penerima_nama ?? '-' }}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-secondary-900 text-right font-medium">{{ formatRupiah($honorarium->jumlah_honor) }}</td>
+                                        <td class="px-6 py-4 text-sm text-secondary-700">{{ $honorarium->nomor_rekening ?? '-' }}</td>
+                                        <td class="px-6 py-4 text-sm text-secondary-700">{{ $honorarium->deskripsi ?? '-' }}</td>
+                                    </tr>
+                                    @endforeach
+                                    <tr class="bg-secondary-50">
+                                        <td colspan="3" class="px-6 py-4 text-right text-sm font-semibold text-secondary-900">Total Pengajuan</td>
+                                        <td colspan="3" class="px-6 py-4 text-right text-lg font-bold text-primary-600">{{ formatRupiah($approval->pengajuanDana->total_pengajuan) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        @else
+                            <!-- Regular Pengajuan Table -->
+                            <table class="w-full">
+                                <thead class="bg-secondary-50 border-b border-secondary-200">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Uraian</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Volume</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Satuan</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold text-secondary-600 uppercase">Harga</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold text-secondary-600 uppercase">Jumlah</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-secondary-100">
+                                    @foreach($approval->pengajuanDana->details ?? [] as $detail)
+                                    <tr>
+                                        <td class="px-6 py-4 text-sm text-secondary-900">{{ $detail->uraian }}</td>
+                                        <td class="px-6 py-4 text-sm text-secondary-700">{{ $detail->volume }}</td>
+                                        <td class="px-6 py-4 text-sm text-secondary-700">{{ $detail->satuan }}</td>
+                                        <td class="px-6 py-4 text-sm text-secondary-700 text-right">{{ formatRupiah($detail->harga_satuan) }}</td>
+                                        <td class="px-6 py-4 text-sm font-semibold text-secondary-900 text-right">{{ formatRupiah($detail->volume * $detail->harga_satuan) }}</td>
+                                    </tr>
+                                    @endforeach
+                                    <tr class="bg-secondary-50">
+                                        <td colspan="4" class="px-6 py-4 text-right text-sm font-semibold text-secondary-900">Total Pengajuan</td>
+                                        <td class="px-6 py-4 text-right text-lg font-bold text-primary-600">{{ formatRupiah($approval->pengajuanDana->total_pengajuan) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        @endif
                     </div>
                 </div>
+
+                <!-- Dokumen Lampiran -->
+                @if($approval->pengajuanDana->attachments && $approval->pengajuanDana->attachments->count() > 0)
+                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+                    <div class="px-6 py-4 border-b border-secondary-200">
+                        <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
+                            <span class="w-8 h-8 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                </svg>
+                            </span>
+                            Dokumen Lampiran
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach($approval->pengajuanDana->attachments as $attachment)
+                            <a href="{{ Storage::url($attachment->path) }}" target="_blank" class="flex items-center p-4 border border-secondary-200 rounded-xl hover:bg-secondary-50 hover:border-primary-300 transition-colors group">
+                                <div class="flex-shrink-0 w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mr-4 group-hover:bg-primary-100 transition-colors">
+                                    @if(str_contains($attachment->mime_type, 'image'))
+                                        <svg class="w-6 h-6 text-secondary-400 group-hover:text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    @elseif(str_contains($attachment->mime_type, 'pdf'))
+                                        <svg class="w-6 h-6 text-secondary-400 group-hover:text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                    @else
+                                        <svg class="w-6 h-6 text-secondary-400 group-hover:text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    @endif
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-secondary-900 truncate group-hover:text-primary-600 transition-colors">{{ $attachment->filename }}</p>
+                                    <p class="text-xs text-secondary-500">{{ formatBytes($attachment->size) }}</p>
+                                </div>
+                                <svg class="w-5 h-5 text-secondary-400 group-hover:text-primary-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                            </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Riwayat Approval -->
                 <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
@@ -257,11 +425,11 @@
                     <div class="p-6">
                         <div class="space-y-2">
                             @foreach($approval->pengajuanDana->attachments ?? [] as $attachment)
-                            <a href="{{ Storage::url($attachment->path_dokumen) }}" target="_blank" class="flex items-center p-3 border border-secondary-200 rounded-xl hover:bg-secondary-50 transition-colors">
+                            <a href="{{ Storage::url($attachment->path) }}" target="_blank" class="flex items-center p-3 border border-secondary-200 rounded-xl hover:bg-secondary-50 transition-colors">
                                 <svg class="w-5 h-5 text-secondary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
-                                <span class="text-sm text-secondary-700 truncate">{{ $attachment->nama_dokumen }}</span>
+                                <span class="text-sm text-secondary-700 truncate">{{ $attachment->filename }}</span>
                             </a>
                             @endforeach
                         </div>

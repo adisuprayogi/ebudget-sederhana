@@ -22,41 +22,57 @@ class StorePengajuanDanaRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $jenisPengajuan = $this->input('jenis_pengajuan');
+
+        // Base rules applicable to all types
+        $rules = [
             'judul_pengajuan' => 'required|string|max:255',
             'jenis_pengajuan' => 'required|in:kegiatan,pengadaan,pembayaran,honorarium,sewa,konsumi,reimbursement,lainnya',
             'program_kerja_id' => 'required|exists:program_kerjas,id',
-            'sub_program_id' => 'required|exists:sub_programs,id',
             'divisi_id' => 'required|exists:divisis,id',
             'tanggal_pengajuan' => 'nullable|date',
-            'periode_mulai' => 'nullable|date',
-            'periode_selesai' => 'nullable|date|after_or_equal:periode_mulai',
             'total_pengajuan' => 'required|numeric|min:1000',
             'deskripsi' => 'required|string|max:1000',
-
-            // Penerima manfaat validation
-            'jenis_penerima' => 'required|in:karyawan,vendor,lainnya',
-            'penerima_manfaat_id' => 'nullable|required_if:jenis_penerima,karyawan|integer|exists:users,id',
-            'penerima_manfaat_name' => 'nullable|required_if:jenis_penerima,vendor,lainnya|string|max:255',
-            'penerima_manfaat_detail' => 'nullable|string',
-
-            // Detail pengajuan validation
-            'details' => 'required|array|min:1',
-            'details.*.uraian' => 'required|string|max:500',
-            'details.*.volume' => 'required|numeric|min:0.01',
-            'details.*.satuan' => 'required|string|max:50',
-            'details.*.harga_satuan' => 'required|numeric|min:0',
-            'details.*.subtotal' => 'nullable|numeric|min:0',
-            'details.*.detail_anggaran_id' => 'nullable|exists:detail_anggarans,id',
-            'details.*.sub_program_id' => 'nullable|exists:sub_programs,id',
-
-            // Attachments
+            'catatan' => 'nullable|string|max:500',
+            // Global attachments (for all jenis pengajuan)
             'attachments' => 'nullable|array|max:5',
             'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:2048',
-
-            // Notes
-            'catatan' => 'nullable|string|max:500',
         ];
+
+        // Rules for regular pengajuan (non-honorarium)
+        if ($jenisPengajuan !== 'honorarium') {
+            $rules['sub_program_id'] = 'required|exists:sub_programs,id';
+            $rules['periode_mulai'] = 'nullable|date';
+            $rules['periode_selesai'] = 'nullable|date|after_or_equal:periode_mulai';
+            $rules['jenis_penerima'] = 'required|in:karyawan,vendor,lainnya';
+            $rules['penerima_manfaat_id'] = 'nullable|required_if:jenis_penerima,karyawan|integer|exists:users,id';
+            $rules['penerima_manfaat_name'] = 'nullable|required_if:jenis_penerima,vendor,lainnya|string|max:255';
+            $rules['penerima_manfaat_detail'] = 'nullable|string';
+            $rules['details'] = 'required|array|min:1';
+            $rules['details.*.uraian'] = 'required|string|max:500';
+            $rules['details.*.volume'] = 'required|numeric|min:0.01';
+            $rules['details.*.satuan'] = 'required|string|max:50';
+            $rules['details.*.harga_satuan'] = 'required|numeric|min:0';
+            $rules['details.*.subtotal'] = 'nullable|numeric|min:0';
+            $rules['details.*.detail_anggaran_id'] = 'nullable|exists:detail_anggarans,id';
+            $rules['details.*.sub_program_id'] = 'nullable|exists:sub_programs,id';
+        }
+
+        // Rules for honorarium
+        if ($jenisPengajuan === 'honorarium') {
+            $rules['sub_program_id'] = 'required|exists:sub_programs,id';
+            $rules['detail_anggaran_id'] = 'required|exists:detail_anggarans,id';
+            $rules['honorarium_details'] = 'required|array|min:1';
+            $rules['honorarium_details.*.penerima_manfaat_type'] = 'required|in:karyawan,non_karyawan';
+            $rules['honorarium_details.*.penerima_manfaat_id'] = 'nullable|integer|exists:users,id';
+            $rules['honorarium_details.*.penerima_manfaat_name'] = 'nullable|string|max:255';
+            $rules['honorarium_details.*.jumlah_honor'] = 'required|numeric|min:0';
+            $rules['honorarium_details.*.nomor_rekening'] = 'required|string|max:50';
+            $rules['honorarium_details.*.deskripsi'] = 'nullable|string|max:500';
+            $rules['honorarium_details.*.lampiran'] = 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048';
+        }
+
+        return $rules;
     }
 
     /**
@@ -105,6 +121,8 @@ class StorePengajuanDanaRequest extends FormRequest
             'details.*.subtotal.numeric' => 'Subtotal harus berupa angka',
             'details.*.subtotal.min' => 'Subtotal minimal Rp 1.000',
 
+            'attachments.required' => 'Lampiran dokumen wajib diupload (minimal 1 file)',
+            'attachments.min' => 'Lampiran dokumen wajib diupload (minimal 1 file)',
             'attachments.max' => 'Maksimal 5 file lampiran',
             'attachments.*.file' => 'File harus berupa file yang valid',
             'attachments.*.mimes' => 'Format file tidak diizinkan',
@@ -121,10 +139,39 @@ class StorePengajuanDanaRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $this->validatePenerimaManfaat($validator);
-            $this->validateDetailsSum($validator);
-            $this->validatePaguAvailability($validator);
+            $jenisPengajuan = $this->input('jenis_pengajuan');
+
+            if ($jenisPengajuan === 'honorarium') {
+                $this->validateHonorariumDetails($validator);
+                $this->validatePaguAvailability($validator);
+            } else {
+                $this->validatePenerimaManfaat($validator);
+                $this->validateDetailsSum($validator);
+                $this->validatePaguAvailability($validator);
+            }
         });
+    }
+
+    /**
+     * Validate honorarium details
+     */
+    protected function validateHonorariumDetails($validator)
+    {
+        $honorariumDetails = $this->input('honorarium_details', []);
+
+        foreach ($honorariumDetails as $index => $detail) {
+            $penerimaType = $detail['penerima_manfaat_type'] ?? null;
+            $penerimaId = $detail['penerima_manfaat_id'] ?? null;
+            $penerimaName = $detail['penerima_manfaat_name'] ?? null;
+
+            if ($penerimaType === 'karyawan' && empty($penerimaId)) {
+                $validator->errors()->add("honorarium_details.{$index}.penerima_manfaat_id", "Karyawan wajib dipilih");
+            }
+
+            if ($penerimaType === 'non_karyawan' && empty($penerimaName)) {
+                $validator->errors()->add("honorarium_details.{$index}.penerima_manfaat_name", "Nama penerima wajib diisi");
+            }
+        }
     }
 
     /**

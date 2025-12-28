@@ -186,8 +186,8 @@ class PengajuanDanaController extends Controller
             // Generate nomor pengajuan
             $nomorPengajuan = NumberingService::generateNomorPengajuan();
 
-            // Create pengajuan dana
-            $pengajuan = PengajuanDana::create([
+            // Prepare common data
+            $pengajuanData = [
                 'nomor_pengajuan' => $nomorPengajuan,
                 'judul_pengajuan' => $request->judul_pengajuan,
                 'jenis_pengajuan' => $request->jenis_pengajuan,
@@ -195,41 +195,84 @@ class PengajuanDanaController extends Controller
                 'divisi_id' => $request->divisi_id,
                 'created_by' => Auth::id(),
                 'tanggal_pengajuan' => $request->tanggal_pengajuan ?? now()->toDateString(),
-                'periode_mulai' => $request->periode_mulai,
-                'periode_selesai' => $request->periode_selesai,
                 'total_pengajuan' => $request->total_pengajuan,
                 'deskripsi' => $request->deskripsi,
-                'penerima_manfaat_type' => $request->jenis_penerima,
-                'penerima_manfaat_id' => $request->penerima_manfaat_id,
-                'penerima_manfaat_name' => $request->penerima_manfaat_name,
-                'penerima_manfaat_detail' => $request->penerima_manfaat_detail,
                 'status' => 'draft',
                 'catatan' => $request->catatan,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ];
 
-            // Create detail pengajuan
-            foreach ($request->details as $detail) {
-                $volume = (float) ($detail['volume'] ?? 0);
-                $hargaSatuan = (float) ($detail['harga_satuan'] ?? 0);
-                $subtotal = $volume * $hargaSatuan;
-
-                DetailPengajuan::create([
-                    'pengajuan_dana_id' => $pengajuan->id,
-                    'sub_program_id' => $detail['sub_program_id'] ?? $request->sub_program_id,
-                    'detail_anggaran_id' => $detail['detail_anggaran_id'] ?? null,
-                    'uraian' => $detail['uraian'],
-                    'volume' => $volume,
-                    'satuan' => $detail['satuan'],
-                    'harga_satuan' => $hargaSatuan,
-                    'subtotal' => $subtotal,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            // Add detail_anggaran_id for honorarium
+            if ($request->jenis_pengajuan === 'honorarium' && $request->detail_anggaran_id) {
+                $pengajuanData['detail_anggaran_id'] = $request->detail_anggaran_id;
+                $pengajuanData['sub_program_id'] = $request->sub_program_id;
             }
 
-            // Handle attachments
+            // Add penerima_manfaat fields only for non-honorarium
+            if ($request->jenis_pengajuan !== 'honorarium') {
+                $pengajuanData['periode_mulai'] = $request->periode_mulai;
+                $pengajuanData['periode_selesai'] = $request->periode_selesai;
+                $pengajuanData['penerima_manfaat_type'] = $request->jenis_penerima;
+                $pengajuanData['penerima_manfaat_id'] = $request->penerima_manfaat_id;
+                $pengajuanData['penerima_manfaat_name'] = $request->penerima_manfaat_name;
+                $pengajuanData['penerima_manfaat_detail'] = $request->penerima_manfaat_detail;
+            }
+
+            // Create pengajuan dana
+            $pengajuan = PengajuanDana::create($pengajuanData);
+
+            // Handle based on jenis pengajuan
+            if ($request->jenis_pengajuan === 'honorarium') {
+                // Store honorarium details
+                foreach ($request->honorarium_details as $index => $detail) {
+                    $lampiranPath = null;
+                    $lampiranFilename = null;
+
+                    // Handle file upload for each recipient
+                    if ($request->hasFile("honorarium_details.$index.lampiran")) {
+                        $file = $request->file("honorarium_details.$index.lampiran");
+                        $lampiranPath = $file->store('honorarium-lampiran', 'public');
+                        $lampiranFilename = $file->getClientOriginalName();
+                    }
+
+                    \App\Models\HonorariumDetail::create([
+                        'pengajuan_dana_id' => $pengajuan->id,
+                        'penerima_manfaat_type' => $detail['penerima_manfaat_type'],
+                        'penerima_manfaat_id' => $detail['penerima_manfaat_id'] ?? null,
+                        'penerima_manfaat_name' => $detail['penerima_manfaat_name'] ?? null,
+                        'jumlah_honor' => $detail['jumlah_honor'],
+                        'nomor_rekening' => $detail['nomor_rekening'] ?? null,
+                        'deskripsi' => $detail['deskripsi'] ?? null,
+                        'lampiran' => $lampiranPath,
+                        'lampiran_filename' => $lampiranFilename,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            } else {
+                // Store regular detail pengajuan
+                foreach ($request->details as $detail) {
+                    $volume = (float) ($detail['volume'] ?? 0);
+                    $hargaSatuan = (float) ($detail['harga_satuan'] ?? 0);
+                    $subtotal = $volume * $hargaSatuan;
+
+                    DetailPengajuan::create([
+                        'pengajuan_dana_id' => $pengajuan->id,
+                        'sub_program_id' => $detail['sub_program_id'] ?? $request->sub_program_id,
+                        'detail_anggaran_id' => $detail['detail_anggaran_id'] ?? null,
+                        'uraian' => $detail['uraian'],
+                        'volume' => $volume,
+                        'satuan' => $detail['satuan'],
+                        'harga_satuan' => $hargaSatuan,
+                        'subtotal' => $subtotal,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+
+            // Handle global attachments for all jenis pengajuan (both honorarium and regular)
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
                     $path = $file->store('pengajuan-attachments', 'public');
@@ -275,26 +318,8 @@ class PengajuanDanaController extends Controller
         }
 
         // Load relationships that exist
-        $relationships = ['divisi', 'programKerja', 'createdBy', 'details.subProgram', 'approvals.approver', 'pencairanDana'];
-        $optionalRelationships = ['attachments', 'laporanPertanggungJawaban', 'refunds'];
-
-        // Load main relationships
-        foreach ($relationships as $relation) {
-            try {
-                $pengajuanDana->load($relation);
-            } catch (\Exception $e) {
-                // Ignore if relationship doesn't exist
-            }
-        }
-
-        // Try loading optional relationships
-        foreach ($optionalRelationships as $relation) {
-            try {
-                $pengajuanDana->load($relation);
-            } catch (\Exception $e) {
-                // Ignore if relationship doesn't exist
-            }
-        }
+        $pengajuanDana->load(['divisi', 'programKerja', 'subProgram', 'createdBy', 'details.subProgram', 'approvals.approver', 'pencairanDana']);
+        $pengajuanDana->load(['attachments', 'honorariumDetails.karyawan']);
 
         // Get approval status
         $approvalStatus = ApprovalService::getApprovalStatus($pengajuanDana->id);
@@ -328,7 +353,7 @@ class PengajuanDanaController extends Controller
         // Check permission
         if (!$user->hasPermission('pengajuan_dana.edit') ||
             ($pengajuanDana->status !== 'draft' && $pengajuanDana->status !== 'revisi') ||
-            ($pengajuanDana->created_by !== $user->id && !$user->hasPermission('pengajuan_dana.edit_all'))) {
+            ($pengajuanDana->created_by != $user->id && !$user->hasPermission('pengajuan_dana.edit_all'))) {
             abort(403);
         }
 
@@ -513,6 +538,43 @@ class PengajuanDanaController extends Controller
     }
 
     /**
+     * Cancel pengajuan dana
+     */
+    public function cancel(PengajuanDana $pengajuanDana)
+    {
+        $user = Auth::user();
+
+        // Only creator can cancel their own pengajuan
+        if ($pengajuanDana->created_by != $user->id) {
+            abort(403, 'Anda tidak memiliki izin untuk membatalkan pengajuan ini.');
+        }
+
+        // Can only cancel draft or menunggu_approval status
+        if (!in_array($pengajuanDana->status, ['draft', 'menunggu_approval'])) {
+            return redirect()
+                ->back()
+                ->with('error', 'Pengajuan tidak dapat dibatalkan karena sudah dalam proses lebih lanjut.');
+        }
+
+        try {
+            $pengajuanDana->update([
+                'status' => 'cancelled',
+            ]);
+
+            return redirect()
+                ->route('pengajuan-dana.show', $pengajuanDana)
+                ->with('success', 'Pengajuan dana berhasil dibatalkan.');
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to cancel pengajuan dana: ' . $e->getMessage());
+
+            return redirect()
+                ->back()
+                ->with('error', 'Gagal membatalkan pengajuan dana. Silakan coba lagi.');
+        }
+    }
+
+    /**
      * Submit pengajuan for approval
      */
     public function submit(PengajuanDana $pengajuanDana)
@@ -520,7 +582,7 @@ class PengajuanDanaController extends Controller
         $user = Auth::user();
 
         // Check permission
-        if ($pengajuanDana->created_by !== $user->id || $pengajuanDana->status !== 'draft') {
+        if ($pengajuanDana->created_by != $user->id || $pengajuanDana->status !== 'draft') {
             abort(403);
         }
 

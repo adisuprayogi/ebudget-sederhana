@@ -13,9 +13,13 @@ class Approval extends Model
         'pengajuan_dana_id',
         'approver_id',
         'level',
+        'urutan',
         'status',
+        'required',
         'catatan',
         'approved_at',
+        'approved_by',
+        'notes',
     ];
 
     protected $casts = [
@@ -47,11 +51,19 @@ class Approval extends Model
     }
 
     /**
+     * Scope a query to only include waiting approvals.
+     */
+    public function scopeWaiting($query)
+    {
+        return $query->where('status', 'waiting');
+    }
+
+    /**
      * Scope a query to only include approved approvals.
      */
     public function scopeApproved($query)
     {
-        return $query->where('status', 'approved');
+        return $query->where('status', 'disetujui');
     }
 
     /**
@@ -59,6 +71,6 @@ class Approval extends Model
      */
     public function scopeRejected($query)
     {
-        return $query->where('status', 'rejected');
+        return $query->where('status', 'ditolak');
     }
 }

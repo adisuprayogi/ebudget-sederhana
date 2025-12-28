@@ -61,6 +61,8 @@
                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Nomor</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Judul</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Jenis</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Pengaju</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Divisi</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Level</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Status</th>
@@ -69,6 +71,33 @@
                     </thead>
                     <tbody class="divide-y divide-secondary-100">
                         @forelse($approvals ?? [] as $approval)
+                            @php
+                                $jenisLabels = [
+                                    'kegiatan' => 'Kegiatan',
+                                    'pengadaan' => 'Pengadaan',
+                                    'pembayaran' => 'Pembayaran',
+                                    'honorarium' => 'Honorarium',
+                                    'sewa' => 'Sewa',
+                                    'konsumsi' => 'Konsumsi',
+                                    'konsumi' => 'Konsumsi',
+                                    'reimbursement' => 'Reimbursement',
+                                    'lainnya' => 'Lainnya',
+                                ];
+                                $jenisColors = [
+                                    'kegiatan' => 'bg-blue-100 text-blue-700',
+                                    'pengadaan' => 'bg-green-100 text-green-700',
+                                    'pembayaran' => 'bg-yellow-100 text-yellow-700',
+                                    'honorarium' => 'bg-purple-100 text-purple-700',
+                                    'sewa' => 'bg-orange-100 text-orange-700',
+                                    'konsumsi' => 'bg-pink-100 text-pink-700',
+                                    'konsumi' => 'bg-pink-100 text-pink-700',
+                                    'reimbursement' => 'bg-teal-100 text-teal-700',
+                                    'lainnya' => 'bg-gray-100 text-gray-700',
+                                ];
+                                $jenis = $approval->pengajuanDana->jenis_pengajuan;
+                                $label = $jenisLabels[$jenis] ?? ucfirst($jenis);
+                                $colorClass = $jenisColors[$jenis] ?? 'bg-gray-100 text-gray-700';
+                            @endphp
                             <tr class="hover:bg-secondary-50 transition-colors duration-150">
                                 <td class="px-6 py-4">
                                     <span class="font-mono text-sm font-semibold text-primary-600">{{ $approval->pengajuanDana->nomor_pengajuan }}</span>
@@ -76,6 +105,14 @@
                                 <td class="px-6 py-4">
                                     <div class="font-medium text-secondary-900">{{ $approval->pengajuanDana->judul_pengajuan }}</div>
                                     <div class="text-sm text-secondary-500">{{ formatRupiah($approval->pengajuanDana->total_pengajuan) }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium {{ $colorClass }}">
+                                        {{ $label }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-sm text-secondary-700">{{ $approval->pengajuanDana->createdBy->name ?? '-' }}</span>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="text-sm text-secondary-700">{{ $approval->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
@@ -109,7 +146,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center">
+                                <td colspan="8" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center">
                                         <svg class="w-16 h-16 text-secondary-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

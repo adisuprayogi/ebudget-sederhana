@@ -15,7 +15,9 @@ class PengajuanDana extends Model
         'tanggal_pengajuan',
         'divisi_id',
         'program_kerja_id',
+        'sub_program_id',
         'jenis_pengajuan',
+        'detail_anggaran_id',
         'penerima_manfaat_type',
         'penerima_manfaat_id',
         'penerima_manfaat_name',
@@ -57,6 +59,22 @@ class PengajuanDana extends Model
     }
 
     /**
+     * Get the sub program for this pengajuan.
+     */
+    public function subProgram()
+    {
+        return $this->belongsTo(SubProgram::class, 'sub_program_id');
+    }
+
+    /**
+     * Get the detail anggaran for this pengajuan.
+     */
+    public function detailAnggaran()
+    {
+        return $this->belongsTo(DetailAnggaran::class, 'detail_anggaran_id');
+    }
+
+    /**
      * Get the user who created the pengajuan.
      */
     public function user()
@@ -65,7 +83,7 @@ class PengajuanDana extends Model
     }
 
     /**
-     * Get the user who created the pengajuan.
+     * Get the user who created the pengajuan (alias).
      */
     public function createdBy()
     {
@@ -110,6 +128,14 @@ class PengajuanDana extends Model
     public function attachments()
     {
         return $this->hasMany(Attachment::class);
+    }
+
+    /**
+     * Get the honorarium details for the pengajuan.
+     */
+    public function honorariumDetails()
+    {
+        return $this->hasMany(HonorariumDetail::class);
     }
 
     /**

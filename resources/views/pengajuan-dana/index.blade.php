@@ -82,8 +82,9 @@
                         <option value="">Semua Status</option>
                         <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
                         <option value="menunggu_approval" {{ request('status') == 'menunggu_approval' ? 'selected' : '' }}>Menunggu Approval</option>
-                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
-                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                        <option value="disetujui" {{ request('status') == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
+                        <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
                         <option value="dicairkan" {{ request('status') == 'dicairkan' ? 'selected' : '' }}>Dicairkan</option>
                     </select>
                 </div>
@@ -151,13 +152,17 @@
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
                                             Menunggu
                                         </span>
-                                    @elseif($pengajuan->status === 'approved')
+                                    @elseif($pengajuan->status === 'disetujui' || $pengajuan->status === 'approved')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
                                             Disetujui
                                         </span>
-                                    @elseif($pengajuan->status === 'rejected')
+                                    @elseif($pengajuan->status === 'ditolak' || $pengajuan->status === 'rejected')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
                                             Ditolak
+                                        </span>
+                                    @elseif($pengajuan->status === 'cancelled')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                                            Dibatalkan
                                         </span>
                                     @elseif($pengajuan->status === 'dicairkan')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
@@ -186,6 +191,17 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                 </svg>
                                             </a>
+                                        @endif
+                                        {{-- Batalkan button for draft and menunggu_approval status - only creator --}}
+                                        @if(in_array($pengajuan->status, ['draft', 'menunggu_approval']) && auth()->id() == $pengajuan->created_by)
+                                            <form method="POST" action="{{ route('pengajuan-dana.cancel', $pengajuan) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pengajuan ini?')" class="inline">
+                                                @csrf
+                                                <button type="submit" class="p-2 text-secondary-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Batalkan">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </form>
                                         @endif
                                     </div>
                                 </td>
