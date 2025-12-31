@@ -18,16 +18,19 @@ class ProgramKerjaController extends Controller
     {
         $user = Auth::user();
 
-        // Get active periode anggaran (default: yang aktif dan dalam fase penggunaan anggaran)
-        $activePeriode = PeriodeAnggaran::active()->first();
+        // Get active periode anggaran (prioritize perencanaan phase)
+        $activePeriodes = PeriodeAnggaran::where('status', 'active')->get();
 
-        // If no periode in penggunaan phase, try to get periode in perencanaan phase
+        // First try to find periode in perencanaan phase
+        $activePeriode = $activePeriodes->first(function ($periode) {
+            return $periode->fase === 'perencangan';
+        });
+
+        // If no periode in perencanaan phase, try to get periode in penggunaan phase
         if (!$activePeriode) {
-            $activePeriode = PeriodeAnggaran::where('status', 'active')
-                ->get()
-                ->first(function ($periode) {
-                    return $periode->fase === 'perencangan';
-                });
+            $activePeriode = $activePeriodes->first(function ($periode) {
+                return $periode->fase === 'penggunaan';
+            });
         }
 
         if (!$activePeriode) {
@@ -79,16 +82,19 @@ class ProgramKerjaController extends Controller
             }
         }
 
-        // Get active periode anggaran (default: yang aktif dan dalam fase penggunaan anggaran)
-        $activePeriode = PeriodeAnggaran::active()->first();
+        // Get active periode anggaran (prioritize perencanaan phase)
+        $activePeriodes = PeriodeAnggaran::where('status', 'active')->get();
 
-        // If no periode in penggunaan phase, try to get periode in perencanaan phase
+        // First try to find periode in perencanaan phase
+        $activePeriode = $activePeriodes->first(function ($periode) {
+            return $periode->fase === 'perencangan';
+        });
+
+        // If no periode in perencanaan phase, try to get periode in penggunaan phase
         if (!$activePeriode) {
-            $activePeriode = PeriodeAnggaran::where('status', 'active')
-                ->get()
-                ->first(function ($periode) {
-                    return $periode->fase === 'perencangan';
-                });
+            $activePeriode = $activePeriodes->first(function ($periode) {
+                return $periode->fase === 'penggunaan';
+            });
         }
 
         if (!$activePeriode) {

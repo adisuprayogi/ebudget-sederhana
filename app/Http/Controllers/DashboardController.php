@@ -320,21 +320,20 @@ class DashboardController extends Controller
             $q->where('divisi_id', $divisi->id);
         })->where('status', 'menunggu_verifikasi')->count();
 
-        // LPJ statistics for this divisi
-        $lpjBelumDibuat = PencairanDana::whereHas('pengajuanDana', function($q) use ($divisi) {
-            $q->where('divisi_id', $divisi->id);
+        // LPJ statistics for current user only
+        $lpjBelumDibuat = PencairanDana::whereHas('pengajuanDana', function($q) use ($user) {
+            $q->where('created_by', $user->id);
         })->where('status', 'processed')
             ->whereDoesntHave('lpjs')
             ->count();
 
-        $lpjMenungguVerifikasi = LaporanPertanggungJawaban::whereHas('pencairanDana.pengajuanDana', function($q) use ($divisi) {
-            $q->where('divisi_id', $divisi->id);
-        })->where('status', 'menunggu_verifikasi')->count();
+        $lpjMenungguVerifikasi = LaporanPertanggungJawaban::where('created_by', $user->id)
+            ->where('status', 'menunggu_verifikasi')
+            ->count();
 
-        // Refund notifications for this divisi
-        $lpjNeedRefund = LaporanPertanggungJawaban::whereHas('pencairanDana.pengajuanDana', function($q) use ($divisi) {
-            $q->where('divisi_id', $divisi->id);
-        })->where('status', 'approved')
+        // Refund notifications for current user only
+        $lpjNeedRefund = LaporanPertanggungJawaban::where('created_by', $user->id)
+            ->where('status', 'approved')
             ->where('sisa_dana', '>', 0)
             ->whereDoesntHave('refunds')
             ->count();
@@ -419,10 +418,9 @@ class DashboardController extends Controller
             ->where('status', 'revisi')
             ->count();
 
-        // Refund notifications
-        $lpjNeedRefund = LaporanPertanggungJawaban::whereHas('pencairanDana.pengajuanDana', function($q) use ($divisi) {
-            $q->where('divisi_id', $divisi->id);
-        })->where('status', 'approved')
+        // Refund notifications for current user only
+        $lpjNeedRefund = LaporanPertanggungJawaban::where('created_by', $user->id)
+            ->where('status', 'approved')
             ->where('sisa_dana', '>', 0)
             ->whereDoesntHave('refunds')
             ->count();

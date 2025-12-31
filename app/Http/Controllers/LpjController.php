@@ -17,8 +17,11 @@ class LpjController extends Controller
      */
     public function index(Request $request): View
     {
+        $user = auth()->user();
+        $canVerifyAll = $user->hasPermission('lpj.verify');
+
         // Base query function
-        $baseQuery = function ($status) use ($request) {
+        $baseQuery = function ($status) use ($request, $user, $canVerifyAll) {
             $query = LaporanPertanggungJawaban::with([
                 'pencairanDana',
                 'pencairanDana.pengajuanDana',
@@ -27,10 +30,21 @@ class LpjController extends Controller
                 'createdBy'
             ])->where('status', $status);
 
-            // Filter by periode anggaran
+            // Only show own LPJ unless can verify all
+            if (!$canVerifyAll) {
+                $query->where('created_by', $user->id);
+            }
+
+            // Filter by periode anggaran (through program_kerja/sub_program)
             if ($request->filled('periode_anggaran_id')) {
                 $query->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
-                    $q->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    $q->where(function ($subQ) use ($request) {
+                        $subQ->whereHas('programKerja', function ($ss) use ($request) {
+                            $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        })->orWhereHas('subProgram', function ($ss) use ($request) {
+                            $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        });
+                    });
                 });
             }
 
@@ -79,20 +93,30 @@ class LpjController extends Controller
             ->paginate(15)
             ->appends($request->except('page'));
 
-        // Get statistics
+        // Get statistics (only user's own LPJ unless can verify all)
+        $statsQuery = LaporanPertanggungJawaban::query();
+        if (!$canVerifyAll) {
+            $statsQuery->where('created_by', $user->id);
+        }
         $stats = [
-            'draft' => LaporanPertanggungJawaban::where('status', 'draft')->count(),
-            'menunggu_verifikasi' => LaporanPertanggungJawaban::where('status', 'menunggu_verifikasi')->count(),
-            'approved' => LaporanPertanggungJawaban::where('status', 'approved')->count(),
-            'rejected' => LaporanPertanggungJawaban::where('status', 'rejected')->count(),
-            'revisi' => LaporanPertanggungJawaban::where('status', 'revisi')->count(),
+            'draft' => (clone $statsQuery)->where('status', 'draft')->count(),
+            'menunggu_verifikasi' => (clone $statsQuery)->where('status', 'menunggu_verifikasi')->count(),
+            'approved' => (clone $statsQuery)->where('status', 'approved')->count(),
+            'rejected' => (clone $statsQuery)->where('status', 'rejected')->count(),
+            'revisi' => (clone $statsQuery)->where('status', 'revisi')->count(),
         ];
+
+        // Calculate total_amount only for user's own LPJ (unless can verify all)
+        $totalAmountQuery = LaporanPertanggungJawaban::where('status', 'approved');
+        if (!$canVerifyAll) {
+            $totalAmountQuery->where('created_by', $user->id);
+        }
 
         $statistics = [
             'total_count' => array_sum($stats),
             'pending_count' => $stats['menunggu_verifikasi'],
             'approved_count' => $stats['approved'],
-            'total_amount' => LaporanPertanggungJawaban::where('status', 'approved')->sum('total_digunakan'),
+            'total_amount' => $totalAmountQuery->sum('total_digunakan'),
         ];
 
         // Get periode anggarans for filter

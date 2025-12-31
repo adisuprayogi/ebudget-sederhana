@@ -17,8 +17,11 @@ class RefundController extends Controller
      */
     public function index(Request $request): View
     {
+        $user = auth()->user();
+        $canProcessAll = $user->hasPermission('refund.process');
+
         // Base query function
-        $baseQuery = function ($status) use ($request) {
+        $baseQuery = function ($status) use ($request, $user, $canProcessAll) {
             $query = Refund::with([
                 'pencairanDana',
                 'pencairanDana.pengajuanDana',
@@ -28,9 +31,32 @@ class RefundController extends Controller
                 'createdBy'
             ])->where('status', $status);
 
-            // Filter by periode anggaran
+            // Only show own refunds unless can process all
+            if (!$canProcessAll) {
+                $query->where('created_by', $user->id);
+            }
+
+            // Filter by periode anggaran (through pengajuanDana -> programKerja/subProgram)
             if ($request->filled('periode_anggaran_id')) {
-                $query->where('periode_anggaran_id', $request->periode_anggaran_id);
+                $query->where(function ($q) use ($request) {
+                    $q->whereHas('pencairanDana.pengajuanDana', function ($sq) use ($request) {
+                        $sq->where(function ($ss) use ($request) {
+                            $ss->whereHas('programKerja', function ($sss) use ($request) {
+                                $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                            })->orWhereHas('subProgram', function ($sss) use ($request) {
+                                $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                            });
+                        });
+                    })->orWhereHas('pengajuanDana', function ($sq) use ($request) {
+                        $sq->where(function ($ss) use ($request) {
+                            $ss->whereHas('programKerja', function ($sss) use ($request) {
+                                $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                            })->orWhereHas('subProgram', function ($sss) use ($request) {
+                                $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                            });
+                        });
+                    });
+                });
             }
 
             // Filter by divisi
@@ -83,21 +109,31 @@ class RefundController extends Controller
             ->paginate(15)
             ->appends($request->except('page'));
 
-        // Get statistics
+        // Get statistics (only user's own refunds unless can process all)
+        $statsQuery = Refund::query();
+        if (!$canProcessAll) {
+            $statsQuery->where('created_by', $user->id);
+        }
         $stats = [
-            'draft' => Refund::where('status', 'draft')->count(),
-            'menunggu_approval' => Refund::where('status', 'menunggu_approval')->count(),
-            'approved' => Refund::where('status', 'approved')->count(),
-            'processed' => Refund::where('status', 'processed')->count(),
-            'rejected' => Refund::where('status', 'rejected')->count(),
+            'draft' => (clone $statsQuery)->where('status', 'draft')->count(),
+            'menunggu_approval' => (clone $statsQuery)->where('status', 'menunggu_approval')->count(),
+            'approved' => (clone $statsQuery)->where('status', 'approved')->count(),
+            'processed' => (clone $statsQuery)->where('status', 'processed')->count(),
+            'rejected' => (clone $statsQuery)->where('status', 'rejected')->count(),
         ];
+
+        // Calculate total_amount only for user's own refunds (unless can process all)
+        $totalAmountQuery = Refund::whereIn('status', ['processed']);
+        if (!$canProcessAll) {
+            $totalAmountQuery->where('created_by', $user->id);
+        }
 
         $statistics = [
             'total_count' => array_sum($stats),
             'pending_count' => $stats['menunggu_approval'],
             'approved_count' => $stats['approved'],
             'processed_count' => $stats['processed'],
-            'total_amount' => Refund::whereIn('status', ['processed'])->sum('jumlah_refund'),
+            'total_amount' => $totalAmountQuery->sum('jumlah_refund'),
         ];
 
         return view('refund.index', compact(
@@ -142,7 +178,25 @@ class RefundController extends Controller
             });
         }
         if ($request->filled('periode_anggaran_id')) {
-            $menungguQuery->where('periode_anggaran_id', $request->periode_anggaran_id);
+            $menungguQuery->where(function ($q) use ($request) {
+                $q->whereHas('pencairanDana.pengajuanDana', function ($sq) use ($request) {
+                    $sq->where(function ($ss) use ($request) {
+                        $ss->whereHas('programKerja', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        })->orWhereHas('subProgram', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        });
+                    });
+                })->orWhereHas('pengajuanDana', function ($sq) use ($request) {
+                    $sq->where(function ($ss) use ($request) {
+                        $ss->whereHas('programKerja', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        })->orWhereHas('subProgram', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        });
+                    });
+                });
+            });
         }
         if ($request->filled('search')) {
             $search = $request->search;
@@ -166,7 +220,25 @@ class RefundController extends Controller
             });
         }
         if ($request->filled('periode_anggaran_id')) {
-            $processedQuery->where('periode_anggaran_id', $request->periode_anggaran_id);
+            $processedQuery->where(function ($q) use ($request) {
+                $q->whereHas('pencairanDana.pengajuanDana', function ($sq) use ($request) {
+                    $sq->where(function ($ss) use ($request) {
+                        $ss->whereHas('programKerja', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        })->orWhereHas('subProgram', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        });
+                    });
+                })->orWhereHas('pengajuanDana', function ($sq) use ($request) {
+                    $sq->where(function ($ss) use ($request) {
+                        $ss->whereHas('programKerja', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        })->orWhereHas('subProgram', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        });
+                    });
+                });
+            });
         }
         if ($request->filled('search')) {
             $search = $request->search;
@@ -190,7 +262,25 @@ class RefundController extends Controller
             });
         }
         if ($request->filled('periode_anggaran_id')) {
-            $rejectedQuery->where('periode_anggaran_id', $request->periode_anggaran_id);
+            $rejectedQuery->where(function ($q) use ($request) {
+                $q->whereHas('pencairanDana.pengajuanDana', function ($sq) use ($request) {
+                    $sq->where(function ($ss) use ($request) {
+                        $ss->whereHas('programKerja', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        })->orWhereHas('subProgram', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        });
+                    });
+                })->orWhereHas('pengajuanDana', function ($sq) use ($request) {
+                    $sq->where(function ($ss) use ($request) {
+                        $ss->whereHas('programKerja', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        })->orWhereHas('subProgram', function ($sss) use ($request) {
+                            $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                        });
+                    });
+                });
+            });
         }
         if ($request->filled('search')) {
             $search = $request->search;
@@ -270,10 +360,16 @@ class RefundController extends Controller
             });
         }
 
-        // Filter by periode anggaran
+        // Filter by periode anggaran (through program_kerja/sub_program)
         if ($request->filled('periode_anggaran_id')) {
             $query->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
-                $q->where('periode_anggaran_id', $request->periode_anggaran_id);
+                $q->where(function ($ss) use ($request) {
+                    $ss->whereHas('programKerja', function ($sss) use ($request) {
+                        $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    })->orWhereHas('subProgram', function ($sss) use ($request) {
+                        $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    });
+                });
             });
         }
 
@@ -316,7 +412,15 @@ class RefundController extends Controller
             if ($lpj) {
                 $validated['pencairan_dana_id'] = $lpj->pencairan_dana_id;
                 $validated['pengajuan_dana_id'] = $lpj->pencairanDana->pengajuan_dana_id ?? null;
-                $validated['periode_anggaran_id'] = $lpj->pencairanDana->pengajuanDana->periode_anggaran_id ?? null;
+                // Get periode_anggaran_id through program_kerja or sub_program
+                $pengajuan = $lpj->pencairanDana->pengajuanDana;
+                if ($pengajuan) {
+                    if ($pengajuan->programKerja) {
+                        $validated['periode_anggaran_id'] = $pengajuan->programKerja->periode_anggaran_id;
+                    } elseif ($pengajuan->subProgram) {
+                        $validated['periode_anggaran_id'] = $pengajuan->subProgram->periode_anggaran_id;
+                    }
+                }
             }
         }
 
@@ -518,28 +622,39 @@ class RefundController extends Controller
     {
         $periodeId = $request->query('periode_anggaran_id');
 
+        // Helper to filter by periode through relationships
+        $filterPeriode = function ($q) use ($periodeId) {
+            if ($periodeId) {
+                $q->where(function ($subQ) use ($periodeId) {
+                    $subQ->whereHas('pencairanDana.pengajuanDana', function ($sq) use ($periodeId) {
+                        $sq->where(function ($ss) use ($periodeId) {
+                            $ss->whereHas('programKerja', function ($sss) use ($periodeId) {
+                                $sss->where('periode_anggaran_id', $periodeId);
+                            })->orWhereHas('subProgram', function ($sss) use ($periodeId) {
+                                $sss->where('periode_anggaran_id', $periodeId);
+                            });
+                        });
+                    })->orWhereHas('pengajuanDana', function ($sq) use ($periodeId) {
+                        $sq->where(function ($ss) use ($periodeId) {
+                            $ss->whereHas('programKerja', function ($sss) use ($periodeId) {
+                                $sss->where('periode_anggaran_id', $periodeId);
+                            })->orWhereHas('subProgram', function ($sss) use ($periodeId) {
+                                $sss->where('periode_anggaran_id', $periodeId);
+                            });
+                        });
+                    });
+                });
+            }
+        };
+
         $stats = [
-            'total' => Refund::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
-            })->count(),
-            'total_nominal' => Refund::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
-            })->where('status', 'processed')->sum('jumlah_refund'),
-            'draft' => Refund::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
-            })->where('status', 'draft')->count(),
-            'menunggu_approval' => Refund::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
-            })->where('status', 'menunggu_approval')->count(),
-            'approved' => Refund::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
-            })->where('status', 'approved')->count(),
-            'rejected' => Refund::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
-            })->where('status', 'rejected')->count(),
-            'processed' => Refund::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
-            })->where('status', 'processed')->count(),
+            'total' => Refund::query()->when($periodeId, $filterPeriode)->count(),
+            'total_nominal' => Refund::query()->when($periodeId, $filterPeriode)->where('status', 'processed')->sum('jumlah_refund'),
+            'draft' => Refund::query()->when($periodeId, $filterPeriode)->where('status', 'draft')->count(),
+            'menunggu_approval' => Refund::query()->when($periodeId, $filterPeriode)->where('status', 'menunggu_approval')->count(),
+            'approved' => Refund::query()->when($periodeId, $filterPeriode)->where('status', 'approved')->count(),
+            'rejected' => Refund::query()->when($periodeId, $filterPeriode)->where('status', 'rejected')->count(),
+            'processed' => Refund::query()->when($periodeId, $filterPeriode)->where('status', 'processed')->count(),
         ];
 
         return response()->json($stats);

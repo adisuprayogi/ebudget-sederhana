@@ -260,13 +260,17 @@
                     </svg>
                     <span>Laporan Pertanggungjawaban</span>
                     @php
-                        $userDivisiId = auth()->user()->divisi_id;
-                        $pencairanNeedLpjCount = \App\Models\PencairanDana::where('status', 'approved')
-                            ->whereHas('pengajuanDana', function($q) use ($userDivisiId) {
-                                $q->where('divisi_id', $userDivisiId);
-                            })
-                            ->whereDoesntHave('lpjs')
-                            ->count();
+                        $userId = auth()->user()->id;
+                        $canVerifyLpj = auth()->user()->hasPermission('lpj.verify');
+                        $pencairanNeedLpjQuery = \App\Models\PencairanDana::where('status', 'approved')
+                            ->whereDoesntHave('lpjs');
+                        // Only show own pengajuan's pencairan unless can verify all
+                        if (!$canVerifyLpj) {
+                            $pencairanNeedLpjQuery->whereHas('pengajuanDana', function($q) use ($userId) {
+                                $q->where('created_by', $userId);
+                            });
+                        }
+                        $pencairanNeedLpjCount = $pencairanNeedLpjQuery->count();
                     @endphp
                     @if($pencairanNeedLpjCount > 0)
                         <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">{{ $pencairanNeedLpjCount }}</span>
@@ -278,14 +282,16 @@
                     </svg>
                     <span>Refund</span>
                     @php
-                        $userDivisiId = auth()->user()->divisi_id;
-                        $lpjWithSisaCount = \App\Models\LaporanPertanggungJawaban::where('status', 'approved')
+                        $userId = auth()->user()->id;
+                        $canProcessRefund = auth()->user()->hasPermission('refund.process');
+                        $lpjWithSisaQuery = \App\Models\LaporanPertanggungJawaban::where('status', 'approved')
                             ->where('sisa_dana', '>', 0)
-                            ->whereHas('pencairanDana.pengajuanDana', function($q) use ($userDivisiId) {
-                                $q->where('divisi_id', $userDivisiId);
-                            })
-                            ->whereDoesntHave('refunds')
-                            ->count();
+                            ->whereDoesntHave('refunds');
+                        // Only show own LPJ unless can process all
+                        if (!$canProcessRefund) {
+                            $lpjWithSisaQuery->where('created_by', $userId);
+                        }
+                        $lpjWithSisaCount = $lpjWithSisaQuery->count();
                     @endphp
                     @if($lpjWithSisaCount > 0)
                         <span class="ml-auto bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">{{ $lpjWithSisaCount }}</span>
