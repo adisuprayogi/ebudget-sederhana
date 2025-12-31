@@ -20,9 +20,18 @@ class PencatatanPenerimaanController extends Controller
     {
         $query = PencatatanPenerimaan::with(['perencanaanPenerimaan', 'periodeAnggaran', 'sumberDana', 'createdBy']);
 
+        // Default to active periode in penggunaan phase (for recording menu)
+        $periodeAnggaranId = $request->periode_anggaran_id;
+        if (!$periodeAnggaranId) {
+            // Find currently active periode anggaran (in penggunaan phase)
+            $activePeriode = PeriodeAnggaran::active()->first();
+
+            $periodeAnggaranId = $activePeriode ? $activePeriode->id : null;
+        }
+
         // Apply filters
-        if ($request->filled('periode_anggaran_id')) {
-            $query->where('periode_anggaran_id', $request->periode_anggaran_id);
+        if ($periodeAnggaranId) {
+            $query->where('periode_anggaran_id', $periodeAnggaranId);
         }
 
         if ($request->filled('sumber_dana_id')) {
@@ -64,7 +73,14 @@ class PencatatanPenerimaanController extends Controller
 
         return view('pencatatan-penerimaan.index', [
             'pencatatanPenerimaans' => $pencatatanPenerimaans,
-            'filters' => $request->only(['periode_anggaran_id', 'sumber_dana_id', 'perencanaan_penerimaan_id', 'search', 'tanggal_mulai', 'tanggal_selesai']),
+            'filters' => [
+                'sumber_dana_id' => $request->input('sumber_dana_id'),
+                'perencanaan_penerimaan_id' => $request->input('perencanaan_penerimaan_id'),
+                'periode_anggaran_id' => $periodeAnggaranId,
+                'search' => $request->input('search'),
+                'tanggal_mulai' => $request->input('tanggal_mulai'),
+                'tanggal_selesai' => $request->input('tanggal_selesai'),
+            ],
             'filterOptions' => [
                 'periodeAnggarans' => $periodeAnggarans,
                 'sumberDanas' => $sumberDanas,

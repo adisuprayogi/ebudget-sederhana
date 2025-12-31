@@ -17,6 +17,42 @@
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
                             Menunggu Approval
                         </span>
+                    @elseif($pengajuan->status === 'menunggu_pencairan')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                            Menunggu Pencairan
+                        </span>
+                    @elseif($pengajuan->status === 'cair')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                            Dana Sudah Dicairkan
+                        </span>
+                    @elseif($pengajuan->status === 'menunggu_lpj')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+                            Menunggu LPJ
+                        </span>
+                    @elseif($pengajuan->status === 'lpj_submitted')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-cyan-100 text-cyan-700">
+                            LPJ Disubmit
+                        </span>
+                    @elseif($pengajuan->status === 'lpj_ditolak')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                            LPJ Ditolak
+                        </span>
+                    @elseif($pengajuan->status === 'lpj_disetujui')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-teal-100 text-teal-700">
+                            LPJ Disetujui
+                        </span>
+                    @elseif($pengajuan->status === 'menunggu_refund')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+                            Menunggu Refund
+                        </span>
+                    @elseif($pengajuan->status === 'refund_ditolak')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                            Refund Ditolak
+                        </span>
+                    @elseif($pengajuan->status === 'selesai')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                            Selesai
+                        </span>
                     @elseif($pengajuan->status === 'disetujui' || $pengajuan->status === 'approved')
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
                             Disetujui
@@ -32,6 +68,10 @@
                     @elseif($pengajuan->status === 'cancelled')
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
                             Dibatalkan
+                        </span>
+                    @else
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                            {{ ucfirst(str_replace('_', ' ', $pengajuan->status)) }}
                         </span>
                     @endif
                 </div>
@@ -99,6 +139,166 @@
                     Pengajuan ini telah <strong>disetujui</strong>. Menunggu proses pencairan dana.
                 </div>
             </div>
+        @elseif($pengajuan->status === 'menunggu_pencairan')
+            <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-blue-700 text-sm">
+                    Pengajuan ini telah <strong>disetujui</strong>. Menunggu staff keuangan untuk membuat pencairan dana.
+                </div>
+            </div>
+        @elseif($pengajuan->status === 'cair')
+            <div class="mb-6 bg-purple-50 border border-purple-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-purple-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-purple-700 text-sm">
+                    Dana <strong>sudah dicairkan</strong>. Silakan verifikasi apakah Anda sudah menerima dana tersebut.
+                </div>
+            </div>
+        @elseif($pengajuan->status === 'selesai')
+            <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-green-700 text-sm">
+                    Pengajuan ini telah <strong>selesai</strong>. Dana telah diterima dan dikonfirmasi.
+                </div>
+            </div>
+        @elseif($pengajuan->status === 'menunggu_lpj')
+            <div class="mb-6 bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-indigo-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <div class="text-indigo-700 text-sm">
+                    Dana telah <strong>dicairkan</strong>. Silakan submit <strong>Laporan Pertanggungjawaban (LPJ)</strong> untuk melanjutkan proses ini.
+                </div>
+            </div>
+        @elseif($pengajuan->status === 'lpj_submitted')
+            <div class="mb-6 bg-cyan-50 border border-cyan-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-cyan-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-cyan-700 text-sm">
+                    <strong>LPJ telah disubmit</strong>. Menunggu approval dari staff keuangan.
+                </div>
+            </div>
+        @elseif($pengajuan->status === 'lpj_ditolak')
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-red-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-red-700 text-sm">
+                    <strong>LPJ ditolak</strong>. Silakan perbaiki dan submit kembali.
+                </div>
+            </div>
+        @elseif($pengajuan->status === 'lpj_disetujui')
+            <div class="mb-6 bg-teal-50 border border-teal-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-teal-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-teal-700 text-sm">
+                    <strong>LPJ disetujui</strong>. Pengajuan sedang dalam proses finalisasi.
+                </div>
+            </div>
+        @elseif($pengajuan->status === 'menunggu_refund')
+            <div class="mb-6 bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-orange-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-orange-700 text-sm">
+                    Menunggu proses <strong>refund</strong> dari staff keuangan.
+                </div>
+            </div>
+        @elseif($pengajuan->status === 'refund_ditolak')
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-red-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-red-700 text-sm">
+                    <strong>Refund ditolak</strong>. Silakan hubungi staff keuangan untuk informasi lebih lanjut.
+                </div>
+            </div>
+        @endif
+
+        {{-- Pencairan Card - shown when status has pencairan data --}}
+        @php
+            \Log::info('Pengajuan Show - Pencairan Check', [
+                'pengajuan_id' => $pengajuan->id,
+                'pengajuan_status' => $pengajuan->status,
+                'has_pencairan' => $pengajuan->activePencairan !== null,
+                'pencairan_id' => $pengajuan->activePencairan->id ?? null,
+                'pencairan_status' => $pengajuan->activePencairan->status ?? null,
+                'is_created_by' => auth()->id() === $pengajuan->created_by,
+                'auth_id' => auth()->id(),
+                'created_by' => $pengajuan->created_by,
+            ]);
+        @endphp
+        @if(in_array($pengajuan->status, ['cair', 'selesai', 'menunggu_lpj', 'lpj_submitted', 'lpj_disetujui', 'menunggu_refund']) && $pengajuan->activePencairan)
+            @php $pencairan = $pengajuan->activePencairan; @endphp
+            @if($pengajuan->status === 'cair')
+                <div class="mb-6 bg-purple-50 border-purple-200 border rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h3 class="text-base font-semibold text-purple-900">
+                                        {{ $pencairan->nomor_pencairan }}
+                                    </h3>
+                                    <span class="text-sm text-purple-700">
+                                        • {{ formatRupiah($pencairan->jumlah_pencairan) }}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-purple-600">
+                                    Menunggu konfirmasi penerimaan dana
+                                </p>
+                            </div>
+                        </div>
+                        @if(auth()->id() === $pengajuan->created_by)
+                        <a href="{{ route('pencairan-dana.show', $pencairan) }}" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Verifikasi Penerimaan
+                        </a>
+                        @else
+                        <a href="{{ route('pencairan-dana.show', $pencairan) }}" class="inline-flex items-center px-4 py-2 bg-white border border-secondary-300 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
+                            Lihat Detail
+                        </a>
+                        @endif
+                    </div>
+                </div>
+            @else
+                <div class="mb-6 bg-green-50 border border-green-200 border rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h3 class="text-base font-semibold text-green-900">
+                                        {{ $pencairan->nomor_pencairan }}
+                                    </h3>
+                                    <span class="text-sm text-green-700">
+                                        • {{ formatRupiah($pencairan->jumlah_pencairan) }}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-green-600">
+                                    Dana sudah dicairkan
+                                </p>
+                            </div>
+                        </div>
+                        <a href="{{ route('pencairan-dana.show', $pencairan) }}" class="inline-flex items-center px-4 py-2 bg-white border border-secondary-300 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
+                            Lihat Detail
+                        </a>
+                    </div>
+                </div>
+            @endif
         @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -182,15 +382,17 @@
                                     <dd class="text-sm text-secondary-900 font-medium">{{ $pengajuan->divisi->nama_divisi ?? '-' }}</dd>
                                 </div>
                             </div>
+                            @if($pengajuan->programKerja && $pengajuan->programKerja->periodeAnggaran)
                             <div class="flex items-start">
                                 <svg class="w-5 h-5 text-secondary-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 <div>
                                     <dt class="text-xs text-secondary-500 uppercase tracking-wider">Periode Anggaran</dt>
-                                    <dd class="text-sm text-secondary-900 font-medium">{{ $pengajuan->periodeAnggaran->nama_periode ?? '-' }}</dd>
+                                    <dd class="text-sm text-secondary-900 font-medium">{{ $pengajuan->programKerja->periodeAnggaran->nama_periode }}</dd>
                                 </div>
                             </div>
+                            @endif
                             @if($pengajuan->programKerja)
                             <div class="flex items-start md:col-span-2">
                                 <svg class="w-5 h-5 text-secondary-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

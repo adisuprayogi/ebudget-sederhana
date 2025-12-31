@@ -28,6 +28,30 @@
     </x-slot>
 
     <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Active Periode Info Banner -->
+        @if(isset($activePeriode))
+            <div class="mb-6 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-soft p-6 text-white">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-sm text-primary-100 mb-1">Periode Anggaran Aktif (Fase Penggunaan)</div>
+                        <div class="text-xl font-bold">{{ $activePeriode->nama_periode }}</div>
+                        <div class="text-primary-100 mt-1">
+                            {{ $activePeriode->tanggal_mulai_penggunaan_anggaran->translatedFormat('d F Y') }} - {{ $activePeriode->tanggal_selesai_penggunaan_anggaran->translatedFormat('d F Y') }}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-primary-100 mb-1">Tahun Anggaran</div>
+                        <div class="text-2xl font-bold">{{ $activePeriode->tahun_anggaran }}</div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('pengajuan-dana.store') }}" enctype="multipart/form-data" id="pengajuan-dana-form">
             @csrf
 

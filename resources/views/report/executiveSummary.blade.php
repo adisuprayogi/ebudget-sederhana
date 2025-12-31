@@ -22,13 +22,21 @@
     </x-slot>
 
     <div class="py-8">
-        <!-- Year Selector -->
+        <!-- Periode Selector -->
         <div class="bg-white rounded-2xl shadow-soft p-6 mb-8">
             <form method="GET" action="{{ route('reports.executive-summary') }}" class="flex items-center gap-4">
-                <label class="text-sm font-medium text-secondary-700">Tahun Anggaran:</label>
-                <select name="tahun" class="px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                    @foreach($filterOptions['years'] ?? [] as $year)
-                        <option value="{{ $year }}" {{ ($filters['tahun'] ?? date('Y')) == $year ? 'selected' : '' }}>{{ $year }}</option>
+                <label class="text-sm font-medium text-secondary-700">Periode Anggaran:</label>
+                <select name="periode_anggaran_id" class="px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    <option value="">-- Pilih Periode Anggaran --</option>
+                    @foreach($availablePeriodes ?? [] as $periode)
+                        @php
+                            $isSelected = ($selectedPeriode && $selectedPeriode->id == $periode->id);
+                            $isActive = ($activePeriode && $activePeriode->id == $periode->id);
+                        @endphp
+                        <option value="{{ $periode->id }}" {{ $isSelected ? 'selected' : '' }}>
+                            {{ $periode->nama_periode }}
+                            @if($isActive) <span class="text-xs text-primary-600">(Aktif)</span> @endif
+                        </option>
                     @endforeach
                 </select>
                 <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">

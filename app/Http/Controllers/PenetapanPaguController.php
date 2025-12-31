@@ -30,13 +30,31 @@ class PenetapanPaguController extends Controller
             }
         }
 
+        // Default to active periode (yang aktif dan dalam fase penggunaan anggaran)
+        $periodeAnggaranId = $request->periode_anggaran_id;
+        if (!$periodeAnggaranId) {
+            // Get active periode in penggunaan phase (default: yang aktif dan dalam fase penggunaan anggaran)
+            $currentPeriode = PeriodeAnggaran::active()->first();
+
+            // If not found in penggunaan phase, try to get periode in perencanaan phase
+            if (!$currentPeriode) {
+                $currentPeriode = PeriodeAnggaran::where('status', 'active')
+                    ->get()
+                    ->first(function ($periode) {
+                        return $periode->fase === 'perencangan';
+                    });
+            }
+
+            $periodeAnggaranId = $currentPeriode ? $currentPeriode->id : null;
+        }
+
         // Apply filters
         if ($request->filled('divisi_id')) {
             $query->where('divisi_id', $request->divisi_id);
         }
 
-        if ($request->filled('periode_anggaran_id')) {
-            $query->where('periode_anggaran_id', $request->periode_anggaran_id);
+        if ($periodeAnggaranId) {
+            $query->where('periode_anggaran_id', $periodeAnggaranId);
         }
 
         if ($request->filled('search')) {
@@ -64,7 +82,11 @@ class PenetapanPaguController extends Controller
 
         return view('penetapan-pagu.index', [
             'penetapanPagus' => $penetapanPagus,
-            'filters' => $request->only(['divisi_id', 'periode_anggaran_id', 'search']),
+            'filters' => [
+                'divisi_id' => $request->input('divisi_id'),
+                'periode_anggaran_id' => $periodeAnggaranId,
+                'search' => $request->input('search'),
+            ],
             'filterOptions' => [
                 'divisis' => $divisis,
                 'periodeAnggarans' => $periodeAnggarans,
@@ -104,6 +126,16 @@ class PenetapanPaguController extends Controller
             'jumlah_pagu' => 'required|numeric|min:0',
             'catatan' => 'nullable|string',
         ]);
+
+        // Validate: Only allow creation when periode is in perencanaan phase
+        $periode = PeriodeAnggaran::find($validated['periode_anggaran_id']);
+        if (!$periode) {
+            return back()->withInput()->with('error', 'Periode anggaran tidak ditemukan.');
+        }
+
+        if ($periode->fase !== 'perencangan') {
+            return back()->withInput()->with('error', 'Tidak dapat menambah penetapan pagu. Periode anggaran harus dalam fase Perencanaan.');
+        }
 
         // Check if pagu already exists for this divisi and periode
         $existing = PenetapanPagu::where('divisi_id', $validated['divisi_id'])
@@ -188,6 +220,12 @@ class PenetapanPaguController extends Controller
     {
         $this->authorize('update', $penetapanPagu);
 
+        // Validate: Only allow update when periode is in perencanaan phase
+        $periode = $penetapanPagu->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->withInput()->with('error', 'Tidak dapat mengubah penetapan pagu. Periode anggaran harus dalam fase Perencanaan.');
+        }
+
         $validated = $request->validate([
             'jumlah_pagu' => 'required|numeric|min:0',
             'catatan' => 'nullable|string',
@@ -209,6 +247,12 @@ class PenetapanPaguController extends Controller
     public function destroy(PenetapanPagu $penetapanPagu)
     {
         $this->authorize('delete', $penetapanPagu);
+
+        // Validate: Only allow deletion when periode is in perencanaan phase
+        $periode = $penetapanPagu->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat menghapus penetapan pagu. Periode anggaran harus dalam fase Perencanaan.');
+        }
 
         $penetapanPagu->delete();
 

@@ -167,16 +167,16 @@ class ApprovalService
                     // Send notification to next approver
                     self::sendApprovalNotification($nextApproval, $pengajuan);
                 } else {
-                    // No more approvals, all completed - approve pengajuan
+                    // No more approvals, all completed - set to menunggu_pencairan
                     $pengajuan->update([
-                        'status' => 'disetujui',
+                        'status' => 'menunggu_pencairan',
                         'approved_at' => now(),
                         'updated_at' => now(),
                     ]);
 
-                    \Log::info('Pengajuan approved - all levels completed', [
+                    \Log::info('Pengajuan approved - all levels completed, waiting for pencairan', [
                         'pengajuan_id' => $pengajuan->id,
-                        'new_status' => 'disetujui',
+                        'new_status' => 'menunggu_pencairan',
                     ]);
 
                     // Send notification to pengaju

@@ -26,10 +26,18 @@
         <div class="bg-white rounded-2xl shadow-soft p-6 mb-8">
             <form method="GET" action="{{ route('reports.budget-realization') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-secondary-700 mb-2">Tahun Anggaran</label>
-                    <select name="tahun" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                        @foreach($filterOptions['years'] ?? [] as $year)
-                            <option value="{{ $year }}" {{ ($filters['tahun'] ?? date('Y')) == $year ? 'selected' : '' }}>{{ $year }}</option>
+                    <label class="block text-sm font-medium text-secondary-700 mb-2">Periode Anggaran</label>
+                    <select name="periode_anggaran_id" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <option value="">-- Pilih Periode Anggaran --</option>
+                        @foreach($availablePeriodes ?? [] as $periode)
+                            @php
+                                $isSelected = ($selectedPeriode && $selectedPeriode->id == $periode->id);
+                                $isActive = ($activePeriode && $activePeriode->id == $periode->id);
+                            @endphp
+                            <option value="{{ $periode->id }}" {{ $isSelected ? 'selected' : '' }}>
+                                {{ $periode->nama_periode }}
+                                @if($isActive) <span class="text-xs text-primary-600">(Aktif)</span> @endif
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -89,11 +97,11 @@
             <div class="bg-white rounded-2xl shadow-soft p-6">
                 <h3 class="text-lg font-semibold text-secondary-900 mb-4">Realisasi per Divisi</h3>
                 <div class="space-y-4">
-                    @foreach($divisionComparison ?? [] as $div)
+                    @foreach($budgetRealization ?? [] as $div)
                         <div class="border-b border-secondary-100 pb-4 last:border-0">
                             <div class="flex justify-between items-center mb-2">
-                                <span class="font-medium text-secondary-900">{{ $div['nama_divisi'] }}</span>
-                                <span class="text-sm text-secondary-600">{{ number_format($div['persentase'] ?? 0, 1) }}%</span>
+                                <span class="font-medium text-secondary-900">{{ $div['divisi'] }}</span>
+                                <span class="text-sm text-secondary-600">{{ number_format($div['persentase_realisasi'] ?? 0, 1) }}%</span>
                             </div>
                             <div class="grid grid-cols-3 gap-4 text-sm">
                                 <div>
@@ -102,15 +110,15 @@
                                 </div>
                                 <div>
                                     <span class="text-secondary-500">Realisasi:</span>
-                                    <span class="font-semibold text-green-600">{{ formatRupiah($div['realisasi'] ?? 0) }}</span>
+                                    <span class="font-semibold text-green-600">{{ formatRupiah($div['total_digunakan'] ?? 0) }}</span>
                                 </div>
                                 <div>
                                     <span class="text-secondary-500">Sisa:</span>
-                                    <span class="font-semibold text-amber-600">{{ formatRupiah($div['sisa'] ?? 0) }}</span>
+                                    <span class="font-semibold text-amber-600">{{ formatRupiah($div['sisa_pagu'] ?? 0) }}</span>
                                 </div>
                             </div>
                             <div class="mt-2 w-full bg-secondary-200 rounded-full h-2">
-                                <div class="bg-primary-600 h-2 rounded-full" style="width: {{ min($div['persentase'] ?? 0, 100) }}%"></div>
+                                <div class="bg-primary-600 h-2 rounded-full" style="width: {{ min($div['persentase_realisasi'] ?? 0, 100) }}%"></div>
                             </div>
                         </div>
                     @endforeach
@@ -122,11 +130,10 @@
     <script>
         function exportReport(format) {
             const params = new URLSearchParams({
-                type: 'budget_realization',
                 format: format,
                 ...@js($filters ?? [])
             });
-            window.location.href = '{{ route('reports.export') }}?' + params.toString();
+            window.location.href = '{{ route('reports.export', ['budget_realization']) }}?' + params.toString();
         }
     </script>
 </x-app-layout>

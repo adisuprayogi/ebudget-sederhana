@@ -17,21 +17,122 @@ class RefundController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Refund::with(['pencairanDana', 'pencairanDana.pengajuanDana', 'pengajuanDana', 'createdBy']);
+        // Base query function
+        $baseQuery = function ($status) use ($request) {
+            $query = Refund::with([
+                'pencairanDana',
+                'pencairanDana.pengajuanDana',
+                'pencairanDana.pengajuanDana.divisi',
+                'pengajuanDana',
+                'pengajuanDana.divisi',
+                'createdBy'
+            ])->where('status', $status);
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+            // Filter by periode anggaran
+            if ($request->filled('periode_anggaran_id')) {
+                $query->where('periode_anggaran_id', $request->periode_anggaran_id);
+            }
 
-        // Filter by periode anggaran
-        if ($request->filled('periode_anggaran_id')) {
-            $query->where('periode_anggaran_id', $request->periode_anggaran_id);
-        }
+            // Filter by divisi
+            if ($request->filled('divisi_id')) {
+                $query->where(function ($q) use ($request) {
+                    $q->whereHas('pencairanDana.pengajuanDana', function ($sq) use ($request) {
+                        $sq->where('divisi_id', $request->divisi_id);
+                    })
+                    ->orWhereHas('pengajuanDana', function ($sq) use ($request) {
+                        $sq->where('divisi_id', $request->divisi_id);
+                    });
+                });
+            }
 
-        // Filter by divisi
+            // Filter by search keyword
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('nomor_refund', 'like', "%{$search}%")
+                      ->orWhere('alasan_refund', 'like', "%{$search}%");
+                });
+            }
+
+            return $query;
+        };
+
+        // Fetch data for each status
+        $refundsDraft = $baseQuery('draft')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        $refundsMenungguApproval = $baseQuery('menunggu_approval')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        $refundsApproved = $baseQuery('approved')
+            ->orderBy('approved_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        $refundsProcessed = $baseQuery('processed')
+            ->orderBy('processed_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        $refundsRejected = $baseQuery('rejected')
+            ->orderBy('approved_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        // Get statistics
+        $stats = [
+            'draft' => Refund::where('status', 'draft')->count(),
+            'menunggu_approval' => Refund::where('status', 'menunggu_approval')->count(),
+            'approved' => Refund::where('status', 'approved')->count(),
+            'processed' => Refund::where('status', 'processed')->count(),
+            'rejected' => Refund::where('status', 'rejected')->count(),
+        ];
+
+        $statistics = [
+            'total_count' => array_sum($stats),
+            'pending_count' => $stats['menunggu_approval'],
+            'approved_count' => $stats['approved'],
+            'processed_count' => $stats['processed'],
+            'total_amount' => Refund::whereIn('status', ['processed'])->sum('jumlah_refund'),
+        ];
+
+        return view('refund.index', compact(
+            'refundsDraft',
+            'refundsMenungguApproval',
+            'refundsApproved',
+            'refundsProcessed',
+            'refundsRejected',
+            'stats',
+            'statistics'
+        ));
+    }
+
+    /**
+     * Display refund verification page for staff_keuangan and direktur_keuangan.
+     */
+    public function verificationIndex(Request $request): View
+    {
+        // Get all data for each tab (without filters for now, to show counts correctly)
+        $baseQuery = function ($status) {
+            return Refund::with([
+                'pencairanDana',
+                'pencairanDana.pengajuanDana',
+                'pencairanDana.pengajuanDana.divisi',
+                'pengajuanDana',
+                'pengajuanDana.divisi',
+                'createdBy',
+                'approvedBy'
+            ])->where('status', $status);
+        };
+
+        // Menunggu Approval
+        $menungguQuery = $baseQuery('menunggu_approval');
         if ($request->filled('divisi_id')) {
-            $query->where(function ($q) use ($request) {
+            $menungguQuery->where(function ($q) use ($request) {
                 $q->whereHas('pencairanDana.pengajuanDana', function ($sq) use ($request) {
                     $sq->where('divisi_id', $request->divisi_id);
                 })
@@ -40,18 +141,74 @@ class RefundController extends Controller
                 });
             });
         }
+        if ($request->filled('periode_anggaran_id')) {
+            $menungguQuery->where('periode_anggaran_id', $request->periode_anggaran_id);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $menungguQuery->where(function ($q) use ($search) {
+                $q->where('nomor_refund', 'like', "%{$search}%")
+                  ->orWhere('alasan_refund', 'like', "%{$search}%");
+            });
+        }
+        $refunds = $menungguQuery->orderBy('created_at', 'desc')->paginate(15);
 
-        $refunds = $query->orderBy('created_at', 'desc')->paginate(15);
+        // Disetujui (processed)
+        $processedQuery = $baseQuery('processed');
+        if ($request->filled('divisi_id')) {
+            $processedQuery->where(function ($q) use ($request) {
+                $q->whereHas('pencairanDana.pengajuanDana', function ($sq) use ($request) {
+                    $sq->where('divisi_id', $request->divisi_id);
+                })
+                ->orWhereHas('pengajuanDana', function ($sq) use ($request) {
+                    $sq->where('divisi_id', $request->divisi_id);
+                });
+            });
+        }
+        if ($request->filled('periode_anggaran_id')) {
+            $processedQuery->where('periode_anggaran_id', $request->periode_anggaran_id);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $processedQuery->where(function ($q) use ($search) {
+                $q->where('nomor_refund', 'like', "%{$search}%")
+                  ->orWhere('alasan_refund', 'like', "%{$search}%");
+            });
+        }
+        $refundsProcessed = $processedQuery->orderBy('approved_at', 'desc')->paginate(15);
 
-        $statusOptions = [
-            'draft' => 'Draft',
-            'menunggu_approval' => 'Menunggu Approval',
-            'approved' => 'Disetujui',
-            'rejected' => 'Ditolak',
-            'processed' => 'Diproses',
+        // Ditolak (rejected)
+        $rejectedQuery = $baseQuery('rejected');
+        if ($request->filled('divisi_id')) {
+            $rejectedQuery->where(function ($q) use ($request) {
+                $q->whereHas('pencairanDana.pengajuanDana', function ($sq) use ($request) {
+                    $sq->where('divisi_id', $request->divisi_id);
+                })
+                ->orWhereHas('pengajuanDana', function ($sq) use ($request) {
+                    $sq->where('divisi_id', $request->divisi_id);
+                });
+            });
+        }
+        if ($request->filled('periode_anggaran_id')) {
+            $rejectedQuery->where('periode_anggaran_id', $request->periode_anggaran_id);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $rejectedQuery->where(function ($q) use ($search) {
+                $q->where('nomor_refund', 'like', "%{$search}%")
+                  ->orWhere('alasan_refund', 'like', "%{$search}%");
+            });
+        }
+        $refundsRejected = $rejectedQuery->orderBy('approved_at', 'desc')->paginate(15);
+
+        // Get statistics
+        $stats = [
+            'menunggu_approval' => Refund::where('status', 'menunggu_approval')->count(),
+            'processed' => Refund::where('status', 'processed')->count(),
+            'rejected' => Refund::where('status', 'rejected')->count(),
         ];
 
-        return view('refund.index', compact('refunds', 'statusOptions'));
+        return view('refund.verification-index', compact('refunds', 'refundsProcessed', 'refundsRejected', 'stats'));
     }
 
     /**
@@ -61,8 +218,10 @@ class RefundController extends Controller
     {
         $pencairanId = $request->query('pencairan_id');
         $pengajuanId = $request->query('pengajuan_id');
+        $lpjId = $request->query('lpj_id');
         $pencairan = null;
         $pengajuan = null;
+        $lpj = null;
 
         if ($pencairanId) {
             $pencairan = PencairanDana::with(['pengajuanDana'])->findOrFail($pencairanId);
@@ -72,7 +231,64 @@ class RefundController extends Controller
             $pengajuan = PengajuanDana::findOrFail($pengajuanId);
         }
 
-        return view('refund.create', compact('pencairan', 'pengajuan'));
+        if ($lpjId) {
+            $lpj = \App\Models\LaporanPertanggungJawaban::with([
+                'pencairanDana',
+                'pencairanDana.pengajuanDana',
+                'detailLpjs'
+            ])->findOrFail($lpjId);
+        }
+
+        // Get active company bank accounts for rekening tujuan
+        $rekeningPerusahaan = \App\Models\RekeningPerusahaan::active()
+            ->with('bank')
+            ->orderBy('is_default', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('refund.create', compact('pencairan', 'pengajuan', 'lpj', 'rekeningPerusahaan'));
+    }
+
+    /**
+     * Show the form to select LPJ for Refund creation.
+     */
+    public function selectLpj(Request $request): View
+    {
+        $query = \App\Models\LaporanPertanggungJawaban::with([
+            'pencairanDana',
+            'pencairanDana.pengajuanDana',
+            'pencairanDana.pengajuanDana.divisi',
+            'detailLpjs',
+            'createdBy'
+        ])->where('status', 'approved')
+          ->where('sisa_dana', '>', 0);
+
+        // Filter by divisi
+        if ($request->filled('divisi_id')) {
+            $query->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
+                $q->where('divisi_id', $request->divisi_id);
+            });
+        }
+
+        // Filter by periode anggaran
+        if ($request->filled('periode_anggaran_id')) {
+            $query->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
+                $q->where('periode_anggaran_id', $request->periode_anggaran_id);
+            });
+        }
+
+        // Filter by search keyword
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nomor_lpj', 'like', "%{$search}%")
+                  ->orWhere('uraian_kegiatan', 'like', "%{$search}%");
+            });
+        }
+
+        $lpjs = $query->orderBy('approved_at', 'desc')->paginate(15);
+
+        return view('refund.select-lpj', compact('lpjs'));
     }
 
     /**
@@ -81,24 +297,40 @@ class RefundController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'lpj_id' => 'nullable|exists:laporan_pertanggung_jawabans,id',
             'pencairan_dana_id' => 'nullable|exists:pencairan_danas,id',
             'pengajuan_dana_id' => 'nullable|exists:pengajuan_danas,id',
             'tanggal_refund' => 'required|date',
             'jumlah_refund' => 'required|numeric|min:0',
             'alasan_refund' => 'required|string|max:1000',
             'jenis_refund' => 'required|in:kelebihan,dana_kembali,batal,pengembalian lainnya',
-            'rekening_tujuan' => 'nullable|string|max:200',
+            'rekening_perusahaan_id' => 'required|exists:rekening_perusahaans,id',
+            'rekening_pengirim' => 'nullable|string|max:100',
+            'nama_pengirim' => 'nullable|string|max:255',
             'bukti_transfer' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
+
+        // Get LPJ data if lpj_id is provided
+        if (!empty($validated['lpj_id'])) {
+            $lpj = \App\Models\LaporanPertanggungJawaban::find($validated['lpj_id']);
+            if ($lpj) {
+                $validated['pencairan_dana_id'] = $lpj->pencairan_dana_id;
+                $validated['pengajuan_dana_id'] = $lpj->pencairanDana->pengajuan_dana_id ?? null;
+                $validated['periode_anggaran_id'] = $lpj->pencairanDana->pengajuanDana->periode_anggaran_id ?? null;
+            }
+        }
 
         // At least one reference is required
         if (empty($validated['pencairan_dana_id']) && empty($validated['pengajuan_dana_id'])) {
             return back()
                 ->withInput()
-                ->with('error', 'Harap pilih pencairan dana atau pengajuan dana terkait.');
+                ->with('error', 'Harap pilih LPJ, pencairan dana, atau pengajuan dana terkait.');
         }
 
         try {
+            // Generate nomor refund
+            $validated['nomor_refund'] = \App\Services\NumberingService::generateNomorRefund();
+
             $refund = RefundService::createRefund([
                 ...$validated,
                 'created_by' => auth()->id(),
@@ -125,6 +357,8 @@ class RefundController extends Controller
             'pencairanDana.pengajuanDana.divisi',
             'pengajuanDana',
             'pengajuanDana.divisi',
+            'rekeningPerusahaan',
+            'rekeningPerusahaan.bank',
             'createdBy',
             'approvedBy',
         ]);

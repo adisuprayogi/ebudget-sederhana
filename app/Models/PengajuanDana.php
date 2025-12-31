@@ -115,6 +115,24 @@ class PengajuanDana extends Model
     }
 
     /**
+     * Get all pencairans for the pengajuan.
+     */
+    public function pencairans()
+    {
+        return $this->hasMany(PencairanDana::class);
+    }
+
+    /**
+     * Get the latest active (non-cancelled, non-revisi) pencairan for the pengajuan.
+     */
+    public function activePencairan()
+    {
+        return $this->hasOne(PencairanDana::class)
+            ->whereNotIn('status', ['cancelled', 'revisi'])
+            ->latest();
+    }
+
+    /**
      * Get the latest approval status.
      */
     public function getLatestApprovalAttribute()
@@ -136,6 +154,14 @@ class PengajuanDana extends Model
     public function honorariumDetails()
     {
         return $this->hasMany(HonorariumDetail::class);
+    }
+
+    /**
+     * Get the laporan pertanggung jawaban for the pengajuan.
+     */
+    public function laporanPertanggungJawabans()
+    {
+        return $this->hasMany(LaporanPertanggungJawaban::class, 'pengajuan_dana_id');
     }
 
     /**

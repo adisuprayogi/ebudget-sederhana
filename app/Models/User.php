@@ -297,6 +297,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user has specific permission (Laravel authorization compatible).
+     * This method is used by Laravel's can middleware.
+     */
+    public function hasPermissionTo($permission)
+    {
+        return $this->hasPermission($permission);
+    }
+
+    /**
      * Add a role+division combination to the user.
      *
      * @param int $roleId The role ID

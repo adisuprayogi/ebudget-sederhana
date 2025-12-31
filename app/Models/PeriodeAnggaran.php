@@ -111,19 +111,26 @@ class PeriodeAnggaran extends Model
     // Scopes
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('status', 'active')
+            ->where(function ($q) {
+                $today = now()->startOfDay();
+                $todayEnd = now()->endOfDay();
+                $q->where('tanggal_mulai_penggunaan_anggaran', '<=', $todayEnd)
+                    ->where('tanggal_selesai_penggunaan_anggaran', '>=', $today);
+            });
     }
 
     public function scopeFase($query, $fase)
     {
         $today = now()->startOfDay();
+        $todayEnd = now()->endOfDay();
 
-        return $query->where(function ($q) use ($fase, $today) {
+        return $query->where(function ($q) use ($fase, $today, $todayEnd) {
             if ($fase === 'perencangan') {
-                $q->where('tanggal_mulai_perencanaan_anggaran', '<=', $today)
+                $q->where('tanggal_mulai_perencanaan_anggaran', '<=', $todayEnd)
                     ->where('tanggal_selesai_perencanaan_anggaran', '>=', $today);
             } elseif ($fase === 'penggunaan') {
-                $q->where('tanggal_mulai_penggunaan_anggaran', '<=', $today)
+                $q->where('tanggal_mulai_penggunaan_anggaran', '<=', $todayEnd)
                     ->where('tanggal_selesai_penggunaan_anggaran', '>=', $today);
             } elseif ($fase === 'closed') {
                 $q->where('status', 'closed')
@@ -142,17 +149,13 @@ class PeriodeAnggaran extends Model
     public function scopeCurrent($query)
     {
         $today = now()->startOfDay();
+        $todayEnd = now()->endOfDay();
 
         return $query->where('status', 'active')
-            ->where(function ($q) use ($today) {
-                // Check if today is within perencanaan phase
-                $q->where(function ($q2) use ($today) {
-                    $q2->where('tanggal_mulai_perencanaan_anggaran', '<=', $today)
-                        ->where('tanggal_selesai_perencanaan_anggaran', '>=', $today);
-                })
-                // OR within penggunaan phase
-                ->orWhere(function ($q3) use ($today) {
-                    $q3->where('tanggal_mulai_penggunaan_anggaran', '<=', $today)
+            ->where(function ($q) use ($today, $todayEnd) {
+                // Only within penggunaan phase (usage phase)
+                $q->where(function ($q2) use ($today, $todayEnd) {
+                    $q2->where('tanggal_mulai_penggunaan_anggaran', '<=', $todayEnd)
                         ->where('tanggal_selesai_penggunaan_anggaran', '>=', $today);
                 });
             });
@@ -168,27 +171,33 @@ class PeriodeAnggaran extends Model
             return 'closed';
         }
 
-        // Check if in perencanaan phase
+        // Check if in perencanaan phase (end date should be end of day)
         if ($this->tanggal_mulai_perencanaan_anggaran &&
-            $this->tanggal_selesai_perencanaan_anggaran &&
-            $today->between($this->tanggal_mulai_perencanaan_anggaran, $this->tanggal_selesai_perencanaan_anggaran)) {
-            return 'perencangan';
+            $this->tanggal_selesai_perencanaan_anggaran) {
+            $startDate = $this->tanggal_mulai_perencanaan_anggaran->startOfDay();
+            $endDate = $this->tanggal_selesai_perencanaan_anggaran->endOfDay();
+            if ($today->between($startDate, $endDate)) {
+                return 'perencangan';
+            }
         }
 
-        // Check if in penggunaan phase
+        // Check if in penggunaan phase (end date should be end of day)
         if ($this->tanggal_mulai_penggunaan_anggaran &&
-            $this->tanggal_selesai_penggunaan_anggaran &&
-            $today->between($this->tanggal_mulai_penggunaan_anggaran, $this->tanggal_selesai_penggunaan_anggaran)) {
-            return 'penggunaan';
+            $this->tanggal_selesai_penggunaan_anggaran) {
+            $startDate = $this->tanggal_mulai_penggunaan_anggaran->startOfDay();
+            $endDate = $this->tanggal_selesai_penggunaan_anggaran->endOfDay();
+            if ($today->between($startDate, $endDate)) {
+                return 'penggunaan';
+            }
         }
 
         // Default: if perencanaan phase is in the future, return perencangan
-        if ($this->tanggal_mulai_perencanaan_anggaran && $today->lt($this->tanggal_mulai_perencanaan_anggaran)) {
+        if ($this->tanggal_mulai_perencanaan_anggaran && $today->lt($this->tanggal_mulai_perencanaan_anggaran->startOfDay())) {
             return 'perencangan';
         }
 
         // If penggunaan phase has ended, return closed
-        if ($this->tanggal_selesai_penggunaan_anggaran && $today->gt($this->tanggal_selesai_penggunaan_anggaran)) {
+        if ($this->tanggal_selesai_penggunaan_anggaran && $today->gt($this->tanggal_selesai_penggunaan_anggaran->endOfDay())) {
             return 'closed';
         }
 
@@ -219,9 +228,11 @@ class PeriodeAnggaran extends Model
 
     public function getIsActiveAttribute()
     {
+        // Active only if status is 'active' AND in penggunaan phase
         return $this->status === 'active' &&
-            $this->getCurrentPhaseStartDate() <= now() &&
-            $this->getCurrentPhaseEndDate() >= now();
+            $this->fase === 'penggunaan' &&
+            $this->tanggal_mulai_penggunaan_anggaran->startOfDay() <= now() &&
+            $this->tanggal_selesai_penggunaan_anggaran->endOfDay() >= now();
     }
 
     public function getDaysRemainingAttribute()
@@ -230,7 +241,7 @@ class PeriodeAnggaran extends Model
             return 0;
         }
 
-        $currentPhaseEnd = $this->getCurrentPhaseEndDate();
+        $currentPhaseEnd = $this->getCurrentPhaseEndDate()->endOfDay();
         return now()->diffInDays($currentPhaseEnd, false);
     }
 
@@ -240,7 +251,7 @@ class PeriodeAnggaran extends Model
             return '0 hari';
         }
 
-        $currentPhaseEnd = $this->getCurrentPhaseEndDate();
+        $currentPhaseEnd = $this->getCurrentPhaseEndDate()->endOfDay();
         $now = now();
 
         if ($now->gt($currentPhaseEnd)) {
@@ -486,7 +497,7 @@ class PeriodeAnggaran extends Model
         if ($this->fase === 'penggunaan') {
             $incompletePrograms = $this->programKerjas()
                 ->where('status', '!=', 'completed')
-                ->where('durasi_selesai', '<', now()->addDays(30))
+                ->where('tanggal_selesai', '<', now()->addDays(30))
                 ->count();
 
             if ($incompletePrograms > 0) {

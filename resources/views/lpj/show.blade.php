@@ -13,13 +13,9 @@
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
                             Draft
                         </span>
-                    @elseif($lpj->status === 'submitted')
+                    @elseif($lpj->status === 'menunggu_verifikasi')
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
                             Menunggu Verifikasi
-                        </span>
-                    @elseif($lpj->status === 'verified')
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                            Terverifikasi
                         </span>
                     @elseif($lpj->status === 'approved')
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
@@ -29,66 +25,53 @@
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
                             Ditolak
                         </span>
+                    @elseif($lpj->status === 'revisi')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+                            Perlu Revisi
+                        </span>
                     @endif
                 </div>
-                <p class="text-secondary-600 mt-1">{{ $lpj->judul_lpj }}</p>
+                <p class="text-secondary-600 mt-1">{{ $lpj->uraian_kegiatan }}</p>
             </div>
-            @if(in_array($lpj->status, ['draft', 'rejected']) && auth()->user()->can('update', $lpj))
-                <a href="{{ route('lpj.edit', $lpj) }}" class="inline-flex items-center px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all duration-200 shadow-soft hover:shadow-medium">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit
-                </a>
-            @endif
         </div>
     </x-slot>
 
     <div class="py-8">
         <!-- Alert Messages -->
-        @if($lpj->status === 'draft')
-            <div class="mb-6 bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-slate-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div class="text-slate-700 text-sm">
-                    LPJ ini masih dalam status <strong>draft</strong>. Silakan lengkapi data dan submit untuk meminta verifikasi.
-                </div>
-            </div>
-        @elseif($lpj->status === 'submitted')
+        @if($lpj->status === 'menunggu_verifikasi')
             <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-amber-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-amber-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div class="text-amber-700 text-sm">
-                    LPJ ini <strong>menunggu verifikasi</strong> dari staff keuangan.
-                </div>
-            </div>
-        @elseif($lpj->status === 'verified')
-            <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div class="text-blue-700 text-sm">
-                    LPJ ini telah <strong>terverifikasi</strong> dan menunggu persetujuan direktur utama.
+                    LPJ ini <strong>menunggu verifikasi</strong> dari staff keuangan atau direktur keuangan.
                 </div>
             </div>
         @elseif($lpj->status === 'approved')
             <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div class="text-green-700 text-sm">
-                    LPJ ini telah <strong>disetujui</strong>. Sisa dana akan dikembalikan ke kas divisi.
+                    LPJ ini telah <strong>disetujui</strong>.
                 </div>
             </div>
         @elseif($lpj->status === 'rejected')
             <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-red-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-red-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div class="text-red-700 text-sm">
-                    LPJ ini <strong>ditolak</strong>. Alasan: {{ $lpj->catatan_penolakan ?? 'Tidak ada' }}
+                    LPJ ini <strong>ditolak</strong>. @if($lpj->rejection_reason) Alasan: {{ $lpj->rejection_reason }} @endif
+                </div>
+            </div>
+        @elseif($lpj->status === 'revisi')
+            <div class="mb-6 bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-orange-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-orange-700 text-sm">
+                    LPJ ini <strong>perlu revisi</strong>. @if($lpj->rejection_reason) Catatan: {{ $lpj->rejection_reason }} @endif
                 </div>
             </div>
         @endif
@@ -150,223 +133,211 @@
                             </div>
                             <div>
                                 <dt class="text-sm text-secondary-500">Tanggal LPJ</dt>
-                                <dd class="mt-1 text-sm text-secondary-900">{{ \Carbon\Carbon::parse($lpj->tanggal_lpj)->format('d/m/Y') }}</dd>
+                                <dd class="mt-1 text-sm text-secondary-900">{{ \Carbon\Carbon::parse($lpj->tanggal_lpj)->format('d/m/Y H:i') }}</dd>
                             </div>
-                            <div>
-                                <dt class="text-sm text-secondary-500">Periode Anggaran</dt>
-                                <dd class="mt-1 text-sm text-secondary-900">{{ $lpj->periodeAnggaran->nama_periode ?? '-' }}</dd>
+                            @if($lpj->uraian_kegiatan)
+                            <div class="md:col-span-2">
+                                <dt class="text-sm text-secondary-500">Uraian Kegiatan</dt>
+                                <dd class="mt-1 text-sm text-secondary-700">{{ $lpj->uraian_kegiatan }}</dd>
                             </div>
-                            <div>
-                                <dt class="text-sm text-secondary-500">Jenis Penggunaan</dt>
-                                <dd class="mt-1">
-                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
-                                        @if($lpj->jenis_penggunaan === 'penuh') bg-green-100 text-green-700
-                                        @else bg-amber-100 text-amber-700 @endif">
-                                        {{ ucfirst($lpj->jenis_penggunaan) }}
-                                    </span>
-                                </dd>
+                            @endif
+                            @if($lpj->catatan)
+                            <div class="md:col-span-2">
+                                <dt class="text-sm text-secondary-500">Catatan</dt>
+                                <dd class="mt-1 text-sm text-secondary-700">{{ $lpj->catatan }}</dd>
                             </div>
-                            <div>
-                                <dt class="text-sm text-secondary-500">Tanggal Mulai Pelaksanaan</dt>
-                                <dd class="mt-1 text-sm text-secondary-900">{{ \Carbon\Carbon::parse($lpj->tanggal_mulai_pelaksanaan)->format('d/m/Y') }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm text-secondary-500">Tanggal Selesai Pelaksanaan</dt>
-                                <dd class="mt-1 text-sm text-secondary-900">{{ \Carbon\Carbon::parse($lpj->tanggal_selesai_pelaksanaan)->format('d/m/Y') }}</dd>
-                            </div>
+                            @endif
                         </dl>
-                        @if($lpj->deskripsi)
-                        <div class="mt-4">
-                            <dt class="text-sm text-secondary-500">Deskripsi Pelaksanaan</dt>
-                            <dd class="mt-1 text-sm text-secondary-700 whitespace-pre-line">{{ $lpj->deskripsi }}</dd>
-                        </div>
-                        @endif
                     </div>
                 </div>
 
-                <!-- Rincian Penggunaan Dana -->
+                <!-- Rincian Realisasi -->
                 <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
                     <div class="px-6 py-4 border-b border-secondary-200">
                         <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
                             <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
                             </span>
-                            Rincian Penggunaan Dana
+                            Rincian Realisasi
                         </h2>
                     </div>
                     <div class="p-6">
-                        <dl class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="p-4 bg-secondary-50 rounded-xl">
-                                <dt class="text-sm text-secondary-500">Jumlah Pencairan</dt>
-                                <dd class="mt-2 text-lg font-bold text-secondary-900">{{ formatRupiah($lpj->pencairanDana->jumlah_pencairan) }}</dd>
-                            </div>
-                            <div class="p-4 bg-primary-50 rounded-xl">
-                                <dt class="text-sm text-primary-600">Jumlah Digunakan</dt>
-                                <dd class="mt-2 text-lg font-bold text-primary-600">{{ formatRupiah($lpj->jumlah_digunakan) }}</dd>
-                            </div>
-                            <div class="p-4 @if($lpj->sisa_dana > 0) bg-green-50 @else bg-red-50 @endif rounded-xl">
-                                <dt class="text-sm @if($lpj->sisa_dana > 0) text-green-600 @else text-red-600 @endif">Sisa Dana</dt>
-                                <dd class="mt-2 text-lg font-bold @if($lpj->sisa_dana > 0) text-green-600 @else text-red-600 @endif">{{ formatRupiah($lpj->sisa_dana) }}</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </div>
-
-                <!-- Lampiran -->
-                @if($lpj->lampiranLpj && $lpj->lampiranLpj->count() > 0)
-                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
-                    <div class="px-6 py-4 border-b border-secondary-200">
-                        <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
-                            <span class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mr-3">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                                </svg>
-                            </span>
-                            Lampiran Dokumen
-                        </h2>
-                    </div>
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            @foreach($lpj->lampiranLpj as $lampiran)
-                            <a href="{{ Storage::url($lampiran->path_dokumen) }}" target="_blank" class="flex items-center p-4 border border-secondary-200 rounded-xl hover:bg-secondary-50 hover:border-primary-300 transition-colors">
-                                <svg class="w-8 h-8 text-secondary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                </svg>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-secondary-900 truncate">{{ $lampiran->nama_dokumen }}</p>
-                                    <p class="text-xs text-secondary-500">{{ $lampiran->jenis_dokumen }}</p>
-                                </div>
-                                <svg class="w-5 h-5 text-secondary-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                </svg>
-                            </a>
-                            @endforeach
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-secondary-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left font-semibold text-secondary-700">Uraian</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-secondary-700">Tgl Realisasi</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-secondary-700">Volume</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-secondary-700">Harga</th>
+                                        <th class="px-4 py-3 text-right font-semibold text-secondary-700">Subtotal</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-secondary-700">Lampiran</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-secondary-200">
+                                    @foreach($lpj->detailLpjs as $detail)
+                                    <tr>
+                                        <td class="px-4 py-3">
+                                            <p class="font-medium text-secondary-900">{{ $detail->uraian }}</p>
+                                            @if($detail->keterangan)
+                                                <p class="text-xs text-secondary-500 mt-1">{{ $detail->keterangan }}</p>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            {{ $detail->tanggal_realisasi ? \Carbon\Carbon::parse($detail->tanggal_realisasi)->format('d/m/Y') : '-' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            {{ $detail->volume_realisasi }} {{ $detail->satuan ?? '' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            {{ formatRupiah($detail->harga_satuan) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-right font-semibold">
+                                            {{ formatRupiah($detail->subtotal_realisasi) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            @if($detail->file_lampiran)
+                                                <a href="{{ Storage::url($detail->file_lampiran) }}" target="_blank" class="text-primary-600 hover:text-primary-800">
+                                                    <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                </a>
+                                            @else
+                                                <span class="text-secondary-400">-</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot class="bg-secondary-50">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-3 text-right font-bold text-secondary-900">Total Realisasi</td>
+                                        <td class="px-4 py-3 text-right font-bold text-primary-600">{{ formatRupiah($lpj->detailLpjs->sum('subtotal_realisasi')) }}</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
                     </div>
                 </div>
-                @endif
 
-                <!-- Riwayat Approval -->
-                @if($lpj->riwayatApproval && $lpj->riwayatApproval->count() > 0)
-                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
-                    <div class="px-6 py-4 border-b border-secondary-200">
-                        <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
-                            <span class="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mr-3">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </span>
-                            Riwayat Verifikasi
-                        </h2>
+                <!-- Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-2xl shadow-soft p-4">
+                        <p class="text-sm text-secondary-500">Jumlah Pencairan</p>
+                        <p class="mt-2 text-lg font-bold text-secondary-900">{{ formatRupiah($lpj->pencairanDana->jumlah_pencairan) }}</p>
                     </div>
-                    <div class="p-6">
-                        <div class="space-y-4">
-                            @foreach($lpj->riwayatApproval as $riwayat)
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0">
-                                    @if($riwayat->status === 'approved' || $riwayat->status === 'verified')
-                                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        </div>
-                                    @elseif($riwayat->status === 'rejected')
-                                        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </div>
-                                    @else
-                                        <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="ml-4 flex-1">
-                                    <div class="flex items-center justify-between">
-                                        <p class="text-sm font-medium text-secondary-900">{{ $riwayat->user->name ?? 'System' }}</p>
-                                        <p class="text-xs text-secondary-500">{{ \Carbon\Carbon::parse($riwayat->created_at)->format('d/m/Y H:i') }}</p>
-                                    </div>
-                                    <p class="text-xs text-secondary-500">{{ $riwayat->level_approval }}</p>
-                                    @if($riwayat->catatan)
-                                    <p class="text-sm text-secondary-700 mt-1">{{ $riwayat->catatan }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
+                    <div class="bg-white rounded-2xl shadow-soft p-4">
+                        <p class="text-sm text-secondary-500">Total Digunakan</p>
+                        <p class="mt-2 text-lg font-bold text-primary-600">{{ formatRupiah($lpj->total_digunakan) }}</p>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-soft p-4 @if($lpj->sisa_dana > 0) border-green-200 @else border-red-200 @endif">
+                        <p class="text-sm @if($lpj->sisa_dana > 0) text-green-600 @else text-red-600 @endif">Sisa Dana</p>
+                        <p class="mt-2 text-lg font-bold @if($lpj->sisa_dana > 0) text-green-600 @else text-red-600 @endif">{{ formatRupiah($lpj->sisa_dana) }}</p>
                     </div>
                 </div>
-                @endif
             </div>
 
             <!-- Sidebar -->
             <div class="space-y-6">
-                <!-- Summary Card -->
-                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
-                    <div class="px-6 py-4 border-b border-secondary-200">
-                        <h3 class="text-lg font-semibold text-secondary-900">Ringkasan</h3>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <div>
-                            <p class="text-sm text-secondary-500">Jumlah Digunakan</p>
-                            <p class="text-2xl font-bold text-primary-600">{{ formatRupiah($lpj->jumlah_digunakan) }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-secondary-500">Sisa Dana</p>
-                            <p class="text-xl font-bold @if($lpj->sisa_dana > 0) text-green-600 @else text-red-600 @endif">{{ formatRupiah($lpj->sisa_dana) }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-secondary-500">Status</p>
-                            <p class="text-sm font-medium text-secondary-900">{{ ucfirst(str_replace('_', ' ', $lpj->status)) }}</p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Actions Card -->
                 <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
                     <div class="px-6 py-4 border-b border-secondary-200">
                         <h3 class="text-lg font-semibold text-secondary-900">Aksi</h3>
                     </div>
                     <div class="p-6 space-y-3">
-                        @if($lpj->status === 'draft' && auth()->user()->can('submit', $lpj))
-                        <form method="POST" action="{{ route('lpj.submit', $lpj) }}">
-                            @csrf
-                            <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                </svg>
-                                Submit LPJ
-                            </button>
-                        </form>
+                        <!-- Revisi LPJ Button for pengaju when status is revisi -->
+                        @if(auth()->id() === $lpj->created_by && $lpj->status === 'revisi')
+                        <a href="{{ route('lpj.edit', $lpj) }}" class="w-full flex items-center justify-center px-4 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-all duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Revisi LPJ
+                        </a>
                         @endif
 
-                        @if(auth()->user()->hasRole('staff_keuangan') && $lpj->status === 'submitted')
-                        <form method="POST" action="{{ route('lpj.verify', $lpj) }}">
-                            @csrf
-                            <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
-                                Verifikasi LPJ
-                            </button>
-                        </form>
-                        @endif
+                        <!-- Verify Buttons for staff_keuangan or direktur_keuangan -->
+                        @if(auth()->user()->hasAnyRole(['staff_keuangan', 'direktur_keuangan']) && $lpj->status === 'menunggu_verifikasi')
+                        <div class="space-y-2">
+                            <p class="text-sm font-medium text-secondary-700 mb-2">Verifikasi LPJ:</p>
 
-                        @if(auth()->user()->hasRole('direktur_utama') && $lpj->status === 'verified')
-                        <form method="POST" action="{{ route('lpj.approve', $lpj) }}">
-                            @csrf
-                            <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200">
+                            <!-- Setujui Button -->
+                            <button type="button" onclick="showApproveForm()" class="w-full flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
-                                Setujui LPJ
+                                Setujui
                             </button>
+
+                            <!-- Tolak/Revisi Button -->
+                            <button type="button" onclick="showRejectForm()" class="w-full flex items-center justify-center px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Tolak / Minta Revisi
+                            </button>
+                        </div>
+
+                        <!-- Approve Form -->
+                        <form id="approveForm" method="POST" action="{{ route('lpj.verify', $lpj) }}" class="hidden space-y-3 mt-3 p-4 bg-green-50 rounded-xl border border-green-200">
+                            @csrf
+                            <input type="hidden" name="status" value="approved">
+                            <div>
+                                <label class="block text-sm font-medium text-green-700 mb-1">Catatan (opsional)</label>
+                                <textarea name="catatan_verifikasi" rows="2" class="w-full px-3 py-2 border border-green-200 rounded-lg text-sm" placeholder="Catatan verifikasi..."></textarea>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button type="button" onclick="hideApproveForm()" class="flex-1 px-3 py-2 border border-green-200 text-green-700 rounded-lg hover:bg-green-50 text-sm">
+                                    Batal
+                                </button>
+                                <button type="submit" class="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Ya, Setujui
+                                </button>
+                            </div>
                         </form>
+
+                        <!-- Reject Form -->
+                        <form id="rejectForm" method="POST" action="{{ route('lpj.verify', $lpj) }}" class="hidden space-y-3 mt-3 p-4 bg-red-50 rounded-xl border border-red-200">
+                            @csrf
+                            <input type="hidden" name="status" value="rejected">
+                            <div>
+                                <label class="block text-sm font-medium text-red-700 mb-1">Alasan Penolakan *</label>
+                                <textarea name="catatan_verifikasi" rows="3" required class="w-full px-3 py-2 border border-red-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Jelaskan alasan penolakan agar pengaju dapat merevisi..."></textarea>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button type="button" onclick="hideRejectForm()" class="flex-1 px-3 py-2 border border-red-200 text-red-700 rounded-lg hover:bg-red-50 text-sm">
+                                    Batal
+                                </button>
+                                <button type="submit" class="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Ya, Tolak
+                                </button>
+                            </div>
+                        </form>
+
+                        <script>
+                        function showApproveForm() {
+                            document.getElementById('approveForm').classList.remove('hidden');
+                            document.getElementById('rejectForm').classList.add('hidden');
+                        }
+                        function hideApproveForm() {
+                            document.getElementById('approveForm').classList.add('hidden');
+                        }
+                        function showRejectForm() {
+                            document.getElementById('rejectForm').classList.remove('hidden');
+                            document.getElementById('approveForm').classList.add('hidden');
+                        }
+                        function hideRejectForm() {
+                            document.getElementById('rejectForm').classList.add('hidden');
+                        }
+                        </script>
                         @endif
 
                         <button onclick="window.print()" class="w-full flex items-center justify-center px-4 py-3 border border-secondary-200 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
@@ -390,6 +361,18 @@
                             <p class="text-xs text-secondary-500">{{ \Carbon\Carbon::parse($lpj->created_at)->format('d/m/Y H:i') }}</p>
                         </div>
                     </div>
+                    @if($lpj->verifiedBy)
+                    <div class="flex items-center mt-4 pt-4 border-t border-secondary-100">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                            <span class="text-white font-semibold">{{ strtoupper(substr($lpj->verifiedBy->name ?? 'A', 0, 1)) }}</span>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-xs text-secondary-500">Diverifikasi oleh</p>
+                            <p class="text-sm font-medium text-secondary-900">{{ $lpj->verifiedBy->name ?? '-' }}</p>
+                            <p class="text-xs text-secondary-500">{{ \Carbon\Carbon::parse($lpj->verified_at)->format('d/m/Y H:i') }}</p>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

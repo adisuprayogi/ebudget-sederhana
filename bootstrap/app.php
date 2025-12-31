@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => App\Http\Middleware\CheckRole::class,
             'divisi' => App\Http\Middleware\CheckDivisi::class,
             'approval.access' => App\Http\Middleware\ApprovalAccess::class,
+            'permission' => App\Http\Middleware\CheckPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

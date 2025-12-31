@@ -77,6 +77,15 @@ class ProgramKerja extends Model
     }
 
     /**
+     * Get calculated pagu from all detail anggarans through sub programs.
+     * This is the real-time pagu based on actual detail anggaran.
+     */
+    public function getCalculatedPaguAttribute()
+    {
+        return $this->detailAnggarans()->sum('total_nominal');
+    }
+
+    /**
      * Get total pagu from all sub programs.
      */
     public function getTotalSubProgramPaguAttribute()
@@ -97,7 +106,7 @@ class ProgramKerja extends Model
      */
     public function getSisaPaguAttribute()
     {
-        return $this->pagu_anggaran - $this->total_detail_anggaran;
+        return $this->calculated_pagu - $this->total_detail_anggaran;
     }
 
     /**
@@ -105,9 +114,67 @@ class ProgramKerja extends Model
      */
     public function getPersentaseTerpakaiAttribute()
     {
-        if ($this->pagu_anggaran > 0) {
-            return round(($this->total_detail_anggaran / $this->pagu_anggaran) * 100, 1);
+        $penetapanPagu = \App\Models\PenetapanPagu::where('divisi_id', $this->divisi_id)
+            ->where('periode_anggaran_id', $this->periode_anggaran_id)
+            ->first();
+
+        if ($penetapanPagu && $penetapanPagu->jumlah_pagu > 0) {
+            return round(($this->calculated_pagu / $penetapanPagu->jumlah_pagu) * 100, 1);
         }
         return 0;
+    }
+
+    /**
+     * Check if adding a new detail anggaran would exceed penetapan pagu.
+     */
+    public function canAddDetailAnggaran($nominal)
+    {
+        $penetapanPagu = \App\Models\PenetapanPagu::where('divisi_id', $this->divisi_id)
+            ->where('periode_anggaran_id', $this->periode_anggaran_id)
+            ->first();
+
+        if (!$penetapanPagu) {
+            return false;
+        }
+
+        // Calculate total for all programs in this divisi and periode
+        $totalAllPrograms = \App\Models\ProgramKerja::where('divisi_id', $this->divisi_id)
+            ->where('periode_anggaran_id', $this->periode_anggaran_id)
+            ->where('id', '!=', $this->id)
+            ->with('detailAnggarans')
+            ->get()
+            ->sum(function ($program) {
+                return $program->detailAnggarans->sum('total_nominal');
+            });
+
+        // Add current program's calculated pagu and new nominal
+        $newTotal = $totalAllPrograms + $this->calculated_pagu + $nominal;
+
+        return $newTotal <= $penetapanPagu->jumlah_pagu;
+    }
+
+    /**
+     * Get remaining pagu from penetapan pagu for this divisi and periode.
+     */
+    public function getRemainingPaguAttribute()
+    {
+        $penetapanPagu = \App\Models\PenetapanPagu::where('divisi_id', $this->divisi_id)
+            ->where('periode_anggaran_id', $this->periode_anggaran_id)
+            ->first();
+
+        if (!$penetapanPagu) {
+            return 0;
+        }
+
+        // Calculate total for all programs in this divisi and periode
+        $totalAllPrograms = \App\Models\ProgramKerja::where('divisi_id', $this->divisi_id)
+            ->where('periode_anggaran_id', $this->periode_anggaran_id)
+            ->with('detailAnggarans')
+            ->get()
+            ->sum(function ($program) {
+                return $program->detailAnggarans->sum('total_nominal');
+            });
+
+        return $penetapanPagu->jumlah_pagu - $totalAllPrograms;
     }
 }

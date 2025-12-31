@@ -27,65 +27,142 @@ class PencairanDanaController extends Controller
             abort(403);
         }
 
-        $query = PencairanDana::with([
-            'pengajuanDana.divisi',
-            'pengajuanDana.programKerja',
-            'pengajuanDana.createdBy',
-            'createdBy',
-            'processedBy',
-        ]);
+        // Base query function
+        $baseQuery = function ($status) use ($request) {
+            $query = PencairanDana::with([
+                'pengajuanDana.divisi',
+                'pengajuanDana.programKerja',
+                'pengajuanDana.createdBy',
+                'createdBy',
+                'processedBy',
+            ])->where('status', $status);
 
-        // Apply filters
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('nomor_pencairan', 'like', "%{$search}%")
-                  ->orWhereHas('pengajuanDana', function ($subQ) use ($search) {
-                      $subQ->where('nomor_pengajuan', 'like', "%{$search}%")
-                        ->orWhere('judul_pengajuan', 'like', "%{$search}%");
-                  });
-            });
-        }
+            // Apply filters
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('nomor_pencairan', 'like', "%{$search}%")
+                      ->orWhereHas('pengajuanDana', function ($subQ) use ($search) {
+                          $subQ->where('nomor_pengajuan', 'like', "%{$search}%")
+                            ->orWhere('judul_pengajuan', 'like', "%{$search}%");
+                      });
+                });
+            }
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+            if ($request->filled('metode_pencairan')) {
+                $query->where('metode_pencairan', $request->metode_pencairan);
+            }
 
-        if ($request->filled('divisi_id')) {
-            $query->whereHas('pengajuanDana', function ($q) use ($request) {
-                $q->where('divisi_id', $request->divisi_id);
-            });
-        }
+            if ($request->filled('tanggal_mulai')) {
+                $query->whereDate('tanggal_pencairan', '>=', $request->tanggal_mulai);
+            }
 
-        if ($request->filled('tanggal_mulai')) {
-            $query->whereDate('tanggal_pencairan', '>=', $request->tanggal_mulai);
-        }
+            if ($request->filled('tanggal_selesai')) {
+                $query->whereDate('tanggal_pencairan', '<=', $request->tanggal_selesai);
+            }
 
-        if ($request->filled('tanggal_selesai')) {
-            $query->whereDate('tanggal_pencairan', '<=', $request->tanggal_selesai);
-        }
+            return $query;
+        };
 
-        $pencairans = $query->orderBy('tanggal_pencairan', 'desc')
-            ->paginate($request->per_page ?? 15)
-            ->withQueryString();
+        // Menunggu Verifikasi
+        $pencairansMenunggu = $baseQuery('menunggu')
+            ->orderBy('tanggal_pencairan', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
 
-        // Get filter options
-        $statuses = PencairanDana::select('status')->distinct()->pluck('status');
-        $divisis = \App\Models\Divisi::orderBy('nama_divisi')->get();
+        // Menunggu Proses
+        $pencairansPending = $baseQuery('pending')
+            ->orderBy('tanggal_pencairan', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        // Diproses
+        $pencairansProcessed = $baseQuery('processed')
+            ->orderBy('tanggal_pencairan', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        // Selesai
+        $pencairansSelesai = $baseQuery('selesai')
+            ->orderBy('tanggal_pencairan', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        // Revisi
+        $pencairansRevisi = $baseQuery('revisi')
+            ->orderBy('tanggal_pencairan', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        // Dibatalkan
+        $pencairansCancelled = $baseQuery('cancelled')
+            ->orderBy('tanggal_pencairan', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        // Get statistics
+        $stats = [
+            'menunggu' => PencairanDana::where('status', 'menunggu')->count(),
+            'pending' => PencairanDana::where('status', 'pending')->count(),
+            'processed' => PencairanDana::where('status', 'processed')->count(),
+            'selesai' => PencairanDana::where('status', 'selesai')->count(),
+            'revisi' => PencairanDana::where('status', 'revisi')->count(),
+            'cancelled' => PencairanDana::where('status', 'cancelled')->count(),
+        ];
+
+        // Calculate overall statistics
+        $statistics = [
+            'total_count' => array_sum($stats),
+            'total_amount' => PencairanDana::whereIn('status', ['processed', 'selesai'])->sum('jumlah_pencairan'),
+            'pending_count' => $stats['menunggu'] + $stats['pending'],
+            'completed_count' => $stats['processed'] + $stats['selesai'],
+        ];
 
         return view('pencairan-dana.index', [
-            'pencairans' => $pencairans,
-            'filters' => $request->only(['search', 'status', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai']),
-            'filterOptions' => [
-                'statuses' => $statuses,
-                'divisis' => $divisis,
-            ],
+            'pencairansMenunggu' => $pencairansMenunggu,
+            'pencairansPending' => $pencairansPending,
+            'pencairansProcessed' => $pencairansProcessed,
+            'pencairansSelesai' => $pencairansSelesai,
+            'pencairansRevisi' => $pencairansRevisi,
+            'pencairansCancelled' => $pencairansCancelled,
+            'stats' => $stats,
+            'statistics' => $statistics,
             'permissions' => [
                 'create' => $user->hasPermission('pencairan_dana.create'),
                 'edit' => $user->hasPermission('pencairan_dana.update'),
                 'delete' => $user->hasPermission('pencairan_dana.delete'),
                 'process' => $user->hasPermission('pencairan_dana.approve'),
             ],
+        ]);
+    }
+
+    /**
+     * Select pengajuan dana for pencairan.
+     */
+    public function selectPengajuan()
+    {
+        $user = Auth::user();
+
+        if (!$user->hasPermission('pencairan_dana.create')) {
+            abort(403);
+        }
+
+        // Get approved pengajuans that haven't been disbursed yet
+        $pengajuans = PengajuanDana::with([
+                'divisi',
+                'programKerja',
+                'createdBy',
+                'approvals' => function ($query) {
+                    $query->with('approver')->orderBy('urutan');
+                },
+            ])
+            ->where('status', 'menunggu_pencairan')
+            ->whereDoesntHave('pencairanDana')
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return view('pencairan-dana.select-pengajuan', [
+            'pengajuans' => $pengajuans,
         ]);
     }
 
@@ -101,31 +178,40 @@ class PencairanDanaController extends Controller
         }
 
         $pengajuanId = $request->pengajuan_id;
-        $pengajuan = null;
 
-        if ($pengajuanId) {
-            $pengajuan = PengajuanDana::with(['divisi', 'programKerja', 'detailPengajuan'])
-                ->findOrFail($pengajuanId);
-
-            // Check if can create pencairan
-            if (!PencairanService::canCreatePencairan($pengajuan)) {
-                return redirect()
-                    ->route('pengajuan-dana.show', $pengajuanId)
-                    ->with('error', 'Pencairan tidak dapat dibuat untuk pengajuan ini');
-            }
+        if (!$pengajuanId) {
+            return redirect()->route('pencairan-dana.select-pengajuan')
+                ->with('error', 'Silakan pilih pengajuan dana terlebih dahulu');
         }
 
-        // Get approved pengajuans for selection
-        $pengajuans = PengajuanDana::with(['divisi', 'programKerja'])
-            ->where('status', 'disetujui')
-            ->whereDoesntHave('pencairanDana')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $pengajuan = PengajuanDana::with([
+            'divisi',
+            'programKerja',
+            'subProgram',
+            'details.subProgram',
+            'honorariumDetails.karyawan',
+            'attachments',
+            'approvals' => function ($query) {
+                $query->with('approver')->orderBy('urutan');
+            },
+        ])->findOrFail($pengajuanId);
+
+        // Check if can create pencairan
+        if (!PencairanService::canCreatePencairan($pengajuan)) {
+            return redirect()
+                ->route('pencairan-dana.select-pengajuan')
+                ->with('error', 'Pencairan tidak dapat dibuat untuk pengajuan ini');
+        }
 
         return view('pencairan-dana.create', [
-            'pengajuans' => $pengajuans,
-            'selectedPengajuan' => $pengajuan,
+            'pengajuan' => $pengajuan,
             'user' => $user,
+            'rekeningPerusahaan' => \App\Models\RekeningPerusahaan::with('bank')
+                ->active()
+                ->orderBy('is_default', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->get(),
+            'banks' => \App\Models\Bank::active()->orderBy('nama_bank')->get(),
         ]);
     }
 
@@ -140,6 +226,39 @@ class PencairanDanaController extends Controller
 
             // Create pencairan
             $pencairan = PencairanService::createPencairan($pengajuan, $request->validated());
+
+            // Handle lampiran uploads (non-honorarium)
+            if ($request->hasFile('lampiran')) {
+                foreach ($request->file('lampiran') as $file) {
+                    $path = $file->store('lampiran-pencairan', 'public');
+                    \App\Models\PencairanLampiran::create([
+                        'pencairan_dana_id' => $pencairan->id,
+                        'nama_file' => $file->getClientOriginalName(),
+                        'path_file' => $path,
+                        'tipe_file' => $file->getClientMimeType(),
+                        'ukuran_file' => $file->getSize(),
+                        'created_by' => Auth::id(),
+                    ]);
+                }
+            }
+
+            // Handle lampiran per honorarium recipient
+            if ($request->hasFile('lampiran_honorarium') && $pengajuan->jenis_pengajuan === 'honorarium') {
+                foreach ($request->file('lampiran_honorarium') as $honorariumId => $file) {
+                    if ($file && $file->isValid()) {
+                        $path = $file->store('lampiran-honorarium', 'public');
+                        \App\Models\HonorariumLampiran::create([
+                            'pencairan_dana_id' => $pencairan->id,
+                            'honorarium_detail_id' => $honorariumId,
+                            'nama_file' => $file->getClientOriginalName(),
+                            'path_file' => $path,
+                            'tipe_file' => $file->getClientMimeType(),
+                            'ukuran_file' => $file->getSize(),
+                            'created_by' => Auth::id(),
+                        ]);
+                    }
+                }
+            }
 
             DB::commit();
 
@@ -165,30 +284,50 @@ class PencairanDanaController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->hasPermission('pencairan_dana.read')) {
+        // Staff keuangan can access all pencairan
+        // Pengaju can only access pencairan related to their own pengajuan
+        $isStaffKeuangan = $user->hasPermission('pencairan_dana.read');
+        $isOwnerPengaju = $pencairanDana->pengajuanDana && $pencairanDana->pengajuanDana->created_by === $user->id;
+
+        // Debug log
+        \Log::info('Pencairan Show Debug', [
+            'pencairan_id' => $pencairanDana->id,
+            'pencairan_status' => $pencairanDana->status,
+            'user_id' => $user->id,
+            'isStaffKeuangan' => $isStaffKeuangan,
+            'isOwnerPengaju' => $isOwnerPengaju,
+            'pengajuan_created_by' => $pencairanDana->pengajuanDana->created_by ?? null,
+            'can_verify' => $isOwnerPengaju && in_array($pencairanDana->status, ['menunggu', 'pending']),
+        ]);
+
+        if (!$isStaffKeuangan && !$isOwnerPengaju) {
             abort(403);
         }
 
         $pencairanDana->load([
             'pengajuanDana.divisi',
             'pengajuanDana.programKerja',
+            'pengajuanDana.subProgram',
+            'pengajuanDana.details.subProgram',
+            'pengajuanDana.attachments',
             'pengajuanDana.createdBy',
-            'detailPencairans.detailPengajuan.subProgram',
+            'pengajuanDana.honorariumDetails',
+            'rekeningPerusahaan.bank',
             'createdBy',
             'processedBy',
+            'lampirans',
+            'detailPencairans.honorariumDetail',
+            'honorariumLampirans',
         ]);
 
         return view('pencairan-dana.show', [
             'pencairan' => $pencairanDana,
             'pengajuan' => $pencairanDana->pengajuanDana,
             'permissions' => [
-                'edit' => $user->hasPermission('pencairan_dana.update') && $pencairanDana->status === 'pending',
-                'delete' => $user->hasPermission('pencairan_dana.delete') && $pencairanDana->status === 'pending',
-                'process' => $user->hasPermission('pencairan_dana.approve') && $pencairanDana->status === 'pending',
-                'verify' => $pencairanDana->pengajuanDana->jenis_pengajuan === 'pembayaran' &&
-                            in_array($pencairanDana->status, ['processed']) &&
-                            ($pencairanDana->pengajuanDana->created_by === $user->id ||
-                             $pencairanDana->pengajuanDana->penerima_manfaat_id === $user->id),
+                'edit' => $isStaffKeuangan && $user->hasPermission('pencairan_dana.update') && in_array($pencairanDana->status, ['menunggu', 'pending']),
+                'delete' => $isStaffKeuangan && $user->hasPermission('pencairan_dana.delete') && in_array($pencairanDana->status, ['menunggu', 'pending']),
+                'verify' => $isOwnerPengaju && in_array($pencairanDana->status, ['menunggu', 'pending']),
+                'retry' => $isStaffKeuangan && $user->hasPermission('pencairan_dana.create') && $pencairanDana->status === 'revisi',
             ],
         ]);
     }
@@ -207,12 +346,19 @@ class PencairanDanaController extends Controller
         $pencairanDana->load([
             'pengajuanDana.divisi',
             'pengajuanDana.programKerja',
-            'detailPencairans.detailPengajuan.subProgram',
+            'pengajuanDana.subProgram',
+            'lampirans',
         ]);
 
         return view('pencairan-dana.edit', [
             'pencairan' => $pencairanDana,
             'pengajuan' => $pencairanDana->pengajuanDana,
+            'rekeningPerusahaan' => \App\Models\RekeningPerusahaan::with('bank')
+                ->active()
+                ->orderBy('is_default', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->get(),
+            'banks' => \App\Models\Bank::active()->orderBy('nama_bank')->get(),
         ]);
     }
 
@@ -223,8 +369,54 @@ class PencairanDanaController extends Controller
     {
         DB::beginTransaction();
         try {
+            $data = $request->validated();
+
+            // Get bank details if bank_id is provided
+            if (isset($data['bank_id'])) {
+                $bank = \App\Models\Bank::find($data['bank_id']);
+                $data['nama_bank'] = $bank ? $bank->nama_bank : null;
+            }
+
+            // Get rekening perusahaan details if provided
+            if (isset($data['rekening_perusahaan_id'])) {
+                $rekeningPerusahaan = \App\Models\RekeningPerusahaan::with('bank')->find($data['rekening_perusahaan_id']);
+                if ($rekeningPerusahaan) {
+                    $data['nama_bank_sumber'] = $rekeningPerusahaan->bank->nama_bank;
+                    $data['nomor_rekening_sumber'] = $rekeningPerusahaan->nomor_rekening;
+                }
+            }
+
             // Update pencairan
-            $pencairanDana->update($request->validated());
+            $pencairanDana->update($data);
+
+            // Handle lampiran removal
+            if ($request->has('remove_lampiran')) {
+                foreach ($request->remove_lampiran as $lampiranId) {
+                    $lampiran = \App\Models\PencairanLampiran::find($lampiranId);
+                    if ($lampiran && $lampiran->pencairan_dana_id === $pencairanDana->id) {
+                        // Delete file from storage
+                        if (Storage::disk('public')->exists($lampiran->path_file)) {
+                            Storage::disk('public')->delete($lampiran->path_file);
+                        }
+                        $lampiran->delete();
+                    }
+                }
+            }
+
+            // Handle new lampiran uploads
+            if ($request->hasFile('lampiran')) {
+                foreach ($request->file('lampiran') as $file) {
+                    $path = $file->store('lampiran-pencairan', 'public');
+                    \App\Models\PencairanLampiran::create([
+                        'pencairan_dana_id' => $pencairanDana->id,
+                        'nama_file' => $file->getClientOriginalName(),
+                        'path_file' => $path,
+                        'tipe_file' => $file->getClientMimeType(),
+                        'ukuran_file' => $file->getSize(),
+                        'created_by' => Auth::id(),
+                    ]);
+                }
+            }
 
             DB::commit();
 
@@ -329,11 +521,16 @@ class PencairanDanaController extends Controller
         $user = Auth::user();
         $pengajuan = $pencairanDana->pengajuanDana;
 
-        // Check if user can verify
-        if ($pengajuan->jenis_pengajuan !== 'pembayaran' ||
-            !in_array($pencairanDana->status, ['processed']) ||
-            ($pengajuan->created_by !== $user->id && $pengajuan->penerima_manfaat_id !== $user->id)) {
+        // Only pengaju (creator) can verify
+        if ($pengajuan->created_by !== $user->id) {
             abort(403);
+        }
+
+        // Check if pencairan is in 'menunggu' or 'pending' status
+        if (!in_array($pencairanDana->status, ['menunggu', 'pending'])) {
+            return redirect()
+                ->route('pencairan-dana.show', $pencairanDana->id)
+                ->with('error', 'Pencairan tidak dapat diverifikasi');
         }
 
         $request->validate([
@@ -364,6 +561,126 @@ class PencairanDanaController extends Controller
             return redirect()
                 ->back()
                 ->with('error', 'Gagal memverifikasi pembayaran. ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show retry form for pencairan (create new from rejected one)
+     */
+    public function retry(PencairanDana $pencairanDana)
+    {
+        $user = Auth::user();
+
+        // Only staff keuangan with create permission can retry
+        if (!$user->hasPermission('pencairan_dana.create')) {
+            abort(403);
+        }
+
+        // Only allow retry for 'revisi' status
+        if ($pencairanDana->status !== 'revisi') {
+            return redirect()
+                ->route('pencairan-dana.show', $pencairanDana->id)
+                ->with('error', 'Hanya pencairan dengan status revisi yang bisa dibuat ulang');
+        }
+
+        $pencairanDana->load([
+            'pengajuanDana.divisi',
+            'pengajuanDana.programKerja',
+            'pengajuanDana.subProgram',
+            'pengajuanDana.honorariumDetails',
+            'pengajuanDana.attachments',
+            'pengajuanDana.approvals' => function ($query) {
+                $query->with('approver')->orderBy('urutan');
+            },
+            'detailPencairans.honorariumDetail',
+        ]);
+
+        return view('pencairan-dana.retry', [
+            'pencairan' => $pencairanDana,
+            'pengajuan' => $pencairanDana->pengajuanDana,
+            'user' => $user,
+            'rekeningPerusahaan' => \App\Models\RekeningPerusahaan::with('bank')
+                ->active()
+                ->orderBy('is_default', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->get(),
+            'banks' => \App\Models\Bank::active()->orderBy('nama_bank')->get(),
+        ]);
+    }
+
+    /**
+     * Store retry pencairan (create new from rejected one)
+     */
+    public function storeRetry(StorePencairanDanaRequest $request, PencairanDana $pencairanDana)
+    {
+        $user = Auth::user();
+
+        // Only staff keuangan with create permission can retry
+        if (!$user->hasPermission('pencairan_dana.create')) {
+            abort(403);
+        }
+
+        // Only allow retry for 'revisi' status
+        if ($pencairanDana->status !== 'revisi') {
+            return redirect()
+                ->route('pencairan-dana.show', $pencairanDana->id)
+                ->with('error', 'Hanya pencairan dengan status revisi yang bisa dibuat ulang');
+        }
+
+        DB::beginTransaction();
+        try {
+            $pengajuan = $pencairanDana->pengajuanDana;
+
+            // Create pencairan with validated data
+            $newPencairan = PencairanService::retryPencairan($pencairanDana, $request->validated());
+
+            // Handle lampiran uploads (non-honorarium)
+            if ($request->hasFile('lampiran')) {
+                foreach ($request->file('lampiran') as $file) {
+                    $path = $file->store('lampiran-pencairan', 'public');
+                    \App\Models\PencairanLampiran::create([
+                        'pencairan_dana_id' => $newPencairan->id,
+                        'nama_file' => $file->getClientOriginalName(),
+                        'path_file' => $path,
+                        'tipe_file' => $file->getClientMimeType(),
+                        'ukuran_file' => $file->getSize(),
+                        'created_by' => Auth::id(),
+                    ]);
+                }
+            }
+
+            // Handle lampiran per honorarium recipient
+            if ($request->hasFile('lampiran_honorarium') && $pengajuan->jenis_pengajuan === 'honorarium') {
+                foreach ($request->file('lampiran_honorarium') as $honorariumId => $file) {
+                    if ($file && $file->isValid()) {
+                        $path = $file->store('lampiran-honorarium', 'public');
+                        \App\Models\HonorariumLampiran::create([
+                            'pencairan_dana_id' => $newPencairan->id,
+                            'honorarium_detail_id' => $honorariumId,
+                            'nama_file' => $file->getClientOriginalName(),
+                            'path_file' => $path,
+                            'tipe_file' => $file->getClientMimeType(),
+                            'ukuran_file' => $file->getSize(),
+                            'created_by' => Auth::id(),
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('pencairan-dana.show', $newPencairan->id)
+                ->with('success', 'Pencairan baru berhasil dibuat dengan nomor: ' . $newPencairan->nomor_pencairan);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to retry pencairan: ' . $e->getMessage());
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Gagal membuat pencairan ulang. ' . $e->getMessage());
         }
     }
 
@@ -414,7 +731,6 @@ class PencairanDanaController extends Controller
             'pengajuanDana.divisi',
             'pengajuanDana.programKerja',
             'pengajuanDana.createdBy',
-            'detailPencairans.detailPengajuan.subProgram',
             'createdBy',
             'processedBy',
         ]);

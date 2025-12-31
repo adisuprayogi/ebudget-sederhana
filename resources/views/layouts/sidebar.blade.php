@@ -57,6 +57,12 @@
                     </svg>
                     <span>Manajemen Role</span>
                 </a>
+                <a href="{{ route('rekening-perusahaan.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('rekening-perusahaan.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    <span>Rekening Perusahaan</span>
+                </a>
 
                 <!-- Section Header -->
                 <div class="px-3 mt-6 mb-2">
@@ -74,30 +80,6 @@
 
             <!-- Direktur Utama -->
             @if(auth()->user()->hasRole('direktur_utama'))
-                <!-- Section Header -->
-                <div class="px-3 mt-6 mb-2">
-                    <p class="text-xs font-semibold text-white/50 uppercase tracking-wider">Administrasi</p>
-                </div>
-
-                <a href="{{ route('periode-anggaran.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('periode-anggaran.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span>Periode Anggaran</span>
-                </a>
-                <a href="{{ route('admin.vendors.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('admin.vendors.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                    <span>Vendor</span>
-                </a>
-                <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('admin.users.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    <span>Manajemen User</span>
-                </a>
-
                 <!-- Section Header -->
                 <div class="px-3 mt-6 mb-2">
                     <p class="text-xs font-semibold text-white/50 uppercase tracking-wider">Laporan</p>
@@ -138,6 +120,12 @@
                     </svg>
                     <span>Sumber Dana</span>
                 </a>
+                <a href="{{ route('rekening-perusahaan.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('rekening-perusahaan.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    <span>Rekening Perusahaan</span>
+                </a>
                 @endif
 
                 <!-- Section Header -->
@@ -169,24 +157,71 @@
                     <p class="text-xs font-semibold text-white/50 uppercase tracking-wider">Verifikasi</p>
                 </div>
 
+                @if(auth()->user()->hasRole('direktur_keuangan'))
                 <a href="{{ route('approvals.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('approvals.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>Approval</span>
                 </a>
+                @endif
+
+                @if(auth()->user()->hasRole('staff_keuangan'))
                 <a href="{{ route('pencairan-dana.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('pencairan-dana.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                     <span>Pencairan Dana</span>
+                    @php
+                        // Pengajuan disetujui yang belum memiliki pencairan (siap diproses)
+                        $pengajuanSiapProsesCount = \App\Models\PengajuanDana::where('status', 'disetujui')
+                            ->whereDoesntHave('pencairanDana')
+                            ->count();
+                    @endphp
+                    @if($pengajuanSiapProsesCount > 0)
+                        <span class="ml-auto bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold animate-pulse">{{ $pengajuanSiapProsesCount }}</span>
+                    @endif
                 </a>
+                @endif
+
                 <a href="{{ route('reports.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('reports.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     <span>Laporan</span>
                 </a>
+
+                <!-- Verifikasi LPJ - Staff Keuangan Only -->
+                @if(auth()->user()->hasRole('staff_keuangan'))
+                <a href="{{ route('lpj-verification.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('lpj-verification.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span>Verifikasi LPJ</span>
+                    @php
+                        $pendingLpjCount = \App\Models\LaporanPertanggungJawaban::where('status', 'menunggu_verifikasi')->count();
+                    @endphp
+                    @if($pendingLpjCount > 0)
+                        <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">{{ $pendingLpjCount }}</span>
+                    @endif
+                </a>
+                @endif
+
+                <!-- Verifikasi Refund - Staff Keuangan Only -->
+                @if(auth()->user()->hasRole('staff_keuangan'))
+                <a href="{{ route('refund-verification.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('refund-verification.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span>Verifikasi Refund</span>
+                    @php
+                        $pendingRefundCount = \App\Models\Refund::where('status', 'menunggu_approval')->count();
+                    @endphp
+                    @if($pendingRefundCount > 0)
+                        <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">{{ $pendingRefundCount }}</span>
+                    @endif
+                </a>
+                @endif
             @endif
 
             <!-- Kepala Divisi & Staff Divisi -->
@@ -207,18 +242,54 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
                     <span>Pengajuan Dana</span>
+                    @php
+                        $userDivisiId = auth()->user()->divisi_id;
+                        $pencairanPendingCount = \App\Models\PencairanDana::where('status', 'menunggu_verifikasi')
+                            ->whereHas('pengajuanDana', function($q) use ($userDivisiId) {
+                                $q->where('divisi_id', $userDivisiId);
+                            })
+                            ->count();
+                    @endphp
+                    @if($pencairanPendingCount > 0)
+                        <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">{{ $pencairanPendingCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('lpj.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('lpj.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <span>Laporan Pertanggungjawaban</span>
+                    @php
+                        $userDivisiId = auth()->user()->divisi_id;
+                        $pencairanNeedLpjCount = \App\Models\PencairanDana::where('status', 'approved')
+                            ->whereHas('pengajuanDana', function($q) use ($userDivisiId) {
+                                $q->where('divisi_id', $userDivisiId);
+                            })
+                            ->whereDoesntHave('lpjs')
+                            ->count();
+                    @endphp
+                    @if($pencairanNeedLpjCount > 0)
+                        <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">{{ $pencairanNeedLpjCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('refund.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('refund.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                     </svg>
                     <span>Refund</span>
+                    @php
+                        $userDivisiId = auth()->user()->divisi_id;
+                        $lpjWithSisaCount = \App\Models\LaporanPertanggungJawaban::where('status', 'approved')
+                            ->where('sisa_dana', '>', 0)
+                            ->whereHas('pencairanDana.pengajuanDana', function($q) use ($userDivisiId) {
+                                $q->where('divisi_id', $userDivisiId);
+                            })
+                            ->whereDoesntHave('refunds')
+                            ->count();
+                    @endphp
+                    @if($lpjWithSisaCount > 0)
+                        <span class="ml-auto bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">{{ $lpjWithSisaCount }}</span>
+                    @endif
                 </a>
             @endif
 

@@ -193,6 +193,66 @@ class LpjService
     }
 
     /**
+     * Verify LPJ (by staff_keuangan or direktur_keuangan)
+     * LPJ is separate from pencairan workflow - only updates LPJ status
+     */
+    public static function verifyLpj($lpjId, $status, $catatan = null, $user = null)
+    {
+        DB::beginTransaction();
+        try {
+            $lpj = LaporanPertanggungJawaban::find($lpjId);
+
+            if (!$lpj) {
+                throw new \Exception('LPJ not found');
+            }
+
+            // Validate LPJ status
+            if ($lpj->status !== 'menunggu_verifikasi') {
+                throw new \Exception('LPJ must be in menunggu_verifikasi status');
+            }
+
+            if ($status === 'approved') {
+                // Verify and approve LPJ only
+                $lpj->update([
+                    'status' => 'approved',
+                    'verified_at' => now(),
+                    'verified_by' => $user ? $user->id : auth()->id(),
+                    'approved_at' => now(),
+                    'approved_by' => $user ? $user->id : auth()->id(),
+                    'approval_notes' => $catatan,
+                    'updated_at' => now(),
+                ]);
+
+                // Note: LPJ verification does not affect pencairan or pengajuan status
+                // Pencairan and pengajuan remain in their current state
+            } elseif ($status === 'rejected') {
+                // Reject with revision
+                $lpj->update([
+                    'status' => 'revisi',
+                    'rejected_at' => now(),
+                    'rejected_by' => $user ? $user->id : auth()->id(),
+                    'rejection_reason' => $catatan,
+                    'updated_at' => now(),
+                ]);
+
+                // Note: LPJ rejection does not affect pencairan or pengajuan status
+                // Pencairan and pengajuan remain in their current state
+            }
+
+            DB::commit();
+
+            return $lpj;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to verify LPJ', [
+                'error' => $e->getMessage(),
+                'lpj_id' => $lpjId
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
      * Approve LPJ
      */
     public static function approveLpj(LaporanPertanggungJawaban $lpj, $notes = null)
@@ -334,16 +394,21 @@ class LpjService
     /**
      * Get LPJ statistics
      */
-    public static function getLpjStatistics($startDate = null, $endDate = null, $divisiId = null)
+    public static function getLpjStatistics($periodeAnggaranId = null, $divisiId = null)
     {
         $query = LaporanPertanggungJawaban::with(['pengajuanDana.divisi', 'pengajuanDana.createdBy']);
 
-        if ($startDate) {
-            $query->whereDate('tanggal_lpj', '>=', $startDate);
-        }
-
-        if ($endDate) {
-            $query->whereDate('tanggal_lpj', '<=', $endDate);
+        // Apply periode anggaran filter through pengajuanDana -> program_kerja / sub_program
+        if ($periodeAnggaranId) {
+            $query->whereHas('pengajuanDana', function ($q) use ($periodeAnggaranId) {
+                $q->where(function ($subQ) use ($periodeAnggaranId) {
+                    $subQ->whereHas('programKerja', function ($ss) use ($periodeAnggaranId) {
+                        $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                    })->orWhereHas('subProgram', function ($ss) use ($periodeAnggaranId) {
+                        $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                    });
+                });
+            });
         }
 
         if ($divisiId) {
@@ -388,13 +453,13 @@ class LpjService
      */
     public static function getOverdueLpj($days = 30)
     {
-        return LaporanPertanggungJawaban::with(['pengajuanDana.divisi', 'pengajuanDana.createdBy'])
-            ->whereDoesntHave('laporanPertanggungJawaban')
-            ->whereHas('pengajuanDana', function ($query) use ($days) {
-                $query->where('status', 'dicairkan')
-                    ->where('dicairkan_at', '<', now()->subDays($days));
+        return \App\Models\PengajuanDana::with(['divisi', 'createdBy'])
+            ->where('status', 'dicairkan')
+            ->whereHas('pencairanDana', function ($query) use ($days) {
+                $query->where('tanggal_pencairan', '<', now()->subDays($days));
             })
-            ->orderBy('pengajuanDana.dicairkan_at', 'asc')
+            ->whereDoesntHave('laporanPertanggungJawabans')
+            ->orderBy('created_at', 'asc')
             ->get();
     }
 

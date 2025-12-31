@@ -16,13 +16,22 @@
                 <h1 class="text-2xl font-bold text-secondary-900">{{ $programKerja->nama_program }}</h1>
                 <p class="text-secondary-600 mt-1">{{ $programKerja->kode_program }} | {{ $divisi->nama_divisi }}</p>
             </div>
-            @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama']))
-                <a href="{{ route('program-kerja.edit', [$divisi, $programKerja]) }}" class="inline-flex items-center px-4 py-2 bg-white border border-secondary-300 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit Program
-                </a>
+            @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
+                @php
+                    $canEdit = true;
+                    $periode = $programKerja->periodeAnggaran;
+                    if($periode && $periode->fase !== 'perencangan') {
+                        $canEdit = false;
+                    }
+                @endphp
+                @if($canEdit)
+                    <a href="{{ route('program-kerja.edit', [$divisi, $programKerja]) }}" class="inline-flex items-center px-4 py-2 bg-white border border-secondary-300 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit Program
+                    </a>
+                @endif
             @endif
         </div>
     </x-slot>

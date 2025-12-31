@@ -16,7 +16,7 @@ class ReportController extends Controller
     /**
      * Display the main reports page.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
@@ -24,17 +24,35 @@ class ReportController extends Controller
             abort(403);
         }
 
-        // Get quick statistics for current year
-        $currentYear = date('Y');
+        // Get selected periode anggaran from query parameter
+        $selectedPeriodeId = $request->periode_anggaran_id;
+
+        // Get all available periode anggaran
+        $availablePeriodes = \App\Models\PeriodeAnggaran::orderBy('tahun_anggaran', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Get active periode (in penggunaan phase)
+        $activePeriode = \App\Models\PeriodeAnggaran::active()->first();
+
+        if ($selectedPeriodeId) {
+            $selectedPeriode = \App\Models\PeriodeAnggaran::find($selectedPeriodeId);
+        } else {
+            // Default: use active periode, or first available periode if none is active
+            $selectedPeriode = $activePeriode ?? $availablePeriodes->first();
+        }
+
+        // Get statistics for selected periode (filter by periode_anggaran_id through program_kerja)
         $dashboardStats = ReportService::getDashboardStatistics(
-            "$currentYear-01-01",
-            "$currentYear-12-31",
+            $selectedPeriode ? $selectedPeriode->id : null,
             $user->hasPermission('report.view_all') ? null : $user->divisi_id
         );
 
-        return view('reports.index', [
+        return view('report.index', [
             'dashboardStats' => $dashboardStats,
-            'currentYear' => $currentYear,
+            'selectedPeriode' => $selectedPeriode,
+            'activePeriode' => $activePeriode,
+            'availablePeriodes' => $availablePeriodes,
             'permissions' => [
                 'view_all' => $user->hasPermission('report.view_all'),
                 'export' => $user->hasPermission('report.export'),
@@ -53,39 +71,54 @@ class ReportController extends Controller
             abort(403);
         }
 
-        $tahun = $request->tahun ?? date('Y');
         $divisiId = $user->hasPermission('report.view_all') ? $request->divisi_id : $user->divisi_id;
 
-        // Get comprehensive pengajuan report data
-        $startDate = $request->tanggal_mulai ?? "$tahun-01-01";
-        $endDate = $request->tanggal_selesai ?? "$tahun-12-31";
+        // Get selected periode anggaran
+        $selectedPeriodeId = $request->periode_anggaran_id;
+        $selectedPeriode = null;
+        $availablePeriodes = \App\Models\PeriodeAnggaran::orderBy('tahun_anggaran', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $activePeriode = \App\Models\PeriodeAnggaran::active()->first();
 
-        $statistics = ReportService::getDashboardStatistics($startDate, $endDate, $divisiId);
+        if ($selectedPeriodeId) {
+            $selectedPeriode = \App\Models\PeriodeAnggaran::find($selectedPeriodeId);
+        } else {
+            $selectedPeriode = $activePeriode;
+        }
+
+        // Determine tahun based on selected periode
+        $tahun = $selectedPeriode ? $selectedPeriode->tahun_anggaran : ($request->tahun ?? date('Y'));
+
+        // Get comprehensive pengajuan report data
+        $statistics = ReportService::getDashboardStatistics($selectedPeriode?->id, $divisiId);
         $monthlyTrend = ReportService::getMonthlyTrend($tahun, $divisiId);
         $jenisAnalysis = ReportService::getJenisPengajuanAnalysis($tahun);
         $divisionComparison = $user->hasPermission('report.view_all') ?
             ReportService::getDivisionComparison($tahun) : [];
         $highValueTransactions = ReportService::getHighValueTransactions(
             $request->threshold ?? 100000000,
-            $startDate,
-            $endDate
+            $selectedPeriode?->id
         );
 
         // Get filter options
         $divisis = \App\Models\Divisi::orderBy('nama_divisi')->get();
         $years = range(date('Y') - 5, date('Y'));
 
-        return view('reports.pengajuan', [
+        return view('report.pengajuan', [
             'statistics' => $statistics,
             'monthlyTrend' => $monthlyTrend,
             'jenisAnalysis' => $jenisAnalysis,
             'divisionComparison' => $divisionComparison,
             'highValueTransactions' => $highValueTransactions,
-            'filters' => $request->only(['tahun', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai', 'threshold']),
+            'filters' => $request->only(['tahun', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai', 'threshold', 'periode_anggaran_id']),
             'filterOptions' => [
                 'divisis' => $divisis,
                 'years' => $years,
             ],
+            'selectedPeriode' => $selectedPeriode,
+            'activePeriode' => $activePeriode,
+            'availablePeriodes' => $availablePeriodes,
             'permissions' => [
                 'view_all' => $user->hasPermission('report.view_all'),
                 'export' => $user->hasPermission('report.export'),
@@ -104,35 +137,51 @@ class ReportController extends Controller
             abort(403);
         }
 
-        $tahun = $request->tahun ?? date('Y');
         $divisiId = $user->hasPermission('report.view_all') ? $request->divisi_id : $user->divisi_id;
 
-        $startDate = $request->tanggal_mulai ?? "$tahun-01-01";
-        $endDate = $request->tanggal_selesai ?? "$tahun-12-31";
+        // Get selected periode anggaran
+        $selectedPeriodeId = $request->periode_anggaran_id;
+        $selectedPeriode = null;
+        $availablePeriodes = \App\Models\PeriodeAnggaran::orderBy('tahun_anggaran', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $activePeriode = \App\Models\PeriodeAnggaran::active()->first();
 
-        $statistics = ReportService::getDashboardStatistics($startDate, $endDate, $divisiId);
-        $monthlyTrend = ReportService::getMonthlyTrend($tahun, $divisiId);
+        if ($selectedPeriodeId) {
+            $selectedPeriode = \App\Models\PeriodeAnggaran::find($selectedPeriodeId);
+        } else {
+            $selectedPeriode = $activePeriode;
+        }
+
+        // Determine tahun based on selected periode
+        $tahun = $selectedPeriode ? $selectedPeriode->tahun_anggaran : ($request->tahun ?? date('Y'));
+
+        $statistics = ReportService::getDashboardStatistics($selectedPeriode?->id, $divisiId);
+        $monthlyTrend = ReportService::getMonthlyTrend($tahun, $divisiId, $selectedPeriode?->id);
         $divisionComparison = $user->hasPermission('report.view_all') ?
-            ReportService::getDivisionComparison($tahun) : [];
+            ReportService::getDivisionComparison($tahun, $selectedPeriode?->id) : [];
 
         // Get pencairan-specific data
-        $pencairanStats = \App\Services\PencairanService::getPencairanStatistics($startDate, $endDate, $divisiId);
+        $pencairanStats = \App\Services\PencairanService::getPencairanStatistics($selectedPeriode?->id, $divisiId);
         $upcomingPencairans = \App\Services\PencairanService::getUpcomingPencairan();
 
         $divisis = \App\Models\Divisi::orderBy('nama_divisi')->get();
         $years = range(date('Y') - 5, date('Y'));
 
-        return view('reports.pencairan', [
+        return view('report.pencairan', [
             'statistics' => $statistics,
             'pencairanStats' => $pencairanStats,
             'monthlyTrend' => $monthlyTrend,
             'divisionComparison' => $divisionComparison,
             'upcomingPencairans' => $upcomingPencairans,
-            'filters' => $request->only(['tahun', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai']),
+            'filters' => $request->only(['tahun', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai', 'periode_anggaran_id']),
             'filterOptions' => [
                 'divisis' => $divisis,
                 'years' => $years,
             ],
+            'selectedPeriode' => $selectedPeriode,
+            'activePeriode' => $activePeriode,
+            'availablePeriodes' => $availablePeriodes,
             'permissions' => [
                 'view_all' => $user->hasPermission('report.view_all'),
                 'export' => $user->hasPermission('report.export'),
@@ -151,17 +200,30 @@ class ReportController extends Controller
             abort(403);
         }
 
-        $tahun = $request->tahun ?? date('Y');
         $divisiId = $user->hasPermission('report.view_all') ? $request->divisi_id : $user->divisi_id;
 
-        $startDate = $request->tanggal_mulai ?? "$tahun-01-01";
-        $endDate = $request->tanggal_selesai ?? "$tahun-12-31";
+        // Get selected periode anggaran
+        $selectedPeriodeId = $request->periode_anggaran_id;
+        $selectedPeriode = null;
+        $availablePeriodes = \App\Models\PeriodeAnggaran::orderBy('tahun_anggaran', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $activePeriode = \App\Models\PeriodeAnggaran::active()->first();
 
-        $statistics = ReportService::getDashboardStatistics($startDate, $endDate, $divisiId);
-        $lpjStats = \App\Services\LpjService::getLpjStatistics($startDate, $endDate, $divisiId);
-        $monthlyTrend = ReportService::getMonthlyTrend($tahun, $divisiId);
+        if ($selectedPeriodeId) {
+            $selectedPeriode = \App\Models\PeriodeAnggaran::find($selectedPeriodeId);
+        } else {
+            $selectedPeriode = $activePeriode;
+        }
+
+        // Determine tahun based on selected periode
+        $tahun = $selectedPeriode ? $selectedPeriode->tahun_anggaran : ($request->tahun ?? date('Y'));
+
+        $statistics = ReportService::getDashboardStatistics($selectedPeriode?->id, $divisiId);
+        $lpjStats = \App\Services\LpjService::getLpjStatistics($selectedPeriode?->id, $divisiId);
+        $monthlyTrend = ReportService::getMonthlyTrend($tahun, $divisiId, $selectedPeriode?->id);
         $divisionComparison = $user->hasPermission('report.view_all') ?
-            ReportService::getDivisionComparison($tahun) : [];
+            ReportService::getDivisionComparison($tahun, $selectedPeriode?->id) : [];
 
         // Get LPJ-specific data
         $overdueLpj = \App\Services\LpjService::getOverdueLpj();
@@ -169,17 +231,20 @@ class ReportController extends Controller
         $divisis = \App\Models\Divisi::orderBy('nama_divisi')->get();
         $years = range(date('Y') - 5, date('Y'));
 
-        return view('reports.lpj', [
+        return view('report.lpj', [
             'statistics' => $statistics,
             'lpjStats' => $lpjStats,
             'monthlyTrend' => $monthlyTrend,
             'divisionComparison' => $divisionComparison,
             'overdueLpj' => $overdueLpj,
-            'filters' => $request->only(['tahun', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai']),
+            'filters' => $request->only(['tahun', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai', 'periode_anggaran_id']),
             'filterOptions' => [
                 'divisis' => $divisis,
                 'years' => $years,
             ],
+            'selectedPeriode' => $selectedPeriode,
+            'activePeriode' => $activePeriode,
+            'availablePeriodes' => $availablePeriodes,
             'permissions' => [
                 'view_all' => $user->hasPermission('report.view_all'),
                 'export' => $user->hasPermission('report.export'),
@@ -198,21 +263,43 @@ class ReportController extends Controller
             abort(403);
         }
 
-        $tahun = $request->tahun ?? date('Y');
         $divisiId = $user->hasPermission('report.view_all') ? $request->divisi_id : $user->divisi_id;
 
-        $startDate = $request->tanggal_mulai ?? "$tahun-01-01";
-        $endDate = $request->tanggal_selesai ?? "$tahun-12-31";
+        // Get selected periode anggaran
+        $selectedPeriodeId = $request->periode_anggaran_id;
+        $selectedPeriode = null;
+        $availablePeriodes = \App\Models\PeriodeAnggaran::orderBy('tahun_anggaran', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $activePeriode = \App\Models\PeriodeAnggaran::active()->first();
 
-        $statistics = ReportService::getDashboardStatistics($startDate, $endDate, $divisiId);
-        $monthlyTrend = ReportService::getMonthlyTrend($tahun, $divisiId);
+        if ($selectedPeriodeId) {
+            $selectedPeriode = \App\Models\PeriodeAnggaran::find($selectedPeriodeId);
+        } else {
+            $selectedPeriode = $activePeriode;
+        }
+
+        // Determine tahun based on selected periode
+        $tahun = $selectedPeriode ? $selectedPeriode->tahun_anggaran : ($request->tahun ?? date('Y'));
+
+        $statistics = ReportService::getDashboardStatistics($selectedPeriode?->id, $divisiId);
+        $monthlyTrend = ReportService::getMonthlyTrend($tahun, $divisiId, $selectedPeriode?->id);
         $divisionComparison = $user->hasPermission('report.view_all') ?
-            ReportService::getDivisionComparison($tahun) : [];
+            ReportService::getDivisionComparison($tahun, $selectedPeriode?->id) : [];
 
         // Get refund-specific data
         $refunds = \App\Models\Refund::with(['pengajuanDana.divisi'])
-            ->whereDate('created_at', '>=', $startDate)
-            ->whereDate('created_at', '<=', $endDate)
+            ->when($selectedPeriodeId, function ($query) use ($selectedPeriodeId) {
+                $query->whereHas('pengajuanDana', function ($q) use ($selectedPeriodeId) {
+                    $q->where(function ($subQ) use ($selectedPeriodeId) {
+                        $subQ->whereHas('programKerja', function ($ss) use ($selectedPeriodeId) {
+                            $ss->where('periode_anggaran_id', $selectedPeriodeId);
+                        })->orWhereHas('subProgram', function ($ss) use ($selectedPeriodeId) {
+                            $ss->where('periode_anggaran_id', $selectedPeriodeId);
+                        });
+                    });
+                });
+            })
             ->when($divisiId, function ($query) use ($divisiId) {
                 $query->whereHas('pengajuanDana', function ($q) use ($divisiId) {
                     $q->where('divisi_id', $divisiId);
@@ -224,16 +311,19 @@ class ReportController extends Controller
         $divisis = \App\Models\Divisi::orderBy('nama_divisi')->get();
         $years = range(date('Y') - 5, date('Y'));
 
-        return view('reports.refund', [
+        return view('report.refund', [
             'statistics' => $statistics,
             'refunds' => $refunds,
             'monthlyTrend' => $monthlyTrend,
             'divisionComparison' => $divisionComparison,
-            'filters' => $request->only(['tahun', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai']),
+            'filters' => $request->only(['tahun', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai', 'periode_anggaran_id']),
             'filterOptions' => [
                 'divisis' => $divisis,
                 'years' => $years,
             ],
+            'selectedPeriode' => $selectedPeriode,
+            'activePeriode' => $activePeriode,
+            'availablePeriodes' => $availablePeriodes,
             'permissions' => [
                 'view_all' => $user->hasPermission('report.view_all'),
                 'export' => $user->hasPermission('report.export'),
@@ -252,24 +342,40 @@ class ReportController extends Controller
             abort(403);
         }
 
-        $tahun = $request->tahun ?? date('Y');
         $divisiId = $user->hasPermission('report.view_all') ? $request->divisi_id : null;
 
-        $budgetRealization = ReportService::getBudgetRealization($tahun, $divisiId);
+        // Get selected periode anggaran
+        $selectedPeriodeId = $request->periode_anggaran_id;
+        $selectedPeriode = null;
+        $availablePeriodes = \App\Models\PeriodeAnggaran::orderBy('tahun_anggaran', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $activePeriode = \App\Models\PeriodeAnggaran::active()->first();
+
+        if ($selectedPeriodeId) {
+            $selectedPeriode = \App\Models\PeriodeAnggaran::find($selectedPeriodeId);
+        } else {
+            $selectedPeriode = $activePeriode;
+        }
+
+        $budgetRealization = ReportService::getBudgetRealization($selectedPeriode?->id, $divisiId);
         $divisionComparison = $user->hasPermission('report.view_all') ?
-            ReportService::getDivisionComparison($tahun) : [];
+            ReportService::getDivisionComparison($selectedPeriode?->tahun_anggaran, $selectedPeriode?->id) : [];
 
         $divisis = \App\Models\Divisi::orderBy('nama_divisi')->get();
         $years = range(date('Y') - 5, date('Y'));
 
-        return view('reports.budget-realization', [
+        return view('report.budgetRealization', [
             'budgetRealization' => $budgetRealization,
             'divisionComparison' => $divisionComparison,
-            'filters' => $request->only(['tahun', 'divisi_id']),
+            'filters' => $request->only(['tahun', 'divisi_id', 'periode_anggaran_id']),
             'filterOptions' => [
                 'divisis' => $divisis,
                 'years' => $years,
             ],
+            'selectedPeriode' => $selectedPeriode,
+            'activePeriode' => $activePeriode,
+            'availablePeriodes' => $availablePeriodes,
             'permissions' => [
                 'view_all' => $user->hasPermission('report.view_all'),
                 'export' => $user->hasPermission('report.export'),
@@ -293,7 +399,7 @@ class ReportController extends Controller
 
         $approvalPerformance = ReportService::getApprovalPerformance($startDate, $endDate);
 
-        return view('reports.approval-performance', [
+        return view('report.approval-performance', [
             'approvalPerformance' => $approvalPerformance,
             'filters' => $request->only(['tanggal_mulai', 'tanggal_selesai']),
             'permissions' => [
@@ -318,17 +424,35 @@ class ReportController extends Controller
             abort(403);
         }
 
-        $tahun = $request->tahun ?? date('Y');
-        $executiveSummary = ReportService::getExecutiveSummary($tahun);
+        // Get selected periode anggaran
+        $selectedPeriodeId = $request->periode_anggaran_id;
+        $selectedPeriode = null;
+        $availablePeriodes = \App\Models\PeriodeAnggaran::orderBy('tahun_anggaran', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $activePeriode = \App\Models\PeriodeAnggaran::active()->first();
+
+        if ($selectedPeriodeId) {
+            $selectedPeriode = \App\Models\PeriodeAnggaran::find($selectedPeriodeId);
+        } else {
+            $selectedPeriode = $activePeriode;
+        }
+
+        // Determine tahun based on selected periode
+        $tahun = $selectedPeriode ? $selectedPeriode->tahun_anggaran : ($request->tahun ?? date('Y'));
+        $executiveSummary = ReportService::getExecutiveSummary($tahun, $selectedPeriode?->id);
 
         $years = range(date('Y') - 5, date('Y'));
 
-        return view('reports.executive-summary', [
+        return view('report.executiveSummary', [
             'executiveSummary' => $executiveSummary,
-            'filters' => $request->only(['tahun']),
+            'filters' => $request->only(['tahun', 'periode_anggaran_id']),
             'filterOptions' => [
                 'years' => $years,
             ],
+            'selectedPeriode' => $selectedPeriode,
+            'activePeriode' => $activePeriode,
+            'availablePeriodes' => $availablePeriodes,
             'permissions' => [
                 'view_all' => $user->hasPermission('report.view_all'),
                 'export' => $user->hasPermission('report.export'),
@@ -349,7 +473,7 @@ class ReportController extends Controller
 
         $pendingItems = ReportService::getPendingItemsReport();
 
-        return view('reports.pending-items', [
+        return view('report.pending-items', [
             'pendingItems' => $pendingItems,
             'permissions' => [
                 'view_all' => $user->hasPermission('report.view_all'),
@@ -502,8 +626,8 @@ class ReportController extends Controller
                 $data = ReportService::getDashboardStatistics($startDate, $endDate, $divisiId);
                 break;
             case 'budget_realization':
-                $tahun = $request->tahun ?? date('Y');
-                $data = ReportService::getBudgetRealization($tahun, $divisiId);
+                $periodeAnggaranId = $request->periode_anggaran_id;
+                $data = ReportService::getBudgetRealization($periodeAnggaranId, $divisiId);
                 break;
             case 'approval_performance':
                 $data = ReportService::getApprovalPerformance($startDate, $endDate);

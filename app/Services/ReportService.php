@@ -18,26 +18,52 @@ class ReportService
     /**
      * Get comprehensive dashboard statistics
      */
-    public static function getDashboardStatistics($startDate = null, $endDate = null, $divisiId = null)
+    public static function getDashboardStatistics($periodeAnggaranId = null, $divisiId = null)
     {
         $queryPengajuan = PengajuanDana::query();
         $queryPencairan = PencairanDana::query();
         $queryLpj = LaporanPertanggungJawaban::query();
         $queryRefund = Refund::query();
 
-        // Apply date filters
-        if ($startDate) {
-            $queryPengajuan->whereDate('created_at', '>=', $startDate);
-            $queryPencairan->whereDate('tanggal_pencairan', '>=', $startDate);
-            $queryLpj->whereDate('tanggal_lpj', '>=', $startDate);
-            $queryRefund->whereDate('created_at', '>=', $startDate);
-        }
+        // Apply periode anggaran filter through program_kerja / sub_program
+        if ($periodeAnggaranId) {
+            $queryPengajuan->where(function ($q) use ($periodeAnggaranId) {
+                $q->whereHas('programKerja', function ($subQ) use ($periodeAnggaranId) {
+                    $subQ->where('periode_anggaran_id', $periodeAnggaranId);
+                })->orWhereHas('subProgram', function ($subQ) use ($periodeAnggaranId) {
+                    $subQ->where('periode_anggaran_id', $periodeAnggaranId);
+                });
+            });
 
-        if ($endDate) {
-            $queryPengajuan->whereDate('created_at', '<=', $endDate);
-            $queryPencairan->whereDate('tanggal_pencairan', '<=', $endDate);
-            $queryLpj->whereDate('tanggal_lpj', '<=', $endDate);
-            $queryRefund->whereDate('created_at', '<=', $endDate);
+            $queryPencairan->whereHas('pengajuanDana', function ($q) use ($periodeAnggaranId) {
+                $q->where(function ($subQ) use ($periodeAnggaranId) {
+                    $subQ->whereHas('programKerja', function ($ss) use ($periodeAnggaranId) {
+                        $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                    })->orWhereHas('subProgram', function ($ss) use ($periodeAnggaranId) {
+                        $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                    });
+                });
+            });
+
+            $queryLpj->whereHas('pengajuanDana', function ($q) use ($periodeAnggaranId) {
+                $q->where(function ($subQ) use ($periodeAnggaranId) {
+                    $subQ->whereHas('programKerja', function ($ss) use ($periodeAnggaranId) {
+                        $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                    })->orWhereHas('subProgram', function ($ss) use ($periodeAnggaranId) {
+                        $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                    });
+                });
+            });
+
+            $queryRefund->whereHas('pengajuanDana', function ($q) use ($periodeAnggaranId) {
+                $q->where(function ($subQ) use ($periodeAnggaranId) {
+                    $subQ->whereHas('programKerja', function ($ss) use ($periodeAnggaranId) {
+                        $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                    })->orWhereHas('subProgram', function ($ss) use ($periodeAnggaranId) {
+                        $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                    });
+                });
+            });
         }
 
         // Apply divisi filter
@@ -54,13 +80,32 @@ class ReportService
             });
         }
 
+        // Get counts by status
+        $pengajuanByStatus = (clone $queryPengajuan)->get()->groupBy('status')->map->count();
+        $lpjByStatus = (clone $queryLpj)->get()->groupBy('status')->map->count();
+
         return [
+            'total_pengajuan' => $queryPengajuan->count(),
+            'total_nominal_pengajuan' => (clone $queryPengajuan)->sum('total_pengajuan'),
+            'pengajuan_approved' => $pengajuanByStatus['selesai'] ?? 0,
+            'pengajuan_pending' => $pengajuanByStatus['menunggu_lpj'] ?? 0,
+            'pengajuan_rejected' => $pengajuanByStatus['ditolak'] ?? 0,
+
+            'total_pencairan' => $queryPencairan->count(),
+            'total_nominal_pencairan' => $queryPencairan->sum('jumlah_pencairan'),
+
+            'total_lpj' => $queryLpj->count(),
+            'lpj_pending' => $lpjByStatus['pending'] ?? 0,
+            'lpj_approved' => $lpjByStatus['approved'] ?? 0,
+
+            'total_refund' => $queryRefund->count(),
+            'total_nominal_refund' => $queryRefund->sum('jumlah_refund'),
+
+            // Nested data for detailed analysis
             'pengajuan' => [
-                'total' => $queryPengajuan->count(),
-                'total_nominal' => $queryPengajuan->sum('total_pengajuan'),
-                'by_status' => $queryPengajuan->get()->groupBy('status')->map->count(),
-                'by_jenis' => $queryPengajuan->get()->groupBy('jenis_pengajuan')->map->count(),
-                'by_divisi' => $queryPengajuan->with('divisi')->get()
+                'by_status' => $pengajuanByStatus,
+                'by_jenis' => (clone $queryPengajuan)->get()->groupBy('jenis_pengajuan')->map->count(),
+                'by_divisi' => (clone $queryPengajuan)->with('divisi')->get()
                     ->groupBy('divisi.nama_divisi')
                     ->map(function ($group) {
                         return [
@@ -70,22 +115,17 @@ class ReportService
                     }),
             ],
             'pencairan' => [
-                'total' => $queryPencairan->count(),
-                'total_nominal' => $queryPencairan->sum('total_pencairan'),
-                'by_status' => $queryPencairan->get()->groupBy('status')->map->count(),
-                'by_cara' => $queryPencairan->get()->groupBy('cara_pencairan')->map->count(),
+                'by_status' => (clone $queryPencairan)->get()->groupBy('status')->map->count(),
+                'by_metode' => (clone $queryPencairan)->get()->groupBy('metode_pencairan')->map->count(),
             ],
             'lpj' => [
-                'total' => $queryLpj->count(),
-                'total_digunakan' => $queryLpj->sum('total_digunakan'),
-                'total_sisa' => $queryLpj->sum('sisa_dana'),
-                'by_status' => $queryLpj->get()->groupBy('status')->map->count(),
+                'total_digunakan' => (clone $queryLpj)->sum('total_digunakan'),
+                'total_sisa' => (clone $queryLpj)->sum('sisa_dana'),
+                'by_status' => $lpjByStatus,
             ],
             'refund' => [
-                'total' => $queryRefund->count(),
-                'total_nominal' => $queryRefund->sum('nominal_refund'),
-                'by_jenis' => $queryRefund->get()->groupBy('jenis_refund')->map->count(),
-                'by_status' => $queryRefund->get()->groupBy('status')->map->count(),
+                'by_jenis' => (clone $queryRefund)->get()->groupBy('jenis_refund')->map->count(),
+                'by_status' => (clone $queryRefund)->get()->groupBy('status')->map->count(),
             ],
         ];
     }
@@ -93,52 +133,83 @@ class ReportService
     /**
      * Get budget realization report
      */
-    public static function getBudgetRealization($tahun = null, $divisiId = null)
+    public static function getBudgetRealization($periodeAnggaranId = null, $divisiId = null)
     {
-        $tahun = $tahun ?? now()->year;
+        // Start with all divisis (or specific divisi if filtered)
+        $divisis = Divisi::when($divisiId, function ($q) use ($divisiId) {
+            return $q->where('id', $divisiId);
+        })->get();
 
-        $query = PenetapanPagu::with(['divisi', 'programKerjas'])
-            ->where('tahun', $tahun);
-
-        if ($divisiId) {
-            $query->where('divisi_id', $divisiId);
-        }
-
-        $paguPerDivisi = $query->get();
+        // Get PenetapanPagu for the periode (indexed by divisi_id for easy lookup)
+        $paguMap = PenetapanPagu::when($periodeAnggaranId, function ($q) use ($periodeAnggaranId) {
+                return $q->where('periode_anggaran_id', $periodeAnggaranId);
+            })
+            ->when($divisiId, function ($q) use ($divisiId) {
+                return $q->where('divisi_id', $divisiId);
+            })
+            ->get()
+            ->keyBy('divisi_id');
 
         $report = [];
 
-        foreach ($paguPerDivisi as $pagu) {
-            // Get total pengajuan for this divisi
-            $totalPengajuan = PengajuanDana::where('divisi_id', $pagu->divisi_id)
-                ->whereYear('created_at', $tahun)
+        foreach ($divisis as $divisi) {
+            $pagu = $paguMap->get($divisi->id);
+            $jumlahPagu = $pagu ? $pagu->jumlah_pagu : 0;
+
+            // Get total pengajuan for this divisi and periode
+            $totalPengajuan = PengajuanDana::where('divisi_id', $divisi->id)
                 ->where('status', '!=', 'ditolak')
+                ->when($periodeAnggaranId, function ($q) use ($periodeAnggaranId) {
+                    return $q->where(function ($subQ) use ($periodeAnggaranId) {
+                        $subQ->whereHas('programKerja', function ($ss) use ($periodeAnggaranId) {
+                            $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                        })->orWhereHas('subProgram', function ($ss) use ($periodeAnggaranId) {
+                            $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                        });
+                    });
+                })
                 ->sum('total_pengajuan');
 
-            // Get total pencairan for this divisi
-            $totalPencairan = PencairanDana::whereHas('pengajuanDana', function ($q) use ($pagu, $tahun) {
-                $q->where('divisi_id', $pagu->divisi_id)
-                  ->whereYear('created_at', $tahun);
-            })->sum('total_pencairan');
+            // Get total pencairan for this divisi and periode
+            $totalPencairan = PencairanDana::whereHas('pengajuanDana', function ($q) use ($divisi, $periodeAnggaranId) {
+                $q->where('divisi_id', $divisi->id)
+                  ->when($periodeAnggaranId, function ($subQ) use ($periodeAnggaranId) {
+                      return $subQ->where(function ($ss) use ($periodeAnggaranId) {
+                          $ss->whereHas('programKerja', function ($sss) use ($periodeAnggaranId) {
+                              $sss->where('periode_anggaran_id', $periodeAnggaranId);
+                          })->orWhereHas('subProgram', function ($sss) use ($periodeAnggaranId) {
+                              $sss->where('periode_anggaran_id', $periodeAnggaranId);
+                          });
+                      });
+                  });
+            })->sum('jumlah_pencairan');
 
-            // Get total LPJ used
-            $totalDigunakan = LaporanPertanggungJawaban::whereHas('pengajuanDana', function ($q) use ($pagu, $tahun) {
-                $q->where('divisi_id', $pagu->divisi_id)
-                  ->whereYear('created_at', $tahun);
+            // Get total LPJ used for this divisi and periode
+            $totalDigunakan = LaporanPertanggungJawaban::whereHas('pengajuanDana', function ($q) use ($divisi, $periodeAnggaranId) {
+                $q->where('divisi_id', $divisi->id)
+                  ->when($periodeAnggaranId, function ($subQ) use ($periodeAnggaranId) {
+                      return $subQ->where(function ($ss) use ($periodeAnggaranId) {
+                          $ss->whereHas('programKerja', function ($sss) use ($periodeAnggaranId) {
+                              $sss->where('periode_anggaran_id', $periodeAnggaranId);
+                          })->orWhereHas('subProgram', function ($sss) use ($periodeAnggaranId) {
+                              $sss->where('periode_anggaran_id', $periodeAnggaranId);
+                          });
+                      });
+                  });
             })->sum('total_digunakan');
 
             $report[] = [
-                'divisi' => $pagu->divisi->nama_divisi,
-                'pagu' => $pagu->jumlah_pagu,
+                'divisi' => $divisi->nama_divisi,
+                'pagu' => $jumlahPagu,
                 'total_pengajuan' => $totalPengajuan,
                 'total_pencairan' => $totalPencairan,
                 'total_digunakan' => $totalDigunakan,
-                'sisa_pagu' => $pagu->jumlah_pagu - $totalPengajuan,
-                'persentase_pengajuan' => $pagu->jumlah_pagu > 0
-                    ? ($totalPengajuan / $pagu->jumlah_pagu) * 100
+                'sisa_pagu' => $jumlahPagu - $totalPengajuan,
+                'persentase_pengajuan' => $jumlahPagu > 0
+                    ? ($totalPengajuan / $jumlahPagu) * 100
                     : 0,
-                'persentase_pencairan' => $pagu->jumlah_pagu > 0
-                    ? ($totalPencairan / $pagu->jumlah_pagu) * 100
+                'persentase_pencairan' => $jumlahPagu > 0
+                    ? ($totalPencairan / $jumlahPagu) * 100
                     : 0,
                 'persentase_realisasi' => $totalPengajuan > 0
                     ? ($totalDigunakan / $totalPengajuan) * 100
@@ -152,44 +223,57 @@ class ReportService
     /**
      * Get monthly trend report
      */
-    public static function getMonthlyTrend($tahun = null, $divisiId = null)
+    public static function getMonthlyTrend($tahun = null, $divisiId = null, $periodeAnggaranId = null)
     {
         $tahun = $tahun ?? now()->year;
 
         $months = [];
         for ($i = 1; $i <= 12; $i++) {
             $month = Carbon::create($tahun, $i, 1);
+
+            // Build query for pengajuan
+            $pengajuanQuery = PengajuanDana::whereYear('created_at', $tahun)
+                ->whereMonth('created_at', $i)
+                ->when($divisiId, function ($q) use ($divisiId) {
+                    return $q->where('divisi_id', $divisiId);
+                })
+                ->when($periodeAnggaranId, function ($q) use ($periodeAnggaranId) {
+                    return $q->where(function ($subQ) use ($periodeAnggaranId) {
+                        $subQ->whereHas('programKerja', function ($ss) use ($periodeAnggaranId) {
+                            $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                        })->orWhereHas('subProgram', function ($ss) use ($periodeAnggaranId) {
+                            $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                        });
+                    });
+                });
+
+            // Build query for pencairan
+            $pencairanQuery = PencairanDana::whereYear('tanggal_pencairan', $tahun)
+                ->whereMonth('tanggal_pencairan', $i)
+                ->when($divisiId, function ($q) use ($divisiId) {
+                    return $q->whereHas('pengajuanDana', function ($subQ) use ($divisiId) {
+                        return $subQ->where('divisi_id', $divisiId);
+                    });
+                })
+                ->when($periodeAnggaranId, function ($q) use ($periodeAnggaranId) {
+                    return $q->whereHas('pengajuanDana', function ($subQ) use ($periodeAnggaranId) {
+                        return $subQ->where(function ($ss) use ($periodeAnggaranId) {
+                            $ss->whereHas('programKerja', function ($sss) use ($periodeAnggaranId) {
+                                $sss->where('periode_anggaran_id', $periodeAnggaranId);
+                            })->orWhereHas('subProgram', function ($sss) use ($periodeAnggaranId) {
+                                $sss->where('periode_anggaran_id', $periodeAnggaranId);
+                            });
+                        });
+                    });
+                });
+
             $months[] = [
                 'month' => $month->format('Y-m'),
                 'month_name' => $month->format('F'),
-                'pengajuan_count' => PengajuanDana::whereYear('created_at', $tahun)
-                    ->whereMonth('created_at', $i)
-                    ->when($divisiId, function ($q) use ($divisiId) {
-                        return $q->where('divisi_id', $divisiId);
-                    })
-                    ->count(),
-                'pengajuan_total' => PengajuanDana::whereYear('created_at', $tahun)
-                    ->whereMonth('created_at', $i)
-                    ->when($divisiId, function ($q) use ($divisiId) {
-                        return $q->where('divisi_id', $divisiId);
-                    })
-                    ->sum('total_pengajuan'),
-                'pencairan_count' => PencairanDana::whereYear('tanggal_pencairan', $tahun)
-                    ->whereMonth('tanggal_pencairan', $i)
-                    ->when($divisiId, function ($q) use ($divisiId) {
-                        return $q->whereHas('pengajuanDana', function ($subQ) use ($divisiId) {
-                            return $subQ->where('divisi_id', $divisiId);
-                        });
-                    })
-                    ->count(),
-                'pencairan_total' => PencairanDana::whereYear('tanggal_pencairan', $tahun)
-                    ->whereMonth('tanggal_pencairan', $i)
-                    ->when($divisiId, function ($q) use ($divisiId) {
-                        return $q->whereHas('pengajuanDana', function ($subQ) use ($divisiId) {
-                            return $subQ->where('divisi_id', $divisiId);
-                        });
-                    })
-                    ->sum('total_pencairan'),
+                'pengajuan_count' => (clone $pengajuanQuery)->count(),
+                'pengajuan_total' => (clone $pengajuanQuery)->sum('total_pengajuan'),
+                'pencairan_count' => (clone $pencairanQuery)->count(),
+                'pencairan_total' => (clone $pencairanQuery)->sum('jumlah_pencairan'),
             ];
         }
 
@@ -253,27 +337,60 @@ class ReportService
     /**
      * Get division comparison report
      */
-    public static function getDivisionComparison($tahun = null)
+    public static function getDivisionComparison($tahun = null, $periodeAnggaranId = null)
     {
         $tahun = $tahun ?? now()->year;
 
-        $divisis = Divisi::with(['pengajuanDan' => function ($q) use ($tahun) {
-            $q->whereYear('created_at', $tahun);
+        // Build base query for pengajuan
+        $pengajuanQuery = PengajuanDana::whereYear('created_at', $tahun)
+            ->when($periodeAnggaranId, function ($q) use ($periodeAnggaranId) {
+                return $q->where(function ($subQ) use ($periodeAnggaranId) {
+                    $subQ->whereHas('programKerja', function ($ss) use ($periodeAnggaranId) {
+                        $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                    })->orWhereHas('subProgram', function ($ss) use ($periodeAnggaranId) {
+                        $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                    });
+                });
+            });
+
+        // Get all divisis with their pengajuan
+        $divisis = Divisi::with(['pengajuanDana' => function ($q) use ($tahun, $periodeAnggaranId) {
+            $q->whereYear('created_at', $tahun)
+                ->when($periodeAnggaranId, function ($query) use ($periodeAnggaranId) {
+                    return $query->where(function ($subQ) use ($periodeAnggaranId) {
+                        $subQ->whereHas('programKerja', function ($ss) use ($periodeAnggaranId) {
+                            $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                        })->orWhereHas('subProgram', function ($ss) use ($periodeAnggaranId) {
+                            $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                        });
+                    });
+                });
         }])->get();
 
         $comparison = [];
 
         foreach ($divisis as $divisi) {
-            $pengajuanCount = $divisi->pengajuanDan->count();
-            $totalPengajuan = $divisi->pengajuanDan->sum('total_pengajuan');
-            $approvedCount = $divisi->pengajuanDan->where('status', 'disetujui')->count();
-            $rejectedCount = $divisi->pengajuanDan->where('status', 'ditolak')->count();
+            $pengajuanCount = $divisi->pengajuanDana->count();
+            $totalPengajuan = $divisi->pengajuanDana->sum('total_pengajuan');
+            $approvedCount = $divisi->pengajuanDana->where('status', 'disetujui')->count();
+            $rejectedCount = $divisi->pengajuanDana->where('status', 'ditolak')->count();
 
-            // Get pencairan data
-            $pencairanTotal = PencairanDana::whereHas('pengajuanDana', function ($q) use ($divisi, $tahun) {
+            // Get pencairan data with periode filter
+            $pencairanQuery = PencairanDana::whereHas('pengajuanDana', function ($q) use ($divisi, $tahun, $periodeAnggaranId) {
                 $q->where('divisi_id', $divisi->id)
-                  ->whereYear('created_at', $tahun);
-            })->sum('total_pencairan');
+                  ->whereYear('created_at', $tahun)
+                  ->when($periodeAnggaranId, function ($query) use ($periodeAnggaranId) {
+                      return $query->where(function ($subQ) use ($periodeAnggaranId) {
+                          $subQ->whereHas('programKerja', function ($ss) use ($periodeAnggaranId) {
+                              $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                          })->orWhereHas('subProgram', function ($ss) use ($periodeAnggaranId) {
+                              $ss->where('periode_anggaran_id', $periodeAnggaranId);
+                          });
+                      });
+                  });
+            });
+
+            $pencairanTotal = $pencairanQuery->sum('jumlah_pencairan');
 
             $comparison[] = [
                 'divisi' => $divisi->nama_divisi,
@@ -310,7 +427,7 @@ class ReportService
         $tahun = $tahun ?? now()->year;
 
         $pengajuanByJenis = PengajuanDana::whereYear('created_at', $tahun)
-            ->with(['pencairanDana', 'laporanPertanggungJawaban'])
+            ->with(['pencairanDana', 'laporanPertanggungJawabans'])
             ->get()
             ->groupBy('jenis_pengajuan');
 
@@ -319,10 +436,10 @@ class ReportService
         foreach ($pengajuanByJenis as $jenis => $pengajuans) {
             $totalPengajuan = $pengajuans->sum('total_pengajuan');
             $totalPencairan = $pengajuans->sum(function ($p) {
-                return $p->pencairanDana?->total_pencairan ?? 0;
+                return $p->pencairanDana?->jumlah_pencairan ?? 0;
             });
             $totalDigunakan = $pengajuans->sum(function ($p) {
-                return $p->laporanPertanggungJawaban?->total_digunakan ?? 0;
+                return $p->laporanPertanggungJawabans?->first()?->total_digunakan ?? 0;
             });
             $avgProcessingTime = $pengajuans->filter(function ($p) {
                 return $p->approved_at && $p->created_at;
@@ -354,18 +471,15 @@ class ReportService
     /**
      * Generate executive summary report
      */
-    public static function getExecutiveSummary($tahun = null)
+    public static function getExecutiveSummary($tahun = null, $periodeAnggaranId = null)
     {
         $tahun = $tahun ?? now()->year;
 
-        $stats = self::getDashboardStatistics(
-            Carbon::create($tahun, 1, 1),
-            Carbon::create($tahun, 12, 31)
-        );
+        $stats = self::getDashboardStatistics($periodeAnggaranId);
 
         $budgetRealization = self::getBudgetRealization($tahun);
-        $monthlyTrend = self::getMonthlyTrend($tahun);
-        $divisionComparison = self::getDivisionComparison($tahun);
+        $monthlyTrend = self::getMonthlyTrend($tahun, null, $periodeAnggaranId);
+        $divisionComparison = self::getDivisionComparison($tahun, $periodeAnggaranId);
         $approvalPerformance = self::getApprovalPerformance(
             Carbon::create($tahun, 1, 1),
             Carbon::create($tahun, 12, 31)
@@ -375,11 +489,11 @@ class ReportService
             'tahun' => $tahun,
             'generated_at' => now()->format('Y-m-d H:i:s'),
             'key_metrics' => [
-                'total_pengajuan' => $stats['pengajuan']['total'],
-                'total_nominal_pengajuan' => $stats['pengajuan']['total_nominal'],
-                'total_pencairan' => $stats['pencairan']['total'],
-                'total_nominal_pencairan' => $stats['pencairan']['total_nominal'],
-                'approval_rate' => $stats['pengajuan']['by_status']['disetujui'] ?? 0,
+                'total_pengajuan' => $stats['total_pengajuan'],
+                'total_nominal_pengajuan' => $stats['total_nominal_pengajuan'],
+                'total_pencairan' => $stats['total_pencairan'],
+                'total_nominal_pencairan' => $stats['total_nominal_pencairan'],
+                'approval_rate' => $stats['pengajuan_approved'] ?? 0,
                 'avg_approval_time' => $approvalPerformance['avg_approval_time'],
             ],
             'budget_realization' => $budgetRealization,
@@ -397,8 +511,7 @@ class ReportService
         switch ($type) {
             case 'dashboard':
                 return self::getDashboardStatistics(
-                    $filters['start_date'] ?? null,
-                    $filters['end_date'] ?? null,
+                    $filters['periode_anggaran_id'] ?? null,
                     $filters['divisi_id'] ?? null
                 );
 
@@ -411,17 +524,20 @@ class ReportService
             case 'monthly_trend':
                 return self::getMonthlyTrend(
                     $filters['tahun'] ?? null,
-                    $filters['divisi_id'] ?? null
+                    $filters['divisi_id'] ?? null,
+                    $filters['periode_anggaran_id'] ?? null
                 );
 
             case 'division_comparison':
                 return self::getDivisionComparison(
-                    $filters['tahun'] ?? null
+                    $filters['tahun'] ?? null,
+                    $filters['periode_anggaran_id'] ?? null
                 );
 
             case 'executive_summary':
                 return self::getExecutiveSummary(
-                    $filters['tahun'] ?? null
+                    $filters['tahun'] ?? null,
+                    $filters['periode_anggaran_id'] ?? null
                 );
 
             default:
@@ -432,17 +548,20 @@ class ReportService
     /**
      * Get high value transactions report
      */
-    public static function getHighValueTransactions($threshold = 100000000, $startDate = null, $endDate = null)
+    public static function getHighValueTransactions($threshold = 100000000, $periodeAnggaranId = null)
     {
         $query = PengajuanDana::with(['divisi', 'createdBy', 'approvals.approver'])
             ->where('total_pengajuan', '>=', $threshold);
 
-        if ($startDate) {
-            $query->whereDate('created_at', '>=', $startDate);
-        }
-
-        if ($endDate) {
-            $query->whereDate('created_at', '<=', $endDate);
+        // Apply periode anggaran filter through program_kerja / sub_program
+        if ($periodeAnggaranId) {
+            $query->where(function ($q) use ($periodeAnggaranId) {
+                $q->whereHas('programKerja', function ($subQ) use ($periodeAnggaranId) {
+                    $subQ->where('periode_anggaran_id', $periodeAnggaranId);
+                })->orWhereHas('subProgram', function ($subQ) use ($periodeAnggaranId) {
+                    $subQ->where('periode_anggaran_id', $periodeAnggaranId);
+                });
+            });
         }
 
         return $query->orderBy('total_pengajuan', 'desc')->get();
@@ -464,12 +583,10 @@ class ReportService
                 ->orderBy('tanggal_pencairan', 'asc')
                 ->get(),
 
-            'overdue_lpj' => LaporanPertanggungJawaban::with(['pengajuanDana.divisi'])
-                ->whereHas('pengajuanDana', function ($q) {
-                    $q->where('status', 'dicairkan')
-                      ->where('dicairkan_at', '<', now()->subDays(30));
-                })
-                ->whereDoesntHave('laporanPertanggungJawaban')
+            'overdue_lpj' => PengajuanDana::with(['divisi'])
+                ->where('status', 'dicairkan')
+                ->where('dicairkan_at', '<', now()->subDays(30))
+                ->whereDoesntHave('laporanPertanggungJawabans')
                 ->get(),
 
             'pending_refund' => Refund::with(['pengajuanDana.divisi'])

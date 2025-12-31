@@ -6,7 +6,7 @@
                 <p class="text-secondary-600 mt-1">Kelola LPJ untuk pencairan dana yang telah dilakukan</p>
             </div>
             @if(auth()->user()->hasAnyRole(['kepala_divisi', 'staff_divisi']))
-                <a href="{{ route('lpj.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
+                <a href="{{ route('lpj.select-pengajuan') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -18,55 +18,58 @@
 
     <div class="py-8">
         <!-- Quick Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-2xl shadow-soft p-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 text-white shadow-soft">
                 <div class="flex items-center justify-between">
                     <div>
-                        <div class="text-sm text-secondary-500 mb-1">Total LPJ</div>
-                        <div class="text-2xl font-bold text-secondary-900">{{ $statistics['total_count'] ?? 0 }}</div>
+                        <p class="text-blue-100 text-sm font-medium">Total LPJ</p>
+                        <p class="text-3xl font-bold mt-1">{{ $statistics['total_count'] ?? 0 }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl shadow-soft p-6">
+
+            <div class="bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl p-6 text-white shadow-soft">
                 <div class="flex items-center justify-between">
                     <div>
-                        <div class="text-sm text-secondary-500 mb-1">Menunggu Verifikasi</div>
-                        <div class="text-2xl font-bold text-amber-600">{{ $statistics['pending_count'] ?? 0 }}</div>
+                        <p class="text-amber-100 text-sm font-medium">Menunggu Verifikasi</p>
+                        <p class="text-3xl font-bold mt-1">{{ $statistics['pending_count'] ?? 0 }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl shadow-soft p-6">
+
+            <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-6 text-white shadow-soft">
                 <div class="flex items-center justify-between">
                     <div>
-                        <div class="text-sm text-secondary-500 mb-1">Disetujui</div>
-                        <div class="text-2xl font-bold text-green-600">{{ $statistics['approved_count'] ?? 0 }}</div>
+                        <p class="text-green-100 text-sm font-medium">Disetujui</p>
+                        <p class="text-3xl font-bold mt-1">{{ $statistics['approved_count'] ?? 0 }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl shadow-soft p-6">
+
+            <div class="bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-2xl p-6 text-white shadow-soft">
                 <div class="flex items-center justify-between">
                     <div>
-                        <div class="text-sm text-secondary-500 mb-1">Total Nilai</div>
-                        <div class="text-2xl font-bold text-primary-600">{{ formatRupiah($statistics['total_amount'] ?? 0) }}</div>
+                        <p class="text-indigo-100 text-sm font-medium">Total Nilai</p>
+                        <p class="text-2xl font-bold mt-1">{{ formatRupiah($statistics['total_amount'] ?? 0) }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                 </div>
@@ -76,17 +79,6 @@
         <!-- Filters -->
         <div class="bg-white rounded-2xl shadow-soft p-6 mb-6">
             <form method="GET" action="{{ route('lpj.index') }}" class="flex flex-wrap gap-4">
-                <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-medium text-secondary-700 mb-2">Status</label>
-                    <select name="status" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                        <option value="">Semua Status</option>
-                        <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
-                        <option value="submitted" {{ request('status') == 'submitted' ? 'selected' : '' }}>Menunggu Verifikasi</option>
-                        <option value="verified" {{ request('status') == 'verified' ? 'selected' : '' }}>Terverifikasi</option>
-                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
-                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
-                    </select>
-                </div>
                 <div class="flex-1 min-w-[200px]">
                     <label class="block text-sm font-medium text-secondary-700 mb-2">Periode</label>
                     <select name="periode_anggaran_id" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
@@ -109,112 +101,193 @@
                         </svg>
                         Filter
                     </button>
+                    @if(request()->anyFilled(['periode_anggaran_id', 'search']))
+                    <a href="{{ route('lpj.index') }}" class="px-4 py-2 border border-secondary-200 text-secondary-600 rounded-xl hover:bg-secondary-50 transition-all duration-200 ml-2">
+                        Reset
+                    </a>
+                    @endif
                 </div>
             </form>
         </div>
 
-        <!-- LPJ List -->
-        <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-secondary-50 border-b border-secondary-200">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Nomor</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Judul</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Divisi</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Periode</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-6 py-4 text-right text-xs font-semibold text-secondary-600 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-secondary-100">
-                        @forelse($lpjs ?? [] as $lpj)
-                            <tr class="hover:bg-secondary-50 transition-colors duration-150">
-                                <td class="px-6 py-4">
-                                    <span class="font-mono text-sm font-semibold text-primary-600">{{ $lpj->nomor_lpj }}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="font-medium text-secondary-900">{{ $lpj->judul_lpj }}</div>
-                                    <div class="text-sm text-secondary-500">{{ $lpj->pencairanDana->pengajuanDana->judul_pengajuan ?? '-' }}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="text-sm text-secondary-700">{{ $lpj->pencairanDana->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="text-sm text-secondary-700">{{ $lpj->periodeAnggaran->nama_periode ?? '-' }}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @if($lpj->status === 'draft')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
-                                            Draft
-                                        </span>
-                                    @elseif($lpj->status === 'submitted')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
-                                            Menunggu
-                                        </span>
-                                    @elseif($lpj->status === 'verified')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                                            Terverifikasi
-                                        </span>
-                                    @elseif($lpj->status === 'approved')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                                            Disetujui
-                                        </span>
-                                    @elseif($lpj->status === 'rejected')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                            Ditolak
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-sm text-secondary-600">
-                                    {{ \Carbon\Carbon::parse($lpj->tanggal_lpj)->format('d/m/Y') }}
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end space-x-2">
-                                        <a href="{{ route('lpj.show', $lpj) }}" class="p-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Lihat">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                        </a>
-                                        @if(in_array($lpj->status, ['draft', 'rejected']) && auth()->user()->can('update', $lpj))
-                                            <a href="{{ route('lpj.edit', $lpj) }}" class="p-2 text-secondary-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
-                                            </a>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center">
-                                        <svg class="w-16 h-16 text-secondary-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        <p class="text-secondary-500">Belum ada LPJ</p>
-                                        @if(auth()->user()->hasAnyRole(['kepala_divisi', 'staff_divisi']))
-                                            <a href="{{ route('lpj.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
-                                                Buat LPJ Baru
-                                            </a>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        <!-- Tabs -->
+        <div class="bg-white rounded-2xl shadow-soft overflow-hidden mb-6">
+            <div class="flex flex-wrap border-b border-secondary-200 overflow-x-auto">
+                <button onclick="showTab('draft')" id="tab-draft" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-slate-500 text-slate-600 bg-slate-50 transition-colors">
+                    <div class="flex items-center justify-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="hidden md:inline">Draft</span>
+                        <span class="bg-slate-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['draft'] ?? 0 }}</span>
+                    </div>
+                </button>
+                <button onclick="showTab('menunggu-verifikasi')" id="tab-menunggu-verifikasi" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-secondary-600 hover:bg-secondary-50 transition-colors">
+                    <div class="flex items-center justify-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="hidden md:inline">Menunggu Verifikasi</span>
+                        <span class="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['menunggu_verifikasi'] ?? 0 }}</span>
+                    </div>
+                </button>
+                <button onclick="showTab('approved')" id="tab-approved" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-secondary-600 hover:bg-secondary-50 transition-colors">
+                    <div class="flex items-center justify-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="hidden md:inline">Disetujui</span>
+                        <span class="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['approved'] ?? 0 }}</span>
+                    </div>
+                </button>
+                <button onclick="showTab('revisi')" id="tab-revisi" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-secondary-600 hover:bg-secondary-50 transition-colors">
+                    <div class="flex items-center justify-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span class="hidden md:inline">Revisi</span>
+                        <span class="bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['revisi'] ?? 0 }}</span>
+                    </div>
+                </button>
+                <button onclick="showTab('rejected')" id="tab-rejected" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-secondary-600 hover:bg-secondary-50 transition-colors">
+                    <div class="flex items-center justify-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="hidden md:inline">Ditolak</span>
+                        <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['rejected'] ?? 0 }}</span>
+                    </div>
+                </button>
             </div>
+        </div>
 
-            <!-- Pagination -->
-            @if(isset($lpjs) && $lpjs->hasPages())
-                <div class="bg-secondary-50 px-6 py-4 border-t border-secondary-200">
-                    {{ $lpjs->appends(request()->query())->links() }}
+        <!-- Tab Content: Draft -->
+        <div id="content-draft" class="tab-content">
+            @if($lpjsDraft->count() > 0)
+                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+                    @include('lpj.partials.table', ['lpjs' => $lpjsDraft])
+                </div>
+            @else
+                <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
+                    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-secondary-900 mb-2">Tidak Ada Draft</h3>
+                    <p class="text-secondary-500">LPJ draft akan ditampilkan di sini.</p>
                 </div>
             @endif
         </div>
+
+        <!-- Tab Content: Menunggu Verifikasi -->
+        <div id="content-menunggu-verifikasi" class="tab-content hidden">
+            @if($lpjsMenungguVerifikasi->count() > 0)
+                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+                    @include('lpj.partials.table', ['lpjs' => $lpjsMenungguVerifikasi])
+                </div>
+            @else
+                <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
+                    <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-secondary-900 mb-2">Tidak Ada LPJ Menunggu Verifikasi</h3>
+                    <p class="text-secondary-500">LPJ yang menunggu verifikasi akan ditampilkan di sini.</p>
+                </div>
+            @endif
+        </div>
+
+        <!-- Tab Content: Disetujui -->
+        <div id="content-approved" class="tab-content hidden">
+            @if($lpjsApproved->count() > 0)
+                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+                    @include('lpj.partials.table', ['lpjs' => $lpjsApproved])
+                </div>
+            @else
+                <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-secondary-900 mb-2">Belum Ada LPJ Disetujui</h3>
+                    <p class="text-secondary-500">LPJ yang disetujui akan ditampilkan di sini.</p>
+                </div>
+            @endif
+        </div>
+
+        <!-- Tab Content: Revisi -->
+        <div id="content-revisi" class="tab-content hidden">
+            @if($lpjsRevisi->count() > 0)
+                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+                    @include('lpj.partials.table', ['lpjs' => $lpjsRevisi])
+                </div>
+            @else
+                <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
+                    <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-secondary-900 mb-2">Tidak Ada LPJ Perlu Revisi</h3>
+                    <p class="text-secondary-500">LPJ yang perlu revisi akan ditampilkan di sini.</p>
+                </div>
+            @endif
+        </div>
+
+        <!-- Tab Content: Ditolak -->
+        <div id="content-rejected" class="tab-content hidden">
+            @if($lpjsRejected->count() > 0)
+                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+                    @include('lpj.partials.table', ['lpjs' => $lpjsRejected])
+                </div>
+            @else
+                <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
+                    <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-secondary-900 mb-2">Tidak Ada LPJ Ditolak</h3>
+                    <p class="text-secondary-500">LPJ yang ditolak akan ditampilkan di sini.</p>
+                </div>
+            @endif
+        </div>
+
+        <script>
+            function showTab(tabName) {
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(function(el) {
+                    el.classList.add('hidden');
+                });
+
+                // Remove active state from all tabs
+                document.querySelectorAll('[id^="tab-"]').forEach(function(el) {
+                    el.classList.remove('border-slate-500', 'border-amber-500', 'border-green-500', 'border-orange-500', 'border-red-500', 'text-slate-600', 'text-amber-600', 'text-green-600', 'text-orange-600', 'text-red-600', 'bg-slate-50', 'bg-amber-50', 'bg-green-50', 'bg-orange-50', 'bg-red-50');
+                    el.classList.add('border-transparent', 'text-secondary-600');
+                });
+
+                // Show selected tab content
+                document.getElementById('content-' + tabName).classList.remove('hidden');
+
+                // Set active state for selected tab
+                var activeTab = document.getElementById('tab-' + tabName);
+                activeTab.classList.remove('border-transparent', 'text-secondary-600');
+
+                if (tabName === 'draft') {
+                    activeTab.classList.add('border-slate-500', 'text-slate-600', 'bg-slate-50');
+                } else if (tabName === 'menunggu-verifikasi') {
+                    activeTab.classList.add('border-amber-500', 'text-amber-600', 'bg-amber-50');
+                } else if (tabName === 'approved') {
+                    activeTab.classList.add('border-green-500', 'text-green-600', 'bg-green-50');
+                } else if (tabName === 'revisi') {
+                    activeTab.classList.add('border-orange-500', 'text-orange-600', 'bg-orange-50');
+                } else if (tabName === 'rejected') {
+                    activeTab.classList.add('border-red-500', 'text-red-600', 'bg-red-50');
+                }
+            }
+        </script>
     </div>
 </x-app-layout>

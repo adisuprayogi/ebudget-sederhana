@@ -156,7 +156,7 @@
                         @elseif($refund->status === 'menunggu_approval') Menunggu Approval
                         @elseif($refund->status === 'approved') Disetujui
                         @elseif($refund->status === 'rejected') Ditolak
-                        @elseif($refund->status === 'processed') Diproses
+                        @elseif($refund->status === 'processed') Selesai
                         @endif
                     </span>
                 </div>
@@ -212,13 +212,12 @@
             </div>
         @endif
 
-        @if($refund->status === 'processed' && $refund->tanggal_transfer)
+        @if($refund->status === 'processed')
             <div class="section">
-                <div class="section-title">Informasi Proses</div>
-                <div class="info-item">
-                    <div class="info-label">Tanggal Transfer</div>
-                    <div class="info-value">{{ \Carbon\Carbon::parse($refund->tanggal_transfer)->format('d F Y') }}</div>
-                </div>
+                <div class="section-title">Refund Selesai</div>
+                <p style="color: #059669; font-size: 12px;">
+                    Refund telah disetujui dan selesai pada {{ \Carbon\Carbon::parse($refund->approved_at)->format('d F Y, H:i') }}
+                </p>
             </div>
         @endif
 

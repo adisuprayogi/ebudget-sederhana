@@ -9,24 +9,46 @@
     </x-slot>
 
     <div class="py-8">
-        <!-- Year Selector -->
+        <!-- Periode Anggaran Selector -->
         <div class="bg-white rounded-2xl shadow-soft p-6 mb-8">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="text-lg font-semibold text-secondary-900">Tahun Anggaran</h2>
-                    <p class="text-sm text-secondary-500">Pilih tahun untuk melihat laporan</p>
+            <form method="GET" action="{{ route('reports.index') }}">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-secondary-900">Periode Anggaran</h2>
+                        <p class="text-sm text-secondary-500">Pilih periode untuk melihat laporan</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        @if($availablePeriodes->isNotEmpty())
+                            <select name="periode_anggaran_id" class="px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                <option value="">-- Pilih Periode Anggaran --</option>
+                                @foreach($availablePeriodes as $periode)
+                                    @php
+                                        $isSelected = ($selectedPeriode && $selectedPeriode->id == $periode->id);
+                                        $isActive = ($activePeriode && $activePeriode->id == $periode->id);
+                                    @endphp
+                                    <option value="{{ $periode->id }}" {{ $isSelected ? 'selected' : '' }}>
+                                        {{ $periode->nama_periode }}
+                                        @if($isActive) <span class="text-xs text-primary-600">(Aktif)</span> @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                        @endif
+                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
+                            Filter
+                        </button>
+                        @if(request()->filled('periode_anggaran_id'))
+                            <a href="{{ route('reports.index') }}" class="px-4 py-2 border border-secondary-200 text-secondary-600 rounded-xl hover:bg-secondary-50 transition-colors">
+                                Reset
+                            </a>
+                        @endif
+                    </div>
                 </div>
-                <select id="yearSelector" class="px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                    @foreach(range(date('Y') - 5, date('Y')) as $year)
-                        <option value="{{ $year }}" {{ $year == $currentYear ? 'selected' : '' }}>{{ $year }}</option>
-                    @endforeach
-                </select>
-            </div>
+            </form>
         </div>
 
         <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow cursor-pointer" onclick="window.location.href='{{ route('reports.pengajuan') }}'">
+            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="text-sm text-secondary-500 mb-1">Total Pengajuan</div>
@@ -40,7 +62,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow cursor-pointer" onclick="window.location.href='{{ route('reports.pencairan') }}'">
+            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="text-sm text-secondary-500 mb-1">Total Pencairan</div>
@@ -54,7 +76,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow cursor-pointer" onclick="window.location.href='{{ route('reports.lpj') }}'">
+            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="text-sm text-secondary-500 mb-1">LPJ Masuk</div>
@@ -68,7 +90,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow cursor-pointer" onclick="window.location.href='{{ route('reports.refund') }}'">
+            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="text-sm text-secondary-500 mb-1">Total Refund</div>
@@ -88,7 +110,7 @@
         <h2 class="text-xl font-bold text-secondary-900 mb-6">Kategori Laporan</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Pengajuan Report -->
-            <a href="{{ route('reports.pengajuan') }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
+            <a href="{{ route('reports.pengajuan', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
                 <div class="flex items-start">
                     <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +125,7 @@
             </a>
 
             <!-- Pencairan Report -->
-            <a href="{{ route('reports.pencairan') }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
+            <a href="{{ route('reports.pencairan', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
                 <div class="flex items-start">
                     <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,7 +140,7 @@
             </a>
 
             <!-- LPJ Report -->
-            <a href="{{ route('reports.lpj') }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
+            <a href="{{ route('reports.lpj', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
                 <div class="flex items-start">
                     <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +155,7 @@
             </a>
 
             <!-- Refund Report -->
-            <a href="{{ route('reports.refund') }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
+            <a href="{{ route('reports.refund', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
                 <div class="flex items-start">
                     <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,7 +170,7 @@
             </a>
 
             <!-- Budget Realization -->
-            <a href="{{ route('reports.budget-realization') }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
+            <a href="{{ route('reports.budget-realization', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
                 <div class="flex items-start">
                     <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,7 +186,7 @@
 
             <!-- Executive Summary -->
             @if(auth()->user()->hasPermission('report.executive_summary'))
-                <a href="{{ route('reports.executive-summary') }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
+                <a href="{{ route('reports.executive-summary', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
                     <div class="flex items-start">
                         <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -15,7 +15,57 @@
     </x-slot>
 
     <div class="max-w-4xl mx-auto py-8">
-        @if($pencairan || $pengajuan)
+        @if($lpj)
+            <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-700">
+                            Membuat refund untuk LPJ: <strong>{{ $lpj->nomor_lpj }}</strong><br>
+                            Sisa Dana: <strong>{{ formatRupiah($lpj->sisa_dana) }}</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LPJ Detail Info -->
+            <div class="bg-white rounded-2xl shadow-soft p-6 mb-6">
+                <h3 class="text-lg font-semibold text-secondary-900 mb-4">Informasi LPJ</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-secondary-500">Nomor LPJ</p>
+                        <p class="font-mono font-semibold text-primary-600">{{ $lpj->nomor_lpj }}</p>
+                    </div>
+                    <div>
+                        <p class="text-secondary-500">Uraian Kegiatan</p>
+                        <p class="text-secondary-900">{{ $lpj->uraian_kegiatan }}</p>
+                    </div>
+                    @if($lpj->pencairanDana && $lpj->pencairanDana->pengajuanDana)
+                    <div>
+                        <p class="text-secondary-500">Divisi</p>
+                        <p class="text-secondary-900">{{ $lpj->pencairanDana->pengajuanDana->divisi->nama_divisi ?? '-' }}</p>
+                    </div>
+                    @endif
+                    <div>
+                        <p class="text-secondary-500">Total Pencairan</p>
+                        <p class="font-semibold text-secondary-900">{{ formatRupiah($lpj->pencairanDana->jumlah_pencairan ?? 0) }}</p>
+                    </div>
+                    <div>
+                        <p class="text-secondary-500">Dana Digunakan</p>
+                        <p class="font-semibold text-secondary-900">{{ formatRupiah($lpj->total_digunakan) }}</p>
+                    </div>
+                    <div>
+                        <p class="text-secondary-500">Sisa Dana</p>
+                        <p class="font-semibold text-green-600">{{ formatRupiah($lpj->sisa_dana) }}</p>
+                    </div>
+                </div>
+                <input type="hidden" name="lpj_id" value="{{ $lpj->id }}">
+            </div>
+        @elseif($pencairan || $pengajuan)
             <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
                 <div class="flex">
                     <div class="flex-shrink-0">
@@ -44,7 +94,16 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Referensi Pencairan Dana -->
-                    @if($pencairan)
+                    @if($lpj && $lpj->pencairanDana)
+                        <input type="hidden" name="pencairan_dana_id" value="{{ $lpj->pencairanDana->id }}">
+                        <div>
+                            <label class="block text-sm font-medium text-secondary-700 mb-2">Nomor Pencairan Dana</label>
+                            <div class="px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-secondary-700">
+                                <div class="font-mono font-semibold text-green-700">{{ $lpj->pencairanDana->nomor_pencairan }}</div>
+                                <div class="text-xs text-secondary-500 mt-1">{{ formatRupiah($lpj->pencairanDana->jumlah_pencairan) }}</div>
+                            </div>
+                        </div>
+                    @elseif($pencairan)
                         <input type="hidden" name="pencairan_dana_id" value="{{ $pencairan->id }}">
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-secondary-700 mb-2">Referensi Pencairan Dana</label>
@@ -61,7 +120,16 @@
                     @endif
 
                     <!-- Referensi Pengajuan Dana -->
-                    @if($pengajuan)
+                    @if($lpj && $lpj->pencairanDana && $lpj->pencairanDana->pengajuanDana)
+                        <input type="hidden" name="pengajuan_dana_id" value="{{ $lpj->pencairanDana->pengajuanDana->id }}">
+                        <div>
+                            <label class="block text-sm font-medium text-secondary-700 mb-2">Nomor Pengajuan Dana</label>
+                            <div class="px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-secondary-700">
+                                <div class="font-mono font-semibold text-green-700">{{ $lpj->pencairanDana->pengajuanDana->nomor_pengajuan }}</div>
+                                <div class="text-xs text-secondary-500 mt-1">{{ formatRupiah($lpj->pencairanDana->pengajuanDana->total_pengajuan) }}</div>
+                            </div>
+                        </div>
+                    @elseif($pengajuan)
                         <input type="hidden" name="pengajuan_dana_id" value="{{ $pengajuan->id }}">
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-secondary-700 mb-2">Referensi Pengajuan Dana</label>
@@ -106,8 +174,15 @@
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Jumlah Refund <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-secondary-500 font-medium">Rp</span>
-                            <input type="number" name="jumlah_refund" value="{{ old('jumlah_refund') }}" required min="0" step="0.01" class="w-full pl-12 pr-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="0">
+                            @if($lpj && $lpj->sisa_dana > 0)
+                                <input type="number" name="jumlah_refund" value="{{ old('jumlah_refund', $lpj->sisa_dana) }}" required min="0" max="{{ $lpj->sisa_dana }}" step="0.01" class="w-full pl-12 pr-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="0">
+                            @else
+                                <input type="number" name="jumlah_refund" value="{{ old('jumlah_refund') }}" required min="0" step="0.01" class="w-full pl-12 pr-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="0">
+                            @endif
                         </div>
+                        @if($lpj && $lpj->sisa_dana > 0)
+                            <p class="mt-2 text-xs text-secondary-500">Maksimal: {{ formatRupiah($lpj->sisa_dana) }}</p>
+                        @endif
                         @error('jumlah_refund')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -116,8 +191,33 @@
                     <!-- Rekening Tujuan -->
                     <div>
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Rekening Tujuan</label>
-                        <input type="text" name="rekening_tujuan" value="{{ old('rekening_tujuan') }}" placeholder="Nomor rekening tujuan pengembalian" class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                        @error('rekening_tujuan')
+                        <select name="rekening_perusahaan_id" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <option value="">Pilih Rekening Perusahaan</option>
+                            @foreach($rekeningPerusahaan ?? [] as $rekening)
+                                <option value="{{ $rekening->id }}" {{ old('rekening_perusahaan_id') == $rekening->id ? 'selected' : '' }} {{ $rekening->is_default ? 'selected' : '' }}>
+                                    {{ $rekening->bank->nama_bank }} - {{ $rekening->nomor_rekening_formatted }} - {{ $rekening->atas_nama }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('rekening_perusahaan_id')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Rekening Pengirim -->
+                    <div>
+                        <label class="block text-sm font-medium text-secondary-700 mb-2">Rekening Pengirim</label>
+                        <input type="text" name="rekening_pengirim" value="{{ old('rekening_pengirim') }}" placeholder="Nomor rekening pengirim" class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        @error('rekening_pengirim')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Nama Pengirim -->
+                    <div>
+                        <label class="block text-sm font-medium text-secondary-700 mb-2">Nama Pengirim</label>
+                        <input type="text" name="nama_pengirim" value="{{ old('nama_pengirim') }}" placeholder="Nama pemilik rekening pengirim" class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        @error('nama_pengirim')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -142,9 +242,10 @@
                                 <div class="flex text-sm text-secondary-600">
                                     <label class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none">
                                         <span>Pilih file</span>
-                                        <input type="file" name="bukti_transfer" class="sr-only" accept=".pdf,.jpg,.jpeg,.png">
+                                        <input type="file" name="bukti_transfer" id="bukti_transfer" class="sr-only" accept=".pdf,.jpg,.jpeg,.png" onchange="displayFileName(this)">
                                     </label>
                                 </div>
+                                <p id="file-name-display" class="text-sm text-secondary-700 font-medium mt-2 hidden"></p>
                                 <p class="text-xs text-secondary-500">PDF, JPG, PNG hingga 5MB</p>
                             </div>
                         </div>
@@ -169,4 +270,16 @@
             </div>
         </form>
     </div>
+
+    <script>
+        function displayFileName(input) {
+            const display = document.getElementById('file-name-display');
+            if (input.files && input.files[0]) {
+                display.textContent = 'File dipilih: ' + input.files[0].name;
+                display.classList.remove('hidden');
+            } else {
+                display.classList.add('hidden');
+            }
+        }
+    </script>
 </x-app-layout>

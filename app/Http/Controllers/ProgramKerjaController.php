@@ -18,11 +18,17 @@ class ProgramKerjaController extends Controller
     {
         $user = Auth::user();
 
-        // Get active periode anggaran
-        $activePeriode = PeriodeAnggaran::where('status', 'active')
-            ->where('tanggal_mulai_perencanaan_anggaran', '<=', now())
-            ->where('tanggal_selesai_perencanaan_anggaran', '>=', now())
-            ->first();
+        // Get active periode anggaran (default: yang aktif dan dalam fase penggunaan anggaran)
+        $activePeriode = PeriodeAnggaran::active()->first();
+
+        // If no periode in penggunaan phase, try to get periode in perencanaan phase
+        if (!$activePeriode) {
+            $activePeriode = PeriodeAnggaran::where('status', 'active')
+                ->get()
+                ->first(function ($periode) {
+                    return $periode->fase === 'perencangan';
+                });
+        }
 
         if (!$activePeriode) {
             return view('program-kerja.index', [
@@ -73,18 +79,24 @@ class ProgramKerjaController extends Controller
             }
         }
 
-        // Get active periode anggaran
-        $activePeriode = PeriodeAnggaran::where('status', 'active')
-            ->where('tanggal_mulai_perencanaan_anggaran', '<=', now())
-            ->where('tanggal_selesai_perencanaan_anggaran', '>=', now())
-            ->first();
+        // Get active periode anggaran (default: yang aktif dan dalam fase penggunaan anggaran)
+        $activePeriode = PeriodeAnggaran::active()->first();
+
+        // If no periode in penggunaan phase, try to get periode in perencanaan phase
+        if (!$activePeriode) {
+            $activePeriode = PeriodeAnggaran::where('status', 'active')
+                ->get()
+                ->first(function ($periode) {
+                    return $periode->fase === 'perencangan';
+                });
+        }
 
         if (!$activePeriode) {
             return back()->with('error', 'Tidak ada periode anggaran yang aktif saat ini.');
         }
 
         // Get program kerja for this divisi and active periode
-        $query = ProgramKerja::with(['subPrograms', 'detailAnggarans'])
+        $query = ProgramKerja::with(['subPrograms', 'detailAnggarans', 'periodeAnggaran'])
             ->where('divisi_id', $divisi->id)
             ->where('periode_anggaran_id', $activePeriode->id);
 
@@ -103,8 +115,11 @@ class ProgramKerjaController extends Controller
             ->paginate($request->per_page ?? 10)
             ->withQueryString();
 
-        // Calculate statistics
-        $totalPagu = $programKerjas->sum('pagu_anggaran');
+        // Calculate statistics - pagu is calculated from detail anggaran
+        $totalPagu = 0;
+        foreach ($programKerjas as $program) {
+            $totalPagu += $program->calculated_pagu ?? 0;
+        }
         $totalProgram = $programKerjas->count();
         $totalSubProgram = SubProgram::whereIn('program_kerja_id', $programKerjas->pluck('id'))->count();
 
@@ -136,11 +151,22 @@ class ProgramKerjaController extends Controller
             }
         }
 
-        // Get active periode anggaran
-        $activePeriode = PeriodeAnggaran::where('status', 'active')
-            ->where('tanggal_mulai_perencanaan_anggaran', '<=', now())
-            ->where('tanggal_selesai_perencanaan_anggaran', '>=', now())
-            ->firstOrFail();
+        // Get active periode anggaran in perencanaan phase
+        $activePeriodes = PeriodeAnggaran::where('status', 'active')->get();
+
+        // First try to find periode in perencanaan phase using the fase accessor
+        $activePeriode = $activePeriodes->first(function ($periode) {
+            return $periode->fase === 'perencangan';
+        });
+
+        // If not found in perencanaan phase, get the most recent active periode
+        if (!$activePeriode) {
+            $activePeriode = $activePeriodes->sortByDesc('tahun_anggaran')->first();
+        }
+
+        if (!$activePeriode) {
+            return back()->with('error', 'Tidak ada periode anggaran yang aktif saat ini.');
+        }
 
         return view('program-kerja.create', [
             'divisi' => $divisi,
@@ -163,11 +189,17 @@ class ProgramKerjaController extends Controller
             }
         }
 
-        // Get active periode anggaran
-        $activePeriode = PeriodeAnggaran::where('status', 'active')
-            ->where('tanggal_mulai_perencanaan_anggaran', '<=', now())
-            ->where('tanggal_selesai_perencanaan_anggaran', '>=', now())
-            ->firstOrFail();
+        // Get active periode anggaran in perencanaan phase
+        $activePeriodes = PeriodeAnggaran::where('status', 'active')->get();
+
+        // First try to find periode in perencanaan phase using the fase accessor
+        $activePeriode = $activePeriodes->first(function ($periode) {
+            return $periode->fase === 'perencangan';
+        });
+
+        if (!$activePeriode) {
+            return back()->with('error', 'Tidak dapat menambah program kerja. Periode anggaran harus dalam fase Perencanaan.');
+        }
 
         // Get penetapan pagu for this divisi and active periode
         $penetapanPagu = \App\Models\PenetapanPagu::where('divisi_id', $divisi->id)
@@ -178,16 +210,10 @@ class ProgramKerjaController extends Controller
             return back()->with('error', 'Belum ada penetapan pagu untuk divisi ini pada periode anggaran aktif.');
         }
 
-        // Calculate total existing program pagu
-        $totalExistingPagu = ProgramKerja::where('divisi_id', $divisi->id)
-            ->where('periode_anggaran_id', $activePeriode->id)
-            ->sum('pagu_anggaran');
-
         $validated = $request->validate([
             'kode_program' => 'required|string|max:50|unique:program_kerjas,kode_program',
             'nama_program' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'pagu_anggaran' => 'required|numeric|min:0',
             'target_output' => 'nullable|string|max:255',
             'tanggal_mulai' => 'nullable|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
@@ -196,23 +222,14 @@ class ProgramKerjaController extends Controller
             'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus setelah atau sama dengan tanggal mulai.',
         ]);
 
-        // Check if new program pagu will exceed penetapan pagu
-        if (($totalExistingPagu + $validated['pagu_anggaran']) > $penetapanPagu->jumlah_pagu) {
-            return back()
-                ->withInput()
-                ->with('error', sprintf(
-                    'Pagu anggaran melebihi pagu yang ditetapkan. Sisa pagu tersedia: %s',
-                    number_format($penetapanPagu->jumlah_pagu - $totalExistingPagu, 0, ',', '.')
-                ));
-        }
-
+        // pagu_anggaran is now calculated from detail anggaran, set to 0 initially
         ProgramKerja::create([
             'kode_program' => $validated['kode_program'],
             'nama_program' => $validated['nama_program'],
             'deskripsi' => $validated['deskripsi'] ?? null,
             'divisi_id' => $divisi->id,
             'periode_anggaran_id' => $activePeriode->id,
-            'pagu_anggaran' => $validated['pagu_anggaran'],
+            'pagu_anggaran' => 0, // Will be calculated from detail anggaran
             'target_output' => $validated['target_output'] ?? null,
             'status' => 'active',
             'tanggal_mulai' => $validated['tanggal_mulai'] ?? $activePeriode->tanggal_mulai_perencanaan_anggaran,
@@ -222,7 +239,7 @@ class ProgramKerjaController extends Controller
 
         return redirect()
             ->route('program-kerja.divisi-show', $divisi)
-            ->with('success', 'Program kerja berhasil dibuat.');
+            ->with('success', 'Program kerja berhasil dibuat. Silakan tambahkan Sub Program dan Detail Anggaran.');
     }
 
     /**
@@ -253,22 +270,20 @@ class ProgramKerjaController extends Controller
             'createdBy',
         ]);
 
-        // Calculate statistics
+        // Calculate statistics - pagu is now calculated from detail anggaran
+        $calculatedPagu = $programKerja->calculated_pagu ?? 0;
         $totalPaguSubProgram = $programKerja->subPrograms->sum('pagu_anggaran');
         $totalDetailAnggaran = $programKerja->detailAnggarans->sum('total_nominal');
-        $sisaPagu = $programKerja->pagu_anggaran - $totalDetailAnggaran;
-        $persentaseTerpakai = $programKerja->pagu_anggaran > 0
-            ? ($totalDetailAnggaran / $programKerja->pagu_anggaran) * 100
-            : 0;
+        $persentaseTerpakai = $programKerja->persentase_terpakai;
 
         return view('program-kerja.show', [
             'programKerja' => $programKerja,
             'divisi' => $divisi,
             'statistics' => [
-                'total_pagu' => $programKerja->pagu_anggaran,
+                'total_pagu' => $calculatedPagu,
                 'total_pagu_sub_program' => $totalPaguSubProgram,
                 'total_detail_anggaran' => $totalDetailAnggaran,
-                'sisa_pagu' => $sisaPagu,
+                'sisa_pagu' => $programKerja->sisa_pagu,
                 'persentase_terpakai' => round($persentaseTerpakai, 1),
                 'jumlah_sub_program' => $programKerja->subPrograms->count(),
                 'jumlah_detail_anggaran' => $programKerja->detailAnggarans->count(),
@@ -294,6 +309,12 @@ class ProgramKerjaController extends Controller
         // Verify program belongs to this divisi
         if ($programKerja->divisi_id !== $divisi->id) {
             abort(404, 'Program kerja tidak ditemukan di divisi ini.');
+        }
+
+        // Validate: Only allow edit when periode is in perencanaan phase
+        $periode = $programKerja->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat mengedit program kerja. Periode anggaran harus dalam fase Perencanaan.');
         }
 
         $programKerja->load('divisi', 'periodeAnggaran');
@@ -324,16 +345,16 @@ class ProgramKerjaController extends Controller
             abort(404, 'Program kerja tidak ditemukan di divisi ini.');
         }
 
-        // Get penetapan pagu for this divisi and periode
-        $penetapanPagu = \App\Models\PenetapanPagu::where('divisi_id', $divisi->id)
-            ->where('periode_anggaran_id', $programKerja->periode_anggaran_id)
-            ->first();
+        // Validate: Only allow update when periode is in perencanaan phase
+        $periode = $programKerja->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->withInput()->with('error', 'Tidak dapat mengubah program kerja. Periode anggaran harus dalam fase Perencanaan.');
+        }
 
         $validated = $request->validate([
             'kode_program' => 'required|string|max:50|unique:program_kerjas,kode_program,' . $programKerja->id,
             'nama_program' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'pagu_anggaran' => 'required|numeric|min:0',
             'target_output' => 'nullable|string|max:255',
             'status' => 'nullable|in:active,inactive,suspended',
             'tanggal_mulai' => 'nullable|date',
@@ -343,28 +364,11 @@ class ProgramKerjaController extends Controller
             'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus setelah atau sama dengan tanggal mulai.',
         ]);
 
-        // Check if updated pagu will exceed penetapan pagu
-        if ($penetapanPagu) {
-            $totalExistingPagu = ProgramKerja::where('divisi_id', $divisi->id)
-                ->where('periode_anggaran_id', $programKerja->periode_anggaran_id)
-                ->where('id', '!=', $programKerja->id)
-                ->sum('pagu_anggaran');
-
-            if (($totalExistingPagu + $validated['pagu_anggaran']) > $penetapanPagu->jumlah_pagu) {
-                return back()
-                    ->withInput()
-                    ->with('error', sprintf(
-                        'Pagu anggaran melebihi pagu yang ditetapkan. Sisa pagu tersedia: %s',
-                        number_format($penetapanPagu->jumlah_pagu - $totalExistingPagu, 0, ',', '.')
-                    ));
-            }
-        }
-
+        // pagu_anggaran is calculated from detail anggaran, don't update it here
         $programKerja->update([
             'kode_program' => $validated['kode_program'],
             'nama_program' => $validated['nama_program'],
             'deskripsi' => $validated['deskripsi'] ?? null,
-            'pagu_anggaran' => $validated['pagu_anggaran'],
             'target_output' => $validated['target_output'] ?? null,
             'status' => $validated['status'] ?? 'active',
             'tanggal_mulai' => $validated['tanggal_mulai'] ?? null,
@@ -394,6 +398,12 @@ class ProgramKerjaController extends Controller
         // Verify program belongs to this divisi
         if ($programKerja->divisi_id !== $divisi->id) {
             abort(404, 'Program kerja tidak ditemukan di divisi ini.');
+        }
+
+        // Validate: Only allow deletion when periode is in perencanaan phase
+        $periode = $programKerja->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat menghapus program kerja. Periode anggaran harus dalam fase Perencanaan.');
         }
 
         // Check if program has related data
@@ -460,6 +470,12 @@ class ProgramKerjaController extends Controller
             abort(404, 'Program kerja tidak ditemukan di divisi ini.');
         }
 
+        // Validate: Only allow status change when periode is in perencanaan phase
+        $periode = $programKerja->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat mengubah status program kerja. Periode anggaran harus dalam fase Perencanaan.');
+        }
+
         $programKerja->update(['status' => 'active']);
 
         return back()->with('success', 'Program kerja berhasil diaktifkan.');
@@ -485,6 +501,12 @@ class ProgramKerjaController extends Controller
             abort(404, 'Program kerja tidak ditemukan di divisi ini.');
         }
 
+        // Validate: Only allow status change when periode is in perencanaan phase
+        $periode = $programKerja->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat mengubah status program kerja. Periode anggaran harus dalam fase Perencanaan.');
+        }
+
         $programKerja->update(['status' => 'suspended']);
 
         return back()->with('success', 'Program kerja berhasil ditangguhkan.');
@@ -505,11 +527,18 @@ class ProgramKerjaController extends Controller
             }
         }
 
-        // Get active periode anggaran
-        $activePeriode = PeriodeAnggaran::where('status', 'active')
-            ->where('tanggal_mulai_perencanaan_anggaran', '<=', now())
-            ->where('tanggal_selesai_perencanaan_anggaran', '>=', now())
-            ->first();
+        // Get active periode anggaran in perencanaan phase
+        $activePeriodes = PeriodeAnggaran::where('status', 'active')->get();
+
+        // First try to find periode in perencanaan phase using the fase accessor
+        $activePeriode = $activePeriodes->first(function ($periode) {
+            return $periode->fase === 'perencangan';
+        });
+
+        // If not found in perencanaan phase, get the most recent active periode
+        if (!$activePeriode) {
+            $activePeriode = $activePeriodes->sortByDesc('tahun_anggaran')->first();
+        }
 
         if (!$activePeriode) {
             return response()->json([
@@ -528,7 +557,11 @@ class ProgramKerjaController extends Controller
             ->with(['subPrograms', 'detailAnggarans'])
             ->get();
 
-        $totalPagu = $programKerjas->sum('pagu_anggaran');
+        // Calculate total pagu from detail anggaran
+        $totalPagu = 0;
+        foreach ($programKerjas as $program) {
+            $totalPagu += $program->calculated_pagu ?? 0;
+        }
         $totalProgram = $programKerjas->count();
         $totalSubProgram = SubProgram::whereIn('program_kerja_id', $programKerjas->pluck('id'))->count();
 

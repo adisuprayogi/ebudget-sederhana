@@ -26,56 +26,102 @@ class PengajuanDanaController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $query = PengajuanDana::with(['divisi', 'programKerja', 'createdBy', 'approvals.approver']);
 
-        // Filter based on user role and permissions
-        if (!$user->hasPermission('pengajuan_dana.view_all')) {
-            if ($user->hasPermission('pengajuan_dana.view_divisi')) {
-                // Get accessible divisions through job positions
-                $accessibleDivisionIds = $user->divisionIds();
-                if (!empty($accessibleDivisionIds)) {
-                    $query->whereIn('divisi_id', $accessibleDivisionIds);
+        // Base query function with permission filters
+        $baseQuery = function ($status) use ($request, $user) {
+            $query = PengajuanDana::with(['divisi', 'programKerja', 'createdBy', 'approvals.approver']);
+
+            // Filter based on user role and permissions
+            if (!$user->hasPermission('pengajuan_dana.view_all')) {
+                if ($user->hasPermission('pengajuan_dana.view_divisi')) {
+                    // Get accessible divisions through job positions
+                    $accessibleDivisionIds = $user->divisionIds();
+                    if (!empty($accessibleDivisionIds)) {
+                        $query->whereIn('divisi_id', $accessibleDivisionIds);
+                    } else {
+                        // If no job positions assigned, only show own
+                        $query->where('created_by', $user->id);
+                    }
                 } else {
-                    // If no job positions assigned, only show own
                     $query->where('created_by', $user->id);
                 }
-            } else {
-                $query->where('created_by', $user->id);
             }
-        }
 
-        // Apply filters
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('nomor_pengajuan', 'like', "%{$search}%")
-                  ->orWhere('judul_pengajuan', 'like', "%{$search}%");
-            });
-        }
+            // Filter by status or status group
+            if (is_array($status)) {
+                $query->whereIn('status', $status);
+            } else {
+                $query->where('status', $status);
+            }
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+            // Apply filters
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('nomor_pengajuan', 'like', "%{$search}%")
+                      ->orWhere('judul_pengajuan', 'like', "%{$search}%");
+                });
+            }
 
-        if ($request->filled('jenis_pengajuan')) {
-            $query->where('jenis_pengajuan', $request->jenis_pengajuan);
-        }
+            if ($request->filled('jenis_pengajuan')) {
+                $query->where('jenis_pengajuan', $request->jenis_pengajuan);
+            }
 
-        if ($request->filled('divisi_id')) {
-            $query->where('divisi_id', $request->divisi_id);
-        }
+            if ($request->filled('divisi_id')) {
+                $query->where('divisi_id', $request->divisi_id);
+            }
 
-        if ($request->filled('tanggal_mulai')) {
-            $query->whereDate('created_at', '>=', $request->tanggal_mulai);
-        }
+            if ($request->filled('tanggal_mulai')) {
+                $query->whereDate('created_at', '>=', $request->tanggal_mulai);
+            }
 
-        if ($request->filled('tanggal_selesai')) {
-            $query->whereDate('created_at', '<=', $request->tanggal_selesai);
-        }
+            if ($request->filled('tanggal_selesai')) {
+                $query->whereDate('created_at', '<=', $request->tanggal_selesai);
+            }
 
-        $pengajuans = $query->orderBy('created_at', 'desc')
-            ->paginate($request->per_page ?? 15)
-            ->withQueryString();
+            return $query;
+        };
+
+        // Fetch data for each status group
+        $pengajuansDraft = $baseQuery('draft')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        $pengajuansMenungguApproval = $baseQuery('menunggu_approval')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        $pengajuansMenungguPencairan = $baseQuery('menunggu_pencairan')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        $pengajuansDicairkan = $baseQuery('cair')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        $pengajuansProses = $baseQuery(['menunggu_lpj', 'lpj_submitted'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        $pengajuansSelesai = $baseQuery(['lpj_disetujui', 'selesai', 'disetujui', 'approved'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        $pengajuansDitolak = $baseQuery(['ditolak', 'rejected', 'lpj_ditolak', 'refund_ditolak'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
+
+        $pengajuansCancelled = $baseQuery('cancelled')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($request->except('page'));
 
         // Calculate statistics based on user's access
         $statsQuery = PengajuanDana::query();
@@ -94,24 +140,41 @@ class PengajuanDanaController extends Controller
             }
         }
 
-        $statistics = [
-            'total' => $statsQuery->count(),
+        $stats = [
+            'draft' => (clone $statsQuery)->where('status', 'draft')->count(),
             'menunggu_approval' => (clone $statsQuery)->where('status', 'menunggu_approval')->count(),
-            'disetujui' => (clone $statsQuery)->whereIn('status', ['approved', 'disetujui'])->count(),
+            'menunggu_pencairan' => (clone $statsQuery)->where('status', 'menunggu_pencairan')->count(),
+            'dicairkan' => (clone $statsQuery)->where('status', 'cair')->count(),
+            'proses' => (clone $statsQuery)->whereIn('status', ['menunggu_lpj', 'lpj_submitted'])->count(),
+            'selesai' => (clone $statsQuery)->whereIn('status', ['lpj_disetujui', 'selesai', 'disetujui', 'approved'])->count(),
+            'ditolak' => (clone $statsQuery)->whereIn('status', ['ditolak', 'rejected', 'lpj_ditolak', 'refund_ditolak'])->count(),
+            'cancelled' => (clone $statsQuery)->where('status', 'cancelled')->count(),
+        ];
+
+        $statistics = [
+            'total' => array_sum($stats),
+            'menunggu_approval' => $stats['menunggu_approval'],
+            'disetujui' => $stats['selesai'],
             'total_nilai' => $statsQuery->sum('total_pengajuan'),
         ];
 
         // Get filter options
-        $statuses = PengajuanDana::select('status')->distinct()->pluck('status');
         $jenisPengajuans = PengajuanDana::select('jenis_pengajuan')->distinct()->pluck('jenis_pengajuan');
         $divisis = Divisi::orderBy('nama_divisi')->get();
 
         return view('pengajuan-dana.index', [
-            'pengajuans' => $pengajuans,
+            'pengajuansDraft' => $pengajuansDraft,
+            'pengajuansMenungguApproval' => $pengajuansMenungguApproval,
+            'pengajuansMenungguPencairan' => $pengajuansMenungguPencairan,
+            'pengajuansDicairkan' => $pengajuansDicairkan,
+            'pengajuansProses' => $pengajuansProses,
+            'pengajuansSelesai' => $pengajuansSelesai,
+            'pengajuansDitolak' => $pengajuansDitolak,
+            'pengajuansCancelled' => $pengajuansCancelled,
+            'stats' => $stats,
             'statistics' => $statistics,
-            'filters' => $request->only(['search', 'status', 'jenis_pengajuan', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai']),
+            'filters' => $request->only(['search', 'jenis_pengajuan', 'divisi_id', 'tanggal_mulai', 'tanggal_selesai']),
             'filterOptions' => [
-                'statuses' => $statuses,
                 'jenisPengajuans' => $jenisPengajuans,
                 'divisis' => $divisis,
             ],
@@ -159,8 +222,17 @@ class PengajuanDanaController extends Controller
             return redirect()->route('pengajuan-dana.select-jenis');
         }
 
-        // Get all program kerjas for user's divisions
+        // Get active periode anggaran in penggunaan phase
+        $activePeriode = \App\Models\PeriodeAnggaran::active()->first();
+
+        if (!$activePeriode) {
+            return redirect()->route('pengajuan-dana.select-jenis')
+                ->with('error', 'Tidak dapat membuat pengajuan dana. Belum ada periode anggaran yang aktif dalam fase Penggunaan.');
+        }
+
+        // Get program kerjas for user's divisions, filtered by active periode in penggunaan phase
         $programKerjas = ProgramKerja::whereIn('divisi_id', $user->divisionIds())
+            ->where('periode_anggaran_id', $activePeriode->id)
             ->where('status', 'active')
             ->orderBy('nama_program')
             ->get();
@@ -173,6 +245,7 @@ class PengajuanDanaController extends Controller
             'users' => $users,
             'jenisPengajuan' => $jenisPengajuan,
             'user' => $user,
+            'activePeriode' => $activePeriode,
         ]);
     }
 

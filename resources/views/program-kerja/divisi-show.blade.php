@@ -134,7 +134,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                <div class="font-semibold text-secondary-900">{{ formatRupiah($program->pagu_anggaran) }}</div>
+                                <div class="font-semibold text-secondary-900">{{ formatRupiah($program->calculated_pagu ?? 0) }}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
@@ -168,12 +168,21 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                         </svg>
                                     </a>
-                                    @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama']))
-                                        <a href="{{ route('program-kerja.edit', [$divisi, $program]) }}" class="p-2 text-secondary-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </a>
+                                    @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
+                                        @php
+                                            $canEdit = true;
+                                            $periode = $program->periodeAnggaran;
+                                            if($periode && $periode->fase !== 'perencangan') {
+                                                $canEdit = false;
+                                            }
+                                        @endphp
+                                        @if($canEdit)
+                                            <a href="{{ route('program-kerja.edit', [$divisi, $program]) }}" class="p-2 text-secondary-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </a>
+                                        @endif
                                     @endif
                                 </div>
                             </td>

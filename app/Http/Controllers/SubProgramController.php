@@ -30,6 +30,12 @@ class SubProgramController extends Controller
             abort(404, 'Program kerja tidak ditemukan di divisi ini.');
         }
 
+        // Validate: Only allow creation when periode is in perencanaan phase
+        $periode = $programKerja->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat menambah sub program. Periode anggaran harus dalam fase Perencanaan.');
+        }
+
         $validated = $request->validate([
             'kode_sub_program' => 'required|string|max:50|unique:sub_programs,kode_sub_program',
             'nama_sub_program' => 'required|string|max:255',
@@ -97,6 +103,12 @@ class SubProgramController extends Controller
             abort(404, 'Sub program tidak ditemukan di program kerja ini.');
         }
 
+        // Validate: Only allow update when periode is in perencanaan phase
+        $periode = $programKerja->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat mengubah sub program. Periode anggaran harus dalam fase Perencanaan.');
+        }
+
         $validated = $request->validate([
             'kode_sub_program' => 'required|string|max:50|unique:sub_programs,kode_sub_program,' . $subProgram->id,
             'nama_sub_program' => 'required|string|max:255',
@@ -161,6 +173,12 @@ class SubProgramController extends Controller
         // Verify sub program belongs to this program
         if ($subProgram->program_kerja_id !== $programKerja->id) {
             abort(404, 'Sub program tidak ditemukan di program kerja ini.');
+        }
+
+        // Validate: Only allow deletion when periode is in perencanaan phase
+        $periode = $programKerja->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat menghapus sub program. Periode anggaran harus dalam fase Perencanaan.');
         }
 
         // Check if sub program has related data

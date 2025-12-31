@@ -26,10 +26,18 @@
         <div class="bg-white rounded-2xl shadow-soft p-6 mb-8">
             <form method="GET" action="{{ route('reports.pengajuan') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-secondary-700 mb-2">Tahun</label>
-                    <select name="tahun" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                        @foreach($filterOptions['years'] ?? [] as $year)
-                            <option value="{{ $year }}" {{ ($filters['tahun'] ?? date('Y')) == $year ? 'selected' : '' }}>{{ $year }}</option>
+                    <label class="block text-sm font-medium text-secondary-700 mb-2">Periode Anggaran</label>
+                    <select name="periode_anggaran_id" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <option value="">-- Pilih Periode Anggaran --</option>
+                        @foreach($availablePeriodes ?? [] as $periode)
+                            @php
+                                $isSelected = ($selectedPeriode && $selectedPeriode->id == $periode->id);
+                                $isActive = ($activePeriode && $activePeriode->id == $periode->id);
+                            @endphp
+                            <option value="{{ $periode->id }}" {{ $isSelected ? 'selected' : '' }}>
+                                {{ $periode->nama_periode }}
+                                @if($isActive) <span class="text-xs text-primary-600">(Aktif)</span> @endif
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -82,11 +90,12 @@
             <div class="bg-white rounded-2xl shadow-soft p-6">
                 <h3 class="text-lg font-semibold text-secondary-900 mb-4">Tren Bulanan</h3>
                 <div class="h-64 flex items-end justify-around space-x-2">
+                    @php($maxTotal = collect($monthlyTrend)->max('pengajuan_total') ?: 1)
                     @foreach($monthlyTrend ?? [] as $month)
                         <div class="flex flex-col items-center flex-1">
-                            <div class="w-full bg-primary-500 rounded-t" style="height: {{ ($month['total'] / ($monthlyTrend->max('total') ?? 1)) * 200 }}px; min-height: 4px;"></div>
-                            <div class="text-xs text-secondary-500 mt-2">{{ substr($month['bulan'], 0, 3) }}</div>
-                            <div class="text-xs font-semibold text-secondary-700">{{ formatRupiah($month['total']) }}</div>
+                            <div class="w-full bg-primary-500 rounded-t" style="height: {{ ($month['pengajuan_total'] / $maxTotal) * 200 }}px; min-height: 4px;"></div>
+                            <div class="text-xs text-secondary-500 mt-2">{{ substr($month['month_name'], 0, 3) }}</div>
+                            <div class="text-xs font-semibold text-secondary-700">{{ formatRupiah($month['pengajuan_total']) }}</div>
                         </div>
                     @endforeach
                 </div>
@@ -96,15 +105,16 @@
             <div class="bg-white rounded-2xl shadow-soft p-6">
                 <h3 class="text-lg font-semibold text-secondary-900 mb-4">Analisis Jenis Pengajuan</h3>
                 <div class="space-y-3">
-                    @foreach($jenisAnalysis ?? [] as $jenis)
+                    @foreach($jenisAnalysis ?? [] as $jenisName => $jenisData)
                         <div class="flex items-center">
                             <div class="flex-1">
                                 <div class="flex justify-between text-sm mb-1">
-                                    <span class="text-secondary-700">{{ ucfirst(str_replace('_', ' ', $jenis['jenis'])) }}</span>
-                                    <span class="font-semibold text-secondary-900">{{ formatRupiah($jenis['total']) }}</span>
+                                    <span class="text-secondary-700">{{ ucfirst(str_replace('_', ' ', $jenisName)) }}</span>
+                                    <span class="font-semibold text-secondary-900">{{ formatRupiah($jenisData['total_pengajuan']) }}</span>
                                 </div>
                                 <div class="w-full bg-secondary-200 rounded-full h-2">
-                                    <div class="bg-primary-600 h-2 rounded-full" style="width: {{ ($jenis['total'] / ($jenisAnalysis->sum('total') ?? 1)) * 100 }}%"></div>
+                                    @php($totalAll = collect($jenisAnalysis)->sum('total_pengajuan'))
+                                    <div class="bg-primary-600 h-2 rounded-full" style="width: {{ ($jenisData['total_pengajuan'] / ($totalAll ?? 1)) * 100 }}%"></div>
                                 </div>
                             </div>
                         </div>
@@ -130,10 +140,10 @@
                         <tbody class="divide-y divide-secondary-100">
                             @foreach($divisionComparison ?? [] as $div)
                                 <tr>
-                                    <td class="px-4 py-3 text-sm text-secondary-900">{{ $div['nama_divisi'] }}</td>
-                                    <td class="px-4 py-3 text-sm text-right text-secondary-900">{{ $div['jumlah'] }}</td>
-                                    <td class="px-4 py-3 text-sm text-right font-semibold text-primary-600">{{ formatRupiah($div['total']) }}</td>
-                                    <td class="px-4 py-3 text-sm text-right text-secondary-700">{{ formatRupiah($div['rata_rata'] ?? 0) }}</td>
+                                    <td class="px-4 py-3 text-sm text-secondary-900">{{ $div['divisi'] }}</td>
+                                    <td class="px-4 py-3 text-sm text-right text-secondary-900">{{ $div['pengajuan_count'] }}</td>
+                                    <td class="px-4 py-3 text-sm text-right font-semibold text-primary-600">{{ formatRupiah($div['total_pengajuan']) }}</td>
+                                    <td class="px-4 py-3 text-sm text-right text-secondary-700">{{ formatRupiah($div['avg_pengajuan'] ?? 0) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -182,11 +192,10 @@
     <script>
         function exportReport(format) {
             const params = new URLSearchParams({
-                type: 'pengajuan',
                 format: format,
                 ...@js($filters ?? [])
             });
-            window.location.href = '{{ route('reports.export') }}?' + params.toString();
+            window.location.href = '{{ route('reports.export', ['pengajuan']) }}?' + params.toString();
         }
     </script>
 </x-app-layout>

@@ -25,6 +25,8 @@ use App\Http\Controllers\PerencanaanPenerimaanController;
 use App\Http\Controllers\PencatatanPenerimaanController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\RekeningPerusahaanController;
+use App\Http\Controllers\BankController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -202,19 +204,64 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // PENCAIRAN DANA ROUTES
     // ============================================================
     Route::prefix('pencairan-dana')->name('pencairan-dana.')->group(function () {
-        Route::get('/', [PencairanDanaController::class, 'index'])->name('index');
-        Route::get('/create', [PencairanDanaController::class, 'create'])->name('create');
-        Route::post('/', [PencairanDanaController::class, 'store'])->name('store');
+        // Routes that require pencairan_dana.read permission (staff keuangan only)
+        Route::middleware(['permission:pencairan_dana.read'])->group(function () {
+            Route::get('/', [PencairanDanaController::class, 'index'])->name('index');
+            Route::get('/select-pengajuan', [PencairanDanaController::class, 'selectPengajuan'])->name('select-pengajuan');
+            Route::get('/api/statistics', [PencairanDanaController::class, 'statistics'])->name('statistics');
+        });
+
+        // Routes that require pencairan_dana.create permission (staff keuangan only)
+        Route::middleware(['permission:pencairan_dana.create'])->group(function () {
+            Route::get('/create', [PencairanDanaController::class, 'create'])->name('create');
+            Route::post('/', [PencairanDanaController::class, 'store'])->name('store');
+        });
+
+        // Show route - accessible by staff keuangan OR pengaju who owns the related pengajuan
         Route::get('/{pencairanDana}', [PencairanDanaController::class, 'show'])->name('show');
-        Route::get('/{pencairanDana}/edit', [PencairanDanaController::class, 'edit'])->name('edit');
-        Route::put('/{pencairanDana}', [PencairanDanaController::class, 'update'])->name('update');
-        Route::delete('/{pencairanDana}', [PencairanDanaController::class, 'destroy'])->name('destroy');
-        Route::post('/{pencairanDana}/submit', [PencairanDanaController::class, 'submit'])->name('submit');
-        Route::post('/{pencairanDana}/process', [PencairanDanaController::class, 'process'])->name('process');
+
+        // Routes that require pencairan_dana.update permission (staff keuangan only)
+        Route::middleware(['permission:pencairan_dana.update'])->group(function () {
+            Route::get('/{pencairanDana}/edit', [PencairanDanaController::class, 'edit'])->name('edit');
+            Route::put('/{pencairanDana}', [PencairanDanaController::class, 'update'])->name('update');
+        });
+
+        // Routes that require pencairan_dana.delete permission (staff keuangan only)
+        Route::middleware(['permission:pencairan_dana.delete'])->group(function () {
+            Route::delete('/{pencairanDana}', [PencairanDanaController::class, 'destroy'])->name('destroy');
+        });
+
+        // Routes that require pencairan_dana.approve permission (staff keuangan only)
+        Route::middleware(['permission:pencairan_dana.approve'])->group(function () {
+            Route::post('/{pencairanDana}/process', [PencairanDanaController::class, 'process'])->name('process');
+        });
+
+        // Verify route - only for pengaju who owns the related pengajuan (handled in controller)
         Route::post('/{pencairanDana}/verify', [PencairanDanaController::class, 'verify'])->name('verify');
+
+        // Retry routes - requires pencairan_dana.create permission (staff keuangan only)
+        Route::middleware(['permission:pencairan_dana.create'])->group(function () {
+            Route::get('/{pencairanDana}/retry', [PencairanDanaController::class, 'retry'])->name('retry');
+            Route::post('/{pencairanDana}/retry', [PencairanDanaController::class, 'storeRetry'])->name('retry.store');
+        });
+
+        Route::post('/{pencairanDana}/submit', [PencairanDanaController::class, 'submit'])->name('submit');
         Route::post('/{pencairanDana}/cancel', [PencairanDanaController::class, 'cancel'])->name('cancel');
-        Route::get('/api/statistics', [PencairanDanaController::class, 'statistics'])->name('statistics');
         Route::get('/{pencairanDana}/print', [PencairanDanaController::class, 'print'])->name('print');
+    });
+
+    // ============================================================
+    // MASTER DATA - REKENING PERUSAHAAN ROUTES
+    // ============================================================
+    Route::prefix('rekening-perusahaan')->name('rekening-perusahaan.')->group(function () {
+        Route::get('/', [RekeningPerusahaanController::class, 'index'])->name('index');
+        Route::get('/create', [RekeningPerusahaanController::class, 'create'])->name('create');
+        Route::post('/', [RekeningPerusahaanController::class, 'store'])->name('store');
+        Route::get('/{rekeningPerusahaan}', [RekeningPerusahaanController::class, 'show'])->name('show');
+        Route::get('/{rekeningPerusahaan}/edit', [RekeningPerusahaanController::class, 'edit'])->name('edit');
+        Route::put('/{rekeningPerusahaan}', [RekeningPerusahaanController::class, 'update'])->name('update');
+        Route::delete('/{rekeningPerusahaan}', [RekeningPerusahaanController::class, 'destroy'])->name('destroy');
+        Route::get('/api/active', [RekeningPerusahaanController::class, 'getActiveRekenings'])->name('api.active');
     });
 
     // ============================================================
@@ -222,6 +269,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ============================================================
     Route::prefix('lpj')->name('lpj.')->group(function () {
         Route::get('/', [LpjController::class, 'index'])->name('index');
+        Route::get('/select-pengajuan', [LpjController::class, 'selectPengajuan'])->name('select-pengajuan');
         Route::get('/create', [LpjController::class, 'create'])->name('create');
         Route::post('/', [LpjController::class, 'store'])->name('store');
         Route::get('/{lpj}', [LpjController::class, 'show'])->name('show');
@@ -234,11 +282,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/api/statistics', [LpjController::class, 'statistics'])->name('statistics');
     });
 
+    // LPJ VERIFICATION ROUTES (staff_keuangan & direktur_keuangan only)
+    // ============================================================
+    Route::prefix('lpj-verification')->name('lpj-verification.')->middleware('role:staff_keuangan,direktur_keuangan')->group(function () {
+        Route::get('/', [LpjController::class, 'verificationIndex'])->name('index');
+    });
+
     // ============================================================
     // REFUND ROUTES
     // ============================================================
     Route::prefix('refund')->name('refund.')->group(function () {
         Route::get('/', [RefundController::class, 'index'])->name('index');
+        Route::get('/select-lpj', [RefundController::class, 'selectLpj'])->name('select-lpj');
         Route::get('/create', [RefundController::class, 'create'])->name('create');
         Route::post('/', [RefundController::class, 'store'])->name('store');
         Route::get('/{refund}', [RefundController::class, 'show'])->name('show');
@@ -249,6 +304,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/{refund}/approve', [RefundController::class, 'approve'])->name('approve');
         Route::post('/{refund}/process', [RefundController::class, 'process'])->name('process');
         Route::get('/api/statistics', [RefundController::class, 'statistics'])->name('statistics');
+    });
+
+    // REFUND VERIFICATION ROUTES (staff_keuangan & direktur_keuangan only)
+    // ============================================================
+    Route::prefix('refund-verification')->name('refund-verification.')->middleware('role:staff_keuangan,direktur_keuangan')->group(function () {
+        Route::get('/', [RefundController::class, 'verificationIndex'])->name('index');
     });
 
     // ============================================================

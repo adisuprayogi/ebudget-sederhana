@@ -7,7 +7,9 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-secondary-900">Edit Periode Anggaran</h1>
+                <h1 class="text-2xl font-bold text-secondary-900">
+                    @if($periodeAnggaran->status === 'active') Edit Tanggal @else Edit Periode Anggaran @endif
+                </h1>
                 <p class="text-secondary-600 mt-1">{{ $periodeAnggaran->nama_periode }}</p>
             </div>
         </div>
@@ -18,26 +20,40 @@
             @csrf
             @method('PUT')
 
-            <!-- Alert: Only draft can be edited -->
-            <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div class="text-blue-700 text-sm">
-                    Hanya periode dengan status <strong>draft</strong> yang dapat diedit. Tahun anggaran tidak dapat diubah setelah dibuat.
-                </div>
-            </div>
-            
-            @error('nama_periode')
-                <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start">
-                    <svg class="w-5 h-5 text-red-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <!-- Alert: Status based info -->
+            @if($periodeAnggaran->status === 'active')
+                <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex items-start">
+                    <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <div class="text-red-700 text-sm">{{ $message }}</div>
+                    <div class="text-green-700 text-sm">
+                        Periode anggaran sedang <strong>aktif</strong>. Hanya tanggal Fase Perencanaan dan Fase Penggunaan yang dapat diedit. Kedua fase dapat berjalan paralel.
+                    </div>
                 </div>
-            @enderror
+            @else
+                <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start">
+                    <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div class="text-blue-700 text-sm">
+                        Periode anggaran masih <strong>draft</strong>. Semua field dapat diedit. Tahun anggaran tidak dapat diubah setelah dibuat.
+                    </div>
+                </div>
+            @endif
 
-            <!-- Informasi Dasar -->
+            @if($periodeAnggaran->status === 'draft')
+                @error('nama_periode')
+                    <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start">
+                        <svg class="w-5 h-5 text-red-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div class="text-red-700 text-sm">{{ $message }}</div>
+                    </div>
+                @enderror
+            @endif
+
+            <!-- Informasi Dasar (hanya untuk draft) -->
+            @if($periodeAnggaran->status === 'draft')
             <div class="mb-8">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
                     <span class="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center mr-3">
@@ -47,7 +63,7 @@
                     </span>
                     Informasi Dasar
                 </h2>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <x-input-label for="nama_periode" value="Nama Periode" />
@@ -71,6 +87,41 @@
                     </div>
                 </div>
             </div>
+            @else
+            <!-- Informasi Dasar (readonly untuk active) -->
+            <div class="mb-8">
+                <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
+                    <span class="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </span>
+                    Informasi Dasar
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <x-input-label for="nama_periode_readonly" value="Nama Periode" />
+                        <input type="text" id="nama_periode_readonly" value="{{ $periodeAnggaran->nama_periode }}" readonly
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl bg-secondary-50 text-secondary-500 cursor-not-allowed">
+                        <p class="mt-1 text-xs text-secondary-500">Nama periode tidak dapat diubah saat status aktif</p>
+                    </div>
+
+                    <div>
+                        <x-input-label for="tahun_anggaran" value="Tahun Anggaran" />
+                        <input type="number" id="tahun_anggaran" value="{{ $periodeAnggaran->tahun_anggaran }}" readonly
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl bg-secondary-50 text-secondary-500 cursor-not-allowed">
+                        <p class="mt-1 text-xs text-secondary-500">Tahun anggaran tidak dapat diubah</p>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <x-input-label for="deskripsi_readonly" value="Deskripsi" />
+                        <textarea id="deskripsi_readonly" rows="3" readonly
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl bg-secondary-50 text-secondary-500 cursor-not-allowed">{{ $periodeAnggaran->deskripsi }}</textarea>
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <!-- Fase Perencanaan -->
             <div class="mb-8">
@@ -95,7 +146,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <x-input-label for="tanggal_mulai_perencanaan_anggaran" value="Tanggal Mulai" />
-                        <input type="date" name="tanggal_mulai_perencanaan_anggaran" id="tanggal_mulai_perencanaan_anggaran" 
+                        <input type="date" name="tanggal_mulai_perencanaan_anggaran" id="tanggal_mulai_perencanaan_anggaran"
                             value="{{ old('tanggal_mulai_perencanaan_anggaran', $periodeAnggaran->tanggal_mulai_perencanaan_anggaran?->format('Y-m-d')) }}" required
                             class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <x-input-error :messages="$errors->get('tanggal_mulai_perencanaan_anggaran')" class="mt-2" />
@@ -103,7 +154,7 @@
 
                     <div>
                         <x-input-label for="tanggal_selesai_perencanaan_anggaran" value="Tanggal Selesai" />
-                        <input type="date" name="tanggal_selesai_perencanaan_anggaran" id="tanggal_selesai_perencanaan_anggaran" 
+                        <input type="date" name="tanggal_selesai_perencanaan_anggaran" id="tanggal_selesai_perencanaan_anggaran"
                             value="{{ old('tanggal_selesai_perencanaan_anggaran', $periodeAnggaran->tanggal_selesai_perencanaan_anggaran?->format('Y-m-d')) }}" required
                             class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <x-input-error :messages="$errors->get('tanggal_selesai_perencanaan_anggaran')" class="mt-2" />
@@ -125,7 +176,7 @@
                 <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
                     <p class="text-sm text-green-700">
                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12 a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Pada fase ini, pengajuan dana, pencairan, dan penggunaan anggaran dilakukan.
                     </p>
@@ -134,7 +185,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <x-input-label for="tanggal_mulai_penggunaan_anggaran" value="Tanggal Mulai" />
-                        <input type="date" name="tanggal_mulai_penggunaan_anggaran" id="tanggal_mulai_penggunaan_anggaran" 
+                        <input type="date" name="tanggal_mulai_penggunaan_anggaran" id="tanggal_mulai_penggunaan_anggaran"
                             value="{{ old('tanggal_mulai_penggunaan_anggaran', $periodeAnggaran->tanggal_mulai_penggunaan_anggaran?->format('Y-m-d')) }}" required
                             class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <x-input-error :messages="$errors->get('tanggal_mulai_penggunaan_anggaran')" class="mt-2" />
@@ -142,7 +193,7 @@
 
                     <div>
                         <x-input-label for="tanggal_selesai_penggunaan_anggaran" value="Tanggal Selesai" />
-                        <input type="date" name="tanggal_selesai_penggunaan_anggaran" id="tanggal_selesai_penggunaan_anggaran" 
+                        <input type="date" name="tanggal_selesai_penggunaan_anggaran" id="tanggal_selesai_penggunaan_anggaran"
                             value="{{ old('tanggal_selesai_penggunaan_anggaran', $periodeAnggaran->tanggal_selesai_penggunaan_anggaran?->format('Y-m-d')) }}" required
                             class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <x-input-error :messages="$errors->get('tanggal_selesai_penggunaan_anggaran')" class="mt-2" />

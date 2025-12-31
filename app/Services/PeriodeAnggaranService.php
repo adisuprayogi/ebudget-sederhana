@@ -79,10 +79,11 @@ class PeriodeAnggaranService
 
     /**
      * Get active periode anggaran
+     * Hanya periode dengan status 'active' DAN dalam fase penggunaan anggaran
      */
     public static function getActivePeriode($fase = null)
     {
-        $query = PeriodeAnggaran::where('status', 'active');
+        $query = PeriodeAnggaran::active();
 
         if ($fase) {
             $query->fase($fase);
@@ -93,26 +94,11 @@ class PeriodeAnggaranService
 
     /**
      * Get current periode (yang sedang berjalan)
+     * Hanya periode yang dalam fase penggunaan anggaran yang dianggap aktif
      */
     public static function getCurrentPeriode()
     {
-        $today = now()->startOfDay();
-
-        return PeriodeAnggaran::where('status', 'active')
-            ->where(function ($query) use ($today) {
-                // Check if today is within perencanaan phase
-                $query->where(function ($q) use ($today) {
-                    $q->where('tanggal_mulai_perencanaan_anggaran', '<=', $today)
-                        ->where('tanggal_selesai_perencanaan_anggaran', '>=', $today);
-                })
-                // OR within penggunaan phase
-                ->orWhere(function ($q) use ($today) {
-                    $q->where('tanggal_mulai_penggunaan_anggaran', '<=', $today)
-                        ->where('tanggal_selesai_penggunaan_anggaran', '>=', $today);
-                });
-            })
-            ->orderBy('created_at', 'desc')
-            ->first();
+        return PeriodeAnggaran::active()->first();
     }
 
     /**

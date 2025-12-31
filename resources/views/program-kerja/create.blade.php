@@ -83,16 +83,16 @@
                         @enderror
                     </div>
 
-                    <!-- Pagu Anggaran -->
-                    <div>
-                        <label class="block text-sm font-medium text-secondary-700 mb-2">Pagu Anggaran <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-secondary-500 font-medium">Rp</span>
-                            <input type="number" name="pagu_anggaran" value="{{ old('pagu_anggaran') }}" required min="0" step="0.01" class="w-full pl-12 pr-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="0">
+                    <!-- Pagu Anggaran Info -->
+                    <div class="md:col-span-2 bg-secondary-50 border border-secondary-200 rounded-xl p-4">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-secondary-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div class="text-sm text-secondary-600">
+                                <span class="font-medium">Pagu Anggaran</span> akan dihitung otomatis dari total Detail Anggaran yang ditambahkan melalui Sub Program.
+                            </div>
                         </div>
-                        @error('pagu_anggaran')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
                     </div>
 
                     <!-- Tanggal Mulai -->

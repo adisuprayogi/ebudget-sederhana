@@ -26,10 +26,18 @@
         <div class="bg-white rounded-2xl shadow-soft p-6 mb-8">
             <form method="GET" action="{{ route('reports.refund') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-secondary-700 mb-2">Tahun</label>
-                    <select name="tahun" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                        @foreach($filterOptions['years'] ?? [] as $year)
-                            <option value="{{ $year }}" {{ ($filters['tahun'] ?? date('Y')) == $year ? 'selected' : '' }}>{{ $year }}</option>
+                    <label class="block text-sm font-medium text-secondary-700 mb-2">Periode Anggaran</label>
+                    <select name="periode_anggaran_id" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <option value="">-- Pilih Periode Anggaran --</option>
+                        @foreach($availablePeriodes ?? [] as $periode)
+                            @php
+                                $isSelected = ($selectedPeriode && $selectedPeriode->id == $periode->id);
+                                $isActive = ($activePeriode && $activePeriode->id == $periode->id);
+                            @endphp
+                            <option value="{{ $periode->id }}" {{ $isSelected ? 'selected' : '' }}>
+                                {{ $periode->nama_periode }}
+                                @if($isActive) <span class="text-xs text-primary-600">(Aktif)</span> @endif
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -121,11 +129,10 @@
     <script>
         function exportReport(format) {
             const params = new URLSearchParams({
-                type: 'refund',
                 format: format,
                 ...@js($filters ?? [])
             });
-            window.location.href = '{{ route('reports.export') }}?' + params.toString();
+            window.location.href = '{{ route('reports.export', ['refund']) }}?' + params.toString();
         }
     </script>
 </x-app-layout>

@@ -109,9 +109,9 @@ class PeriodeAnggaranController extends Controller
      */
     public function edit(PeriodeAnggaran $periodeAnggaran): View
     {
-        // Only allow editing draft periodes
-        if ($periodeAnggaran->status !== 'draft') {
-            abort(403, 'Hanya periode dengan status draft yang dapat diedit.');
+        // Allow editing draft and active periodes
+        if (!in_array($periodeAnggaran->status, ['draft', 'active'])) {
+            abort(403, 'Hanya periode dengan status draft atau active yang dapat diedit.');
         }
 
         return view('periode-anggaran.edit', compact('periodeAnggaran'));
@@ -122,19 +122,31 @@ class PeriodeAnggaranController extends Controller
      */
     public function update(Request $request, PeriodeAnggaran $periodeAnggaran): RedirectResponse
     {
-        // Only allow updating draft periodes
-        if ($periodeAnggaran->status !== 'draft') {
-            return back()->with('error', 'Hanya periode dengan status draft yang dapat diedit.');
+        // Allow updating draft and active periodes
+        if (!in_array($periodeAnggaran->status, ['draft', 'active'])) {
+            return back()->with('error', 'Hanya periode dengan status draft atau active yang dapat diedit.');
         }
 
-        $validated = $request->validate([
-            'nama_periode' => 'required|string|max:200',
-            'tanggal_mulai_perencanaan_anggaran' => 'required|date|before:tanggal_selesai_perencanaan_anggaran',
-            'tanggal_selesai_perencanaan_anggaran' => 'required|date|before:tanggal_mulai_penggunaan_anggaran',
-            'tanggal_mulai_penggunaan_anggaran' => 'required|date|before:tanggal_selesai_penggunaan_anggaran',
-            'tanggal_selesai_penggunaan_anggaran' => 'required|date|after:tanggal_mulai_penggunaan_anggaran',
-            'deskripsi' => 'nullable|string|max:1000',
-        ]);
+        // Different validation rules based on status
+        if ($periodeAnggaran->status === 'active') {
+            // When active, only allow editing dates
+            $validated = $request->validate([
+                'tanggal_mulai_perencanaan_anggaran' => 'required|date',
+                'tanggal_selesai_perencanaan_anggaran' => 'required|date',
+                'tanggal_mulai_penggunaan_anggaran' => 'required|date',
+                'tanggal_selesai_penggunaan_anggaran' => 'required|date',
+            ]);
+        } else {
+            // When draft, allow editing all fields
+            $validated = $request->validate([
+                'nama_periode' => 'required|string|max:200',
+                'tanggal_mulai_perencanaan_anggaran' => 'required|date|before:tanggal_selesai_perencanaan_anggaran',
+                'tanggal_selesai_perencanaan_anggaran' => 'required|date|before:tanggal_mulai_penggunaan_anggaran',
+                'tanggal_mulai_penggunaan_anggaran' => 'required|date|before:tanggal_selesai_penggunaan_anggaran',
+                'tanggal_selesai_penggunaan_anggaran' => 'required|date|after:tanggal_mulai_penggunaan_anggaran',
+                'deskripsi' => 'nullable|string|max:1000',
+            ]);
+        }
 
         try {
             $periodeAnggaran->update($validated);

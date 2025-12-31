@@ -35,9 +35,10 @@ class PenetapanPagu extends Model
 
     public function getUsedAmountAttribute()
     {
-        // TODO: Calculate used amount from pengajuan_danas once the table structure is updated
-        // For now, return 0
-        return 0;
+        // Calculate real-time used amount from Program Kerja pagu for this divisi and periode
+        return \App\Models\ProgramKerja::where('divisi_id', $this->divisi_id)
+            ->where('periode_anggaran_id', $this->periode_anggaran_id)
+            ->sum('pagu_anggaran');
     }
 
     public function getRemainingAmountAttribute()

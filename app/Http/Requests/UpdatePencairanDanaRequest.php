@@ -16,15 +16,7 @@ class UpdatePencairanDanaRequest extends FormRequest
             return false;
         }
 
-        $pencairan = $this->route('pencairan_dana');
-
-        // Only staff keuangan can update
-        if (!Auth::user()->hasPermission('pencairan_dana.edit')) {
-            return false;
-        }
-
-        // Can only update pending pencairan
-        return $pencairan->status === 'pending';
+        return Auth::user()->hasPermission('pencairan_dana.update');
     }
 
     /**
@@ -35,23 +27,26 @@ class UpdatePencairanDanaRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'rekening_perusahaan_id' => 'sometimes|required|exists:rekening_perusahaans,id',
             'tanggal_pencairan' => 'sometimes|required|date|after_or_equal:today',
-            'total_pencairan' => 'sometimes|required|numeric|min:1000',
-            'cara_pencairan' => 'sometimes|required|in:transfer,tunai,cek,bilyet_giro',
+            'jumlah_pencairan' => 'sometimes|required|numeric|min:1000',
+            'metode_pencairan' => 'sometimes|required|in:transfer,cash,reimburse',
 
-            // Bank transfer details (required if cara_pencairan is transfer)
-            'bank_tujuan' => 'required_if:cara_pencairan,transfer|string|max:100',
-            'nomor_rekening' => 'required_if:cara_pencairan,transfer|string|max:50',
-            'atas_nama' => 'required_if:cara_pencairan,transfer|string|max:255',
+            // Bank transfer details (required if metode_pencairan is transfer)
+            'bank_id' => 'sometimes|required_if:metode_pencairan,transfer|nullable|exists:banks,id',
+            'nomor_rekening' => 'sometimes|required_if:metode_pencairan,transfer|string|max:50',
+            'atas_nama' => 'sometimes|required_if:metode_pencairan,transfer|string|max:255',
 
-            // Check/bilyet giro details
-            'nomor_cek' => 'nullable|required_if:cara_pencairan,cek|string|max:50',
-            'nomor_giro' => 'nullable|required_if:cara_pencairan,bilyet_giro|string|max:50',
-            'bank_cek_giro' => 'nullable|required_if:cara_pencairan,cek,bilyet_giro|string|max:100',
+            // Lampiran attachments
+            'lampiran' => 'nullable|array|max:5',
+            'lampiran.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120',
+
+            // Remove existing lampiran
+            'remove_lampiran' => 'nullable|array',
+            'remove_lampiran.*' => 'integer|exists:pencairan_lampirans,id',
 
             // Notes and attachments
             'catatan' => 'nullable|string|max:500',
-            'bukti_pencairan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ];
     }
 
@@ -63,34 +58,50 @@ class UpdatePencairanDanaRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'rekening_perusahaan_id.required' => 'Rekening sumber wajib dipilih',
+            'rekening_perusahaan_id.exists' => 'Rekening sumber tidak valid',
             'tanggal_pencairan.required' => 'Tanggal pencairan wajib diisi',
             'tanggal_pencairan.date' => 'Format tanggal tidak valid',
             'tanggal_pencairan.after_or_equal' => 'Tanggal pencairan tidak boleh kurang dari hari ini',
-            'total_pencairan.required' => 'Total pencairan wajib diisi',
-            'total_pencairan.numeric' => 'Total pencairan harus berupa angka',
-            'total_pencairan.min' => 'Total pencairan minimal Rp 1.000',
-            'cara_pencairan.required' => 'Cara pencairan wajib dipilih',
-            'cara_pencairan.in' => 'Cara pencairan tidak valid',
+            'jumlah_pencairan.required' => 'Jumlah pencairan wajib diisi',
+            'jumlah_pencairan.numeric' => 'Jumlah pencairan harus berupa angka',
+            'jumlah_pencairan.min' => 'Jumlah pencairan minimal Rp 1.000',
+            'metode_pencairan.required' => 'Metode pencairan wajib dipilih',
+            'metode_pencairan.in' => 'Metode pencairan tidak valid',
 
-            'bank_tujuan.required_if' => 'Bank tujuan wajib diisi untuk transfer',
-            'bank_tujuan.max' => 'Nama bank maksimal 100 karakter',
-            'nomor_rekening.required_if' => 'Nomor rekening wajib diisi untuk transfer',
+            'bank_id.required_if' => 'Nama bank tujuan wajib dipilih untuk transfer',
+            'bank_id.exists' => 'Bank tujuan tidak valid',
+            'nomor_rekening.required_if' => 'Nomor rekening tujuan wajib diisi untuk transfer',
             'nomor_rekening.max' => 'Nomor rekening maksimal 50 karakter',
-            'atas_nama.required_if' => 'Atas nama rekening wajib diisi untuk transfer',
+            'atas_nama.required_if' => 'Atas nama tujuan wajib diisi untuk transfer',
             'atas_nama.max' => 'Atas nama maksimal 255 karakter',
 
-            'nomor_cek.required_if' => 'Nomor cek wajib diisi untuk pembayaran dengan cek',
-            'nomor_cek.max' => 'Nomor cek maksimal 50 karakter',
-            'nomor_giro.required_if' => 'Nomor giro wajib diisi untuk pembayaran dengan bilyet giro',
-            'nomor_giro.max' => 'Nomor giro maksimal 50 karakter',
-            'bank_cek_giro.required_if' => 'Bank cek/giro wajib diisi',
-            'bank_cek_giro.max' => 'Nama bank maksimal 100 karakter',
+            'lampiran.max' => 'Maksimal 5 file lampiran',
+            'lampiran.*.mimes' => 'Format file harus PDF, JPG, JPEG, PNG, DOC, atau DOCX',
+            'lampiran.*.max' => 'Ukuran file maksimal 5MB',
 
             'catatan.string' => 'Catatan harus berupa teks',
             'catatan.max' => 'Catatan maksimal 500 karakter',
-            'bukti_pencairan.file' => 'File bukti pencairan harus berupa file yang valid',
-            'bukti_pencairan.mimes' => 'Format file bukti pencairan tidak diizinkan',
-            'bukti_pencairan.max' => 'Ukuran file bukti pencairan maksimal 2MB',
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes(): array
+    {
+        return [
+            'rekening_perusahaan_id' => 'Rekening Perusahaan',
+            'tanggal_pencairan' => 'Tanggal Pencairan',
+            'jumlah_pencairan' => 'Jumlah Pencairan',
+            'metode_pencairan' => 'Metode Pencairan',
+            'bank_id' => 'Nama Bank Tujuan',
+            'nomor_rekening' => 'Nomor Rekening Tujuan',
+            'atas_nama' => 'Atas Nama Tujuan',
+            'lampiran' => 'Lampiran',
+            'catatan' => 'Catatan',
         ];
     }
 
@@ -103,22 +114,9 @@ class UpdatePencairanDanaRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $this->validateEditable($validator);
             $this->validatePencairanAmount($validator);
             $this->validateBankDetails($validator);
         });
-    }
-
-    /**
-     * Validate that pencairan can be edited
-     */
-    protected function validateEditable($validator)
-    {
-        $pencairan = $this->route('pencairan_dana');
-
-        if ($pencairan->status !== 'pending') {
-            $validator->errors()->add('status', 'Pencairan tidak dapat diedit karena status: ' . $pencairan->status);
-        }
     }
 
     /**
@@ -126,16 +124,18 @@ class UpdatePencairanDanaRequest extends FormRequest
      */
     protected function validatePencairanAmount($validator)
     {
-        $totalPencairan = $this->input('total_pencairan');
-        if (!$totalPencairan) {
+        $pencairan = $this->route('pencairanDana'); // Use correct parameter name
+        $jumlahPencairan = $this->input('jumlah_pencairan');
+
+        if (!$pencairan || !$jumlahPencairan) {
             return;
         }
 
-        $pencairan = $this->route('pencairan_dana');
-        $pengajuan = $pencairan->pengajuanDana;
+        // Load the relationship to avoid null error
+        $pengajuan = \App\Models\PengajuanDana::find($pencairan->pengajuan_dana_id);
 
-        if ($totalPencairan > $pengajuan->total_pengajuan) {
-            $validator->errors()->add('total_pencairan', 'Total pencairan tidak boleh melebihi total pengajuan (Rp ' . number_format($pengajuan->total_pengajuan, 0, ',', '.') . ')');
+        if ($pengajuan && $jumlahPencairan > $pengajuan->total_pengajuan) {
+            $validator->errors()->add('jumlah_pencairan', 'Jumlah pencairan tidak boleh melebihi total pengajuan (' . formatRupiah($pengajuan->total_pengajuan) . ')');
         }
     }
 
@@ -144,54 +144,38 @@ class UpdatePencairanDanaRequest extends FormRequest
      */
     protected function validateBankDetails($validator)
     {
-        $caraPencairan = $this->input('cara_pencairan');
-        if (!$caraPencairan) {
-            $caraPencairan = $this->route('pencairan_dana')->cara_pencairan;
+        $pencairan = $this->route('pencairanDana'); // Use correct parameter name
+        $metodePencairan = $this->input('metode_pencairan');
+        if (!$metodePencairan && $pencairan) {
+            $metodePencairan = $pencairan->metode_pencairan;
         }
 
         $nomorRekening = $this->input('nomor_rekening');
 
-        if ($caraPencairan === 'transfer' && $nomorRekening) {
-            // Check if account number contains only numbers
-            if (!preg_match('/^[0-9]+$/', $nomorRekening)) {
+        if ($metodePencairan === 'transfer' && $nomorRekening) {
+            // Check if account number contains only numbers and spaces
+            if (!preg_match('/^[0-9\s]+$/', $nomorRekening)) {
                 $validator->errors()->add('nomor_rekening', 'Nomor rekening hanya boleh mengandung angka');
             }
 
-            // Check minimum length
-            if (strlen($nomorRekening) < 5) {
+            // Check minimum length (without spaces)
+            if (strlen(preg_replace('/\s+/', '', $nomorRekening)) < 5) {
                 $validator->errors()->add('nomor_rekening', 'Nomor rekening minimal 5 digit');
             }
         }
     }
 
     /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array
-     */
-    public function attributes(): array
-    {
-        return [
-            'tanggal_pencairan' => 'Tanggal Pencairan',
-            'total_pencairan' => 'Total Pencairan',
-            'cara_pencairan' => 'Cara Pencairan',
-            'bank_tujuan' => 'Bank Tujuan',
-            'nomor_rekening' => 'Nomor Rekening',
-            'atas_nama' => 'Atas Nama',
-            'nomor_cek' => 'Nomor Cek',
-            'nomor_giro' => 'Nomor Giro',
-            'bank_cek_giro' => 'Bank Cek/Giro',
-            'catatan' => 'Catatan',
-            'bukti_pencairan' => 'Bukti Pencairan',
-        ];
-    }
-
-    /**
      * Get validated data with additional processing
      */
-    public function validated(): array
+    public function validated($key = null, $default = null)
     {
-        $validated = parent::validated();
+        $validated = parent::validated($key, $default);
+
+        // If a specific key is requested, return it directly
+        if ($key !== null) {
+            return $validated;
+        }
 
         // Format dates
         if (isset($validated['tanggal_pencairan'])) {

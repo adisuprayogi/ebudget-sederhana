@@ -32,10 +32,21 @@ class PerencanaanPenerimaanController extends Controller
             }
         }
 
-        // Default to current running periode anggaran if not provided
+        // Default to active periode (yang aktif dan dalam fase penggunaan anggaran)
         $periodeAnggaranId = $request->periode_anggaran_id;
         if (!$periodeAnggaranId) {
-            $currentPeriode = PeriodeAnggaran::current()->first();
+            // Get active periode in penggunaan phase
+            $currentPeriode = PeriodeAnggaran::active()->first();
+
+            // If not found in penggunaan phase, try to get periode in perencanaan phase
+            if (!$currentPeriode) {
+                $currentPeriode = PeriodeAnggaran::where('status', 'active')
+                    ->get()
+                    ->first(function ($periode) {
+                        return $periode->fase === 'perencangan';
+                    });
+            }
+
             $periodeAnggaranId = $currentPeriode ? $currentPeriode->id : null;
         }
 
@@ -77,9 +88,12 @@ class PerencanaanPenerimaanController extends Controller
 
         return view('perencanaan-penerimaan.index', [
             'perencanaanPenerimaans' => $perencanaanPenerimaans,
-            'filters' => array_merge($request->only(['divisi_id', 'sumber_dana_id', 'search']), [
+            'filters' => [
+                'divisi_id' => $request->input('divisi_id'),
+                'sumber_dana_id' => $request->input('sumber_dana_id'),
                 'periode_anggaran_id' => $periodeAnggaranId,
-            ]),
+                'search' => $request->input('search'),
+            ],
             'filterOptions' => [
                 'periodeAnggarans' => $periodeAnggarans,
                 'divisis' => $divisis,
@@ -175,10 +189,15 @@ class PerencanaanPenerimaanController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
-        // Get periode anggaran to validate months
+        // Get periode anggaran to validate
         $periode = PeriodeAnggaran::find($validated['periode_anggaran_id']);
         if (!$periode) {
             return back()->withInput()->with('error', 'Periode anggaran tidak ditemukan.');
+        }
+
+        // Validate: Only allow creation when periode is in perencanaan phase
+        if ($periode->fase !== 'perencangan') {
+            return back()->withInput()->with('error', 'Tidak dapat menambah perencanaan penerimaan. Periode anggaran harus dalam fase Perencanaan.');
         }
 
         // Build perkiraan_bulanan array
@@ -273,6 +292,12 @@ class PerencanaanPenerimaanController extends Controller
     {
         $this->authorize('update', $perencanaanPenerimaan);
 
+        // Validate: Only allow update when periode is in perencanaan phase
+        $periode = $perencanaanPenerimaan->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->withInput()->with('error', 'Tidak dapat mengubah perencanaan penerimaan. Periode anggaran harus dalam fase Perencanaan.');
+        }
+
         $validated = $request->validate([
             'kode_rekening' => 'nullable|string|max:50',
             'uraian' => 'required|string|max:500',
@@ -321,6 +346,12 @@ class PerencanaanPenerimaanController extends Controller
     public function destroy(PerencanaanPenerimaan $perencanaanPenerimaan)
     {
         $this->authorize('delete', $perencanaanPenerimaan);
+
+        // Validate: Only allow deletion when periode is in perencanaan phase
+        $periode = $perencanaanPenerimaan->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat menghapus perencanaan penerimaan. Periode anggaran harus dalam fase Perencanaan.');
+        }
 
         $perencanaanPenerimaan->delete();
 

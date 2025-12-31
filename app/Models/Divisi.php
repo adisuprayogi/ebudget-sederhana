@@ -70,6 +70,14 @@ class Divisi extends Model
     }
 
     /**
+     * Get the penetapan pagu for the divisi.
+     */
+    public function penetapanPagus()
+    {
+        return $this->hasMany(PenetapanPagu::class);
+    }
+
+    /**
      * Update pagu usage.
      */
     public function updatePaguUsage()

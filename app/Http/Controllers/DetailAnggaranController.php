@@ -36,6 +36,12 @@ class DetailAnggaranController extends Controller
             abort(404, 'Sub program tidak ditemukan di program kerja ini.');
         }
 
+        // Validate: Only allow creation when periode is in perencanaan phase
+        $periode = $programKerja->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat menambah detail anggaran. Periode anggaran harus dalam fase Perencanaan.');
+        }
+
         $validated = $request->validate([
             'nama_detail' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
@@ -116,6 +122,12 @@ class DetailAnggaranController extends Controller
             abort(404, 'Detail anggaran tidak ditemukan di sub program ini.');
         }
 
+        // Validate: Only allow update when periode is in perencanaan phase
+        $periode = $programKerja->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat mengubah detail anggaran. Periode anggaran harus dalam fase Perencanaan.');
+        }
+
         $validated = $request->validate([
             'nama_detail' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
@@ -194,6 +206,12 @@ class DetailAnggaranController extends Controller
         // Verify detail anggaran belongs to this sub program
         if ($detailAnggaran->sub_program_id !== $subProgram->id) {
             abort(404, 'Detail anggaran tidak ditemukan di sub program ini.');
+        }
+
+        // Validate: Only allow deletion when periode is in perencanaan phase
+        $periode = $programKerja->periodeAnggaran;
+        if ($periode->fase !== 'perencangan') {
+            return back()->with('error', 'Tidak dapat menghapus detail anggaran. Periode anggaran harus dalam fase Perencanaan.');
         }
 
         // Check if detail has realisasi
