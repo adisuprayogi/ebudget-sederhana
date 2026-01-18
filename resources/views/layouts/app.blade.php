@@ -17,6 +17,32 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script src="{{ asset('js/currency-input.js') }}" defer></script>
+
+        <!-- Notification Counter Script -->
+        <script>
+            function notificationCounter() {
+                return {
+                    unreadCount: 0,
+                    init() {
+                        this.fetchUnreadCount();
+                        // Refresh every 30 seconds
+                        setInterval(() => {
+                            this.fetchUnreadCount();
+                        }, 30000);
+                    },
+                    fetchUnreadCount() {
+                        fetch('{{ route('notifications.unread-count') }}')
+                            .then(response => response.json())
+                            .then(data => {
+                                this.unreadCount = data.count;
+                            })
+                            .catch(error => {
+                                console.error('Failed to fetch unread count:', error);
+                            });
+                    }
+                }
+            }
+        </script>
     </head>
     <body class="font-sans antialiased bg-slate-50" x-data="{ sidebarOpen: false }">
         @auth

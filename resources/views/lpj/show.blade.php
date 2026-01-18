@@ -10,15 +10,15 @@
                 <div class="flex items-center space-x-3">
                     <h1 class="text-2xl font-bold text-secondary-900">{{ $lpj->nomor_lpj }}</h1>
                     @if($lpj->status === 'draft')
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
                             Draft
                         </span>
                     @elseif($lpj->status === 'menunggu_verifikasi')
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
                             Menunggu Verifikasi
                         </span>
                     @elseif($lpj->status === 'approved')
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
                             Disetujui
                         </span>
                     @elseif($lpj->status === 'rejected')
@@ -39,20 +39,20 @@
     <div class="py-8">
         <!-- Alert Messages -->
         @if($lpj->status === 'menunggu_verifikasi')
-            <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-amber-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="mb-6 bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-orange-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <div class="text-amber-700 text-sm">
+                <div class="text-orange-700 text-sm">
                     LPJ ini <strong>menunggu verifikasi</strong> dari staff keuangan atau direktur keuangan.
                 </div>
             </div>
         @elseif($lpj->status === 'approved')
-            <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <div class="text-green-700 text-sm">
+                <div class="text-blue-700 text-sm">
                     LPJ ini telah <strong>disetujui</strong>.
                 </div>
             </div>
@@ -155,7 +155,7 @@
                 <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
                     <div class="px-6 py-4 border-b border-secondary-200">
                         <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
-                            <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-3">
+                            <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
@@ -264,7 +264,7 @@
                             <p class="text-sm font-medium text-secondary-700 mb-2">Verifikasi LPJ:</p>
 
                             <!-- Setujui Button -->
-                            <button type="button" onclick="showApproveForm()" class="w-full flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200">
+                            <button type="button" onclick="showApproveForm()" class="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -281,18 +281,18 @@
                         </div>
 
                         <!-- Approve Form -->
-                        <form id="approveForm" method="POST" action="{{ route('lpj.verify', $lpj) }}" class="hidden space-y-3 mt-3 p-4 bg-green-50 rounded-xl border border-green-200">
+                        <form id="approveForm" method="POST" action="{{ route('lpj.verify', $lpj) }}" class="hidden space-y-3 mt-3 p-4 bg-blue-50 rounded-xl border border-blue-200">
                             @csrf
                             <input type="hidden" name="status" value="approved">
                             <div>
-                                <label class="block text-sm font-medium text-green-700 mb-1">Catatan (opsional)</label>
-                                <textarea name="catatan_verifikasi" rows="2" class="w-full px-3 py-2 border border-green-200 rounded-lg text-sm" placeholder="Catatan verifikasi..."></textarea>
+                                <label class="block text-sm font-medium text-blue-700 mb-1">Catatan (opsional)</label>
+                                <textarea name="catatan_verifikasi" rows="2" class="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm" placeholder="Catatan verifikasi..."></textarea>
                             </div>
                             <div class="flex space-x-2">
-                                <button type="button" onclick="hideApproveForm()" class="flex-1 px-3 py-2 border border-green-200 text-green-700 rounded-lg hover:bg-green-50 text-sm">
+                                <button type="button" onclick="hideApproveForm()" class="flex-1 px-3 py-2 border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-50 text-sm">
                                     Batal
                                 </button>
-                                <button type="submit" class="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
+                                <button type="submit" class="flex-1 flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>

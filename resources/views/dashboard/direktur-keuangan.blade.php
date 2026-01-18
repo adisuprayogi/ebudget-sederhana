@@ -18,17 +18,17 @@
 
     @if($data['activePeriode'])
     <!-- Periode Info Banner -->
-    <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-soft p-6 mb-8 text-white">
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl shadow-soft p-6 mb-8 text-white">
         <div class="flex items-center justify-between">
             <div>
-                <div class="text-sm text-primary-100 mb-1">Periode Anggaran Aktif</div>
+                <div class="text-sm text-blue-100 mb-1">Periode Anggaran Aktif</div>
                 <div class="text-2xl font-bold">{{ $data['activePeriode']->nama_periode }}</div>
-                <div class="text-primary-100 mt-1">
+                <div class="text-blue-100 mt-1">
                     {{ $data['activePeriode']->tanggal_mulai_perencanaan_anggaran->translatedFormat('d F Y') }} - {{ $data['activePeriode']->tanggal_selesai_perencanaan_anggaran->translatedFormat('d F Y') }}
                 </div>
             </div>
             <div class="text-right">
-                <div class="text-sm text-primary-100 mb-1">Total Pagu Periode</div>
+                <div class="text-sm text-blue-100 mb-1">Total Pagu Periode</div>
                 <div class="text-2xl font-bold">{{ formatRupiah($data['totalPagu']) }}</div>
             </div>
         </div>
@@ -53,10 +53,10 @@
         </div>
 
         <!-- Terpakai -->
-        <div class="bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl p-6 text-white shadow-soft">
+        <div class="bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl p-6 text-white shadow-soft">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-amber-100 text-sm font-medium">Total Terpakai</p>
+                    <p class="text-orange-100 text-sm font-medium">Total Terpakai</p>
                     <p class="text-2xl font-bold mt-1">{{ formatRupiah($data['terpakai']) }}</p>
                 </div>
                 <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -83,10 +83,10 @@
         </div>
 
         <!-- Pencairan Hari Ini -->
-        <div class="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl p-6 text-white shadow-soft">
+        <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 text-white shadow-soft">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-purple-100 text-sm font-medium">Pencairan Hari Ini</p>
+                    <p class="text-blue-100 text-sm font-medium">Pencairan Hari Ini</p>
                     <p class="text-2xl font-bold mt-1">{{ formatRupiah($data['totalPencairanHariIni']) }}</p>
                 </div>
                 <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -104,10 +104,10 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-secondary-500 text-sm font-medium">Menunggu Approval</p>
-                    <p class="text-3xl font-bold text-amber-600 mt-1">{{ $data['pengajuanMenunggu'] }}</p>
+                    <p class="text-3xl font-bold text-orange-600 mt-1">{{ $data['pengajuanMenunggu'] }}</p>
                 </div>
-                <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
@@ -143,11 +143,48 @@
         </div>
     </div>
 
+    <!-- Menunggu Approval Saya -->
+    @if(isset($data['myPendingApprovals']) && $data['myPendingApprovals']->count() > 0)
+    <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl shadow-soft p-6 mb-8 text-white">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold">Menunggu Approval Saya</h3>
+                    <p class="text-orange-100 text-sm">{{ $data['myPendingApprovals']->count() }} pengajuan memerlukan persetujuan Anda</p>
+                </div>
+            </div>
+            <a href="{{ route('approvals.index') }}" class="bg-white text-orange-600 px-4 py-2 rounded-xl font-semibold hover:bg-orange-50 transition-colors">
+                Lihat Semua
+            </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach($data['myPendingApprovals'] as $approval)
+                <a href="{{ route('approvals.show', $approval) }}" class="bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-colors block">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-bold">{{ $approval->pengajuanDana->nomor_pengajuan }}</span>
+                        <span class="text-xs bg-white/20 px-2 py-1 rounded-full">{{ $approval->level }}</span>
+                    </div>
+                    <p class="text-sm text-orange-100 mb-2">{{ $approval->pengajuanDana->judul_pengajuan }}</p>
+                    <div class="flex justify-between items-center text-sm">
+                        <span>{{ $approval->pengajuanDana->createdBy->full_name ?? '-' }}</span>
+                        <span class="font-bold">{{ formatRupiah($approval->pengajuanDana->total_pengajuan) }}</span>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <!-- LPJ & Refund Statistics -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-amber-500">
+        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-orange-500">
             <p class="text-secondary-500 text-sm font-medium">LPJ Pending</p>
-            <p class="text-2xl font-bold text-amber-600 mt-1">{{ $data['lpjPending'] }}</p>
+            <p class="text-2xl font-bold text-orange-600 mt-1">{{ $data['lpjPending'] }}</p>
         </div>
         <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-blue-500">
             <p class="text-secondary-500 text-sm font-medium">LPJ Revisi</p>
@@ -157,9 +194,9 @@
             <p class="text-secondary-500 text-sm font-medium">Refund Pending</p>
             <p class="text-2xl font-bold text-red-600 mt-1">{{ $data['refundPending'] }}</p>
         </div>
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-purple-500">
+        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-blue-500">
             <p class="text-secondary-500 text-sm font-medium">Pencairan Pending</p>
-            <p class="text-2xl font-bold text-purple-600 mt-1">{{ $data['pencairanPending'] }}</p>
+            <p class="text-2xl font-bold text-blue-600 mt-1">{{ $data['pencairanPending'] }}</p>
         </div>
     </div>
 
@@ -167,7 +204,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <!-- Pencairan Need Verification -->
         <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4 flex items-center justify-between">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 flex items-center justify-between">
                 <h3 class="text-lg font-bold text-white flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -180,14 +217,14 @@
                 @if($data['pencairanNeedVerification']->count() > 0)
                     <div class="space-y-3">
                         @foreach($data['pencairanNeedVerification'] as $pencairan)
-                            <a href="{{ route('pencairan-dana.show', $pencairan) }}" class="block p-3 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors">
+                            <a href="{{ route('pencairan-dana.show', $pencairan) }}" class="block p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
                                 <div class="flex justify-between items-start">
                                     <div>
                                         <p class="font-semibold text-gray-900">{{ $pencairan->nomor_pencairan }}</p>
                                         <p class="text-sm text-gray-500">{{ $pencairan->pengajuanDana->divisi->nama_divisi ?? '-' }}</p>
                                     </div>
                                     <div class="text-right">
-                                        <p class="font-bold text-purple-600">{{ formatRupiah($pencairan->jumlah_pencairan) }}</p>
+                                        <p class="font-bold text-blue-600">{{ formatRupiah($pencairan->jumlah_pencairan) }}</p>
                                     </div>
                                 </div>
                             </a>
@@ -206,7 +243,7 @@
 
         <!-- LPJ Need Verification -->
         <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
-            <div class="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 flex items-center justify-between">
+            <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 flex items-center justify-between">
                 <h3 class="text-lg font-bold text-white flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -219,14 +256,14 @@
                 @if($data['lpjNeedVerification']->count() > 0)
                     <div class="space-y-3">
                         @foreach($data['lpjNeedVerification'] as $lpj)
-                            <a href="{{ route('lpj.show', $lpj) }}" class="block p-3 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors">
+                            <a href="{{ route('lpj.show', $lpj) }}" class="block p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
                                 <div class="flex justify-between items-start">
                                     <div>
                                         <p class="font-semibold text-gray-900">{{ $lpj->nomor_lpj }}</p>
                                         <p class="text-sm text-gray-500">{{ $lpj->pencairanDana->pengajuanDana->divisi->nama_divisi ?? '-' }}</p>
                                     </div>
                                     <div class="text-right">
-                                        <p class="font-bold text-amber-600">{{ formatRupiah($lpj->total_pengeluaran) }}</p>
+                                        <p class="font-bold text-orange-600">{{ formatRupiah($lpj->total_pengeluaran) }}</p>
                                     </div>
                                 </div>
                             </a>
@@ -319,7 +356,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold
-                                    @if($pengajuan->status == 'menunggu_approval') bg-amber-100 text-amber-800
+                                    @if($pengajuan->status == 'menunggu_approval') bg-orange-100 text-orange-800
                                     @elseif($pengajuan->status == 'disetujui') bg-green-100 text-green-800
                                     @elseif($pengajuan->status == 'ditolak') bg-red-100 text-red-800
                                     @else bg-gray-100 text-gray-800

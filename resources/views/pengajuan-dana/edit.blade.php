@@ -40,7 +40,7 @@
             <!-- Informasi Dasar -->
             <div class="mb-8">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                    <span class="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg flex items-center justify-center mr-3 shadow-blue-500/30 shadow-md">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -52,7 +52,7 @@
                     <div class="md:col-span-2">
                         <x-input-label for="judul_pengajuan" value="Judul Pengajuan *" />
                         <input type="text" name="judul_pengajuan" id="judul_pengajuan" value="{{ old('judul_pengajuan', $pengajuan->judul_pengajuan) }}" required
-                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                             placeholder="Contoh: Pengadaan ATK Bulan Januari">
                         <x-input-error :messages="$errors->get('judul_pengajuan')" class="mt-2" />
                     </div>
@@ -60,7 +60,7 @@
                     <div>
                         <x-input-label for="periode_anggaran_id" value="Periode Anggaran *" />
                         <select name="periode_anggaran_id" id="periode_anggaran_id" required
-                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             <option value="">Pilih Periode</option>
                             @foreach($periodeAnggarans ?? [] as $periode)
                                 <option value="{{ $periode->id }}" {{ old('periode_anggaran_id', $pengajuan->periode_anggaran_id) == $periode->id ? 'selected' : '' }}>
@@ -74,14 +74,14 @@
                     <div>
                         <x-input-label for="tanggal_dibutuhkan" value="Tanggal Dana Dibutuhkan *" />
                         <input type="date" name="tanggal_dibutuhkan" id="tanggal_dibutuhkan" value="{{ old('tanggal_dibutuhkan', $pengajuan->tanggal_dibutuhkan?->format('Y-m-d')) }}" required
-                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                         <x-input-error :messages="$errors->get('tanggal_dibutuhkan')" class="mt-2" />
                     </div>
 
                     <div>
                         <x-input-label for="program_kerja_id" value="Program Kerja" />
                         <select name="program_kerja_id" id="program_kerja_id"
-                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             <option value="">Pilih Program Kerja (Opsional)</option>
                             @foreach($programKerjas ?? [] as $program)
                                 <option value="{{ $program->id }}" {{ old('program_kerja_id', $pengajuan->program_kerja_id) == $program->id ? 'selected' : '' }}>
@@ -95,7 +95,7 @@
                     <div>
                         <x-input-label for="kegiatan_id" value="Kegiatan" />
                         <select name="kegiatan_id" id="kegiatan_id"
-                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             <option value="">Pilih Kegiatan (Opsional)</option>
                             @foreach($kegiatans ?? [] as $kegiatan)
                                 <option value="{{ $kegiatan->id }}" {{ old('kegiatan_id', $pengajuan->kegiatan_id) == $kegiatan->id ? 'selected' : '' }}>
@@ -109,7 +109,7 @@
                     <div class="md:col-span-2">
                         <x-input-label for="metode_pencairan" value="Metode Pencairan *" />
                         <select name="metode_pencairan" id="metode_pencairan" required
-                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             <option value="">Pilih Metode Pencairan</option>
                             <option value="transfer" {{ old('metode_pencairan', $pengajuan->metode_pencairan) === 'transfer' ? 'selected' : '' }}>Transfer Bank</option>
                             <option value="cash" {{ old('metode_pencairan', $pengajuan->metode_pencairan) === 'cash' ? 'selected' : '' }}>Uang Tunai</option>
@@ -121,7 +121,7 @@
                     <div class="md:col-span-2">
                         <x-input-label for="deskripsi" value="Deskripsi Pengajuan" />
                         <textarea name="deskripsi" id="deskripsi" rows="3"
-                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                             placeholder="Jelaskan detail pengajuan dana...">{{ old('deskripsi', $pengajuan->deskripsi) }}</textarea>
                         <x-input-error :messages="$errors->get('deskripsi')" class="mt-2" />
                     </div>
@@ -131,7 +131,7 @@
             <!-- Detail Pengajuan -->
             <div class="mb-8">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                    <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg flex items-center justify-center mr-3 shadow-blue-500/30 shadow-md">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
@@ -149,25 +149,25 @@
                         <div class="col-span-12 md:col-span-4">
                             <label class="block text-xs font-medium text-secondary-700 mb-1">Uraian</label>
                             <input type="text" name="details[{{ $index }}][uraian]" value="{{ $detail['uraian'] ?? '' }}" required
-                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                                 placeholder="Nama barang/jasa">
                         </div>
                         <div class="col-span-3 md:col-span-2">
                             <label class="block text-xs font-medium text-secondary-700 mb-1">Volume</label>
                             <input type="number" name="details[{{ $index }}][volume]" value="{{ $detail['volume'] ?? '' }}" min="1" required
-                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent detail-volume"
+                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 detail-volume"
                                 data-index="{{ $index }}" onchange="calculateRowTotal({{ $index }})">
                         </div>
                         <div class="col-span-4 md:col-span-2">
                             <label class="block text-xs font-medium text-secondary-700 mb-1">Satuan</label>
                             <input type="text" name="details[{{ $index }}][satuan]" value="{{ $detail['satuan'] ?? '' }}"
-                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                                 placeholder="unit/pcs/ls">
                         </div>
                         <div class="col-span-3 md:col-span-2">
                             <label class="block text-xs font-medium text-secondary-700 mb-1">Harga</label>
                             <input type="number" name="details[{{ $index }}][harga_satuan]" value="{{ $detail['harga_satuan'] ?? '' }}" min="0" step="0.01" required
-                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent detail-harga"
+                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 detail-harga"
                                 data-index="{{ $index }}" onchange="calculateRowTotal({{ $index }})">
                         </div>
                         <div class="col-span-2 md:col-span-1 text-right">
@@ -191,17 +191,17 @@
                     @endforeach
                 </div>
 
-                <button type="button" onclick="addDetailRow()" class="mt-4 flex items-center text-sm text-primary-600 hover:text-primary-700 font-medium">
+                <button type="button" onclick="addDetailRow()" class="mt-4 flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium">
                     <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
                     Tambah Rincian
                 </button>
 
-                <div class="mt-6 p-4 bg-primary-50 rounded-xl">
+                <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
                     <div class="flex justify-between items-center">
                         <span class="text-sm font-medium text-secondary-700">Total Pengajuan:</span>
-                        <span id="total-pengajuan" class="text-xl font-bold text-primary-600">{{ formatRupiah(old('total_pengajuan', $pengajuan->total_pengajuan)) }}</span>
+                        <span id="total-pengajuan" class="text-xl font-bold text-blue-600">{{ formatRupiah(old('total_pengajuan', $pengajuan->total_pengajuan)) }}</span>
                     </div>
                 </div>
             </div>
@@ -209,7 +209,7 @@
             <!-- Penerima Manfaat -->
             <div class="mb-8">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                    <span class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg flex items-center justify-center mr-3 shadow-blue-500/30 shadow-md">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -226,17 +226,17 @@
                     <div class="penerima-row grid grid-cols-12 gap-3 items-center p-4 bg-secondary-50 rounded-xl">
                         <div class="col-span-12 md:col-span-5">
                             <input type="text" name="penerimas[{{ $pIndex }}][nama_penerima]" value="{{ $penerima['nama_penerima'] ?? '' }}"
-                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                                 placeholder="Nama penerima">
                         </div>
                         <div class="col-span-6 md:col-span-4">
                             <input type="text" name="penerimas[{{ $pIndex }}][jenis_penerima]" value="{{ $penerima['jenis_penerima'] ?? '' }}"
-                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                                 placeholder="Jenis (pegawai/vendor/etc)">
                         </div>
                         <div class="col-span-6 md:col-span-2">
                             <input type="text" name="penerimas[{{ $pIndex }}][nomor_identitas]" value="{{ $penerima['nomor_identitas'] ?? '' }}"
-                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                                 placeholder="No. Identitas">
                         </div>
                         <div class="col-span-12 md:col-span-1 text-center">
@@ -253,7 +253,7 @@
                     @endforeach
                 </div>
 
-                <button type="button" onclick="addPenerimaRow()" class="mt-4 flex items-center text-sm text-primary-600 hover:text-primary-700 font-medium">
+                <button type="button" onclick="addPenerimaRow()" class="mt-4 flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium">
                     <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -297,7 +297,7 @@
                             </svg>
                             <span class="text-sm text-secondary-700">{{ $lampiran->nama_dokumen }}</span>
                         </div>
-                        <input type="checkbox" name="remove_lampiran[]" value="{{ $lampiran->id }}" class="rounded border-secondary-300 text-primary-600 focus:ring-primary-500">
+                        <input type="checkbox" name="remove_lampiran[]" value="{{ $lampiran->id }}" class="rounded border-secondary-300 text-blue-600 focus:ring-blue-500">
                     </div>
                     @endforeach
                     <p class="text-xs text-secondary-500">Centang file yang ingin dihapus</p>
@@ -312,7 +312,7 @@
                 <a href="{{ route('pengajuan-dana.show', $pengajuan) }}" class="px-6 py-3 border border-secondary-200 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
                     Batal
                 </a>
-                <button type="submit" class="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
+                <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-soft hover:shadow-medium">
                     <span class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

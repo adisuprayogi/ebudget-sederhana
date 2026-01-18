@@ -65,10 +65,10 @@
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-6 text-white shadow-soft">
+        <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 text-white shadow-soft">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-green-100 text-sm font-medium">Sisa Pagu</p>
+                    <p class="text-blue-100 text-sm font-medium">Sisa Pagu</p>
                     <p class="text-2xl font-bold mt-1">{{ formatRupiah($data['sisaPagu']) }}</p>
                 </div>
                 <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -84,12 +84,12 @@
     <div class="bg-white rounded-2xl shadow-soft p-6 mb-8">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-bold text-secondary-900">Penggunaan Pagu Anggaran</h3>
-            <span class="text-2xl font-bold {{ ($data['terpakai'] / $data['totalPagu']) * 100 > 90 ? 'text-red-600' : (($data['terpakai'] / $data['totalPagu']) * 100 > 70 ? 'text-amber-600' : 'text-green-600') }}">
+            <span class="text-2xl font-bold {{ ($data['terpakai'] / $data['totalPagu']) * 100 > 90 ? 'text-red-600' : (($data['terpakai'] / $data['totalPagu']) * 100 > 70 ? 'text-orange-600' : 'text-blue-600') }}">
                 {{ round(($data['terpakai'] / $data['totalPagu']) * 100, 1) }}%
             </span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
-            <div class="h-4 rounded-full bg-gradient-to-r {{ ($data['terpakai'] / $data['totalPagu']) * 100 > 90 ? 'from-red-500 to-red-600' : (($data['terpakai'] / $data['totalPagu']) * 100 > 70 ? 'from-amber-500 to-amber-600' : 'from-green-500 to-green-600') }}" style="width: {{ min(($data['terpakai'] / $data['totalPagu']) * 100, 100) }}%"></div>
+            <div class="h-4 rounded-full bg-gradient-to-r {{ ($data['terpakai'] / $data['totalPagu']) * 100 > 90 ? 'from-red-500 to-red-600' : (($data['terpakai'] / $data['totalPagu']) * 100 > 70 ? 'from-orange-500 to-orange-600' : 'from-blue-500 to-blue-600') }}" style="width: {{ min(($data['terpakai'] / $data['totalPagu']) * 100, 100) }}%"></div>
         </div>
         <div class="flex justify-between text-sm text-gray-600">
             <span>{{ formatRupiah($data['terpakai']) }} terpakai</span>
@@ -103,9 +103,9 @@
             <p class="text-secondary-500 text-sm font-medium">Menunggu Approval</p>
             <p class="text-3xl font-bold text-amber-600 mt-1">{{ $data['pengajuanMenunggu'] }}</p>
         </div>
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-green-500">
+        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-blue-500">
             <p class="text-secondary-500 text-sm font-medium">Disetujui</p>
-            <p class="text-3xl font-bold text-green-600 mt-1">{{ $data['pengajuanDisetujui'] }}</p>
+            <p class="text-3xl font-bold text-blue-600 mt-1">{{ $data['pengajuanDisetujui'] }}</p>
         </div>
         <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-red-500">
             <p class="text-secondary-500 text-sm font-medium">Ditolak</p>
@@ -117,17 +117,54 @@
         </div>
     </div>
 
+    <!-- Menunggu Approval Saya -->
+    @if(isset($data['myPendingApprovals']) && $data['myPendingApprovals']->count() > 0)
+    <div class="bg-gradient-to-r from-blue-400 to-blue-600 rounded-2xl shadow-soft p-6 mb-8 text-white">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold">Menunggu Approval Saya</h3>
+                    <p class="text-blue-100 text-sm">{{ $data['myPendingApprovals']->count() }} pengajuan memerlukan persetujuan Anda</p>
+                </div>
+            </div>
+            <a href="{{ route('approvals.index') }}" class="bg-white text-blue-600 px-4 py-2 rounded-xl font-semibold hover:bg-blue-50 transition-colors">
+                Lihat Semua
+            </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach($data['myPendingApprovals'] as $approval)
+                <a href="{{ route('approvals.show', $approval) }}" class="bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-colors block">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-bold">{{ $approval->pengajuanDana->nomor_pengajuan }}</span>
+                        <span class="text-xs bg-white/20 px-2 py-1 rounded-full">{{ $approval->level }}</span>
+                    </div>
+                    <p class="text-sm text-blue-100 mb-2">{{ $approval->pengajuanDana->judul_pengajuan }}</p>
+                    <div class="flex justify-between items-center text-sm">
+                        <span>{{ $approval->pengajuanDana->createdBy->full_name ?? '-' }}</span>
+                        <span class="font-bold">{{ formatRupiah($approval->pengajuanDana->total_pengajuan) }}</span>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <!-- Notifications -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 mb-8">
         <!-- Pencairan Menunggu -->
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-purple-500">
+        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-blue-500">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-secondary-500 text-sm font-medium">Pencairan Menunggu</p>
-                    <p class="text-2xl font-bold text-purple-600 mt-1">{{ $data['pencairanMenunggu'] }}</p>
+                    <p class="text-2xl font-bold text-blue-600 mt-1">{{ $data['pencairanMenunggu'] }}</p>
                 </div>
-                <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                 </div>
@@ -150,14 +187,14 @@
         </div>
 
         <!-- LPJ Need Refund -->
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-teal-500">
+        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-blue-500">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-secondary-500 text-sm font-medium">Perlu Refund</p>
-                    <p class="text-2xl font-bold text-teal-600 mt-1">{{ $data['lpjNeedRefund'] }}</p>
+                    <p class="text-2xl font-bold text-blue-600 mt-1">{{ $data['lpjNeedRefund'] }}</p>
                 </div>
-                <div class="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                 </div>
@@ -183,31 +220,31 @@
         </a>
 
         <a href="{{ route('pengajuan-dana.create') }}" class="flex items-center p-6 bg-white rounded-2xl shadow-soft hover:shadow-medium transition-all group">
-            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 group-hover:scale-110 transition-transform">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 group-hover:scale-110 transition-transform">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
             </div>
             <div class="ml-5">
-                <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-600">Buat Pengajuan</h3>
+                <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-600">Buat Pengajuan</h3>
                 <p class="text-sm text-gray-500 mt-1">Ajukan dana baru</p>
             </div>
-            <svg class="w-5 h-5 text-gray-400 ml-auto group-hover:text-green-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-gray-400 ml-auto group-hover:text-blue-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </a>
 
         <a href="{{ route('pengajuan-dana.index') }}" class="flex items-center p-6 bg-white rounded-2xl shadow-soft hover:shadow-medium transition-all group">
-            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 group-hover:scale-110 transition-transform">
+            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 group-hover:scale-110 transition-transform">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
             </div>
             <div class="ml-5">
-                <h3 class="text-lg font-bold text-gray-900 group-hover:text-purple-600">Lihat Semua Pengajuan</h3>
+                <h3 class="text-lg font-bold text-gray-900 group-hover:text-orange-600">Lihat Semua Pengajuan</h3>
                 <p class="text-sm text-gray-500 mt-1">Daftar pengajuan divisi</p>
             </div>
-            <svg class="w-5 h-5 text-gray-400 ml-auto group-hover:text-purple-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-gray-400 ml-auto group-hover:text-orange-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </a>

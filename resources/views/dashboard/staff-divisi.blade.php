@@ -36,7 +36,7 @@
     @endif
 
     <!-- Welcome Section -->
-    <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-soft p-8 mb-8 text-white">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-soft p-8 mb-8 text-white">
         <div class="flex items-center space-x-4">
             <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,10 +80,10 @@
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-6 text-white shadow-soft">
+        <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 text-white shadow-soft">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-green-100 text-sm font-medium">Sisa Pagu</p>
+                    <p class="text-blue-100 text-sm font-medium">Sisa Pagu</p>
                     <p class="text-2xl font-bold mt-1">{{ formatRupiah($data['sisaPagu']) }}</p>
                 </div>
                 <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -109,9 +109,9 @@
             <p class="text-secondary-500 text-sm font-medium">Menunggu</p>
             <p class="text-3xl font-bold text-amber-600 mt-1">{{ $data['pengajuanMenunggu'] }}</p>
         </div>
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-green-500">
+        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-blue-500">
             <p class="text-secondary-500 text-sm font-medium">Disetujui</p>
-            <p class="text-3xl font-bold text-green-600 mt-1">{{ $data['pengajuanDisetujui'] }}</p>
+            <p class="text-3xl font-bold text-blue-600 mt-1">{{ $data['pengajuanDisetujui'] }}</p>
         </div>
         <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-red-500">
             <p class="text-secondary-500 text-sm font-medium">Ditolak</p>
@@ -297,7 +297,7 @@
     </div>
 
     <!-- Help Section -->
-    <div class="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+    <div class="mt-8 bg-gradient-to-r from-blue-50 to-blue-50 rounded-2xl p-6 border border-blue-200">
         <div class="flex items-start">
             <div class="flex-shrink-0 bg-blue-100 rounded-xl p-3">
                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

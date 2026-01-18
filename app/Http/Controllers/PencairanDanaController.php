@@ -196,6 +196,12 @@ class PencairanDanaController extends Controller
             },
         ])->findOrFail($pengajuanId);
 
+        // Load vendor data if penerima_manfaat_type is vendor and ID is set
+        $vendor = null;
+        if ($pengajuan->penerima_manfaat_type === 'vendor' && $pengajuan->penerima_manfaat_id) {
+            $vendor = \App\Models\Vendor::with('bank')->find($pengajuan->penerima_manfaat_id);
+        }
+
         // Check if can create pencairan
         if (!PencairanService::canCreatePencairan($pengajuan)) {
             return redirect()
@@ -205,6 +211,7 @@ class PencairanDanaController extends Controller
 
         return view('pencairan-dana.create', [
             'pengajuan' => $pengajuan,
+            'vendor' => $vendor,
             'user' => $user,
             'rekeningPerusahaan' => \App\Models\RekeningPerusahaan::with('bank')
                 ->active()
@@ -595,9 +602,17 @@ class PencairanDanaController extends Controller
             'detailPencairans.honorariumDetail',
         ]);
 
+        // Load vendor data if applicable
+        $vendor = null;
+        $pengajuan = $pencairanDana->pengajuanDana;
+        if ($pengajuan->penerima_manfaat_type === 'vendor' && $pengajuan->penerima_manfaat_id) {
+            $vendor = \App\Models\Vendor::with('bank')->find($pengajuan->penerima_manfaat_id);
+        }
+
         return view('pencairan-dana.retry', [
             'pencairan' => $pencairanDana,
-            'pengajuan' => $pencairanDana->pengajuanDana,
+            'pengajuan' => $pengajuan,
+            'vendor' => $vendor,
             'user' => $user,
             'rekeningPerusahaan' => \App\Models\RekeningPerusahaan::with('bank')
                 ->active()

@@ -103,7 +103,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                                         {{ $pengajuan->divisi->nama_divisi ?? '-' }}
                                     </span>
                                 </td>

@@ -38,7 +38,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
                         <p class="text-secondary-500">Nomor LPJ</p>
-                        <p class="font-mono font-semibold text-primary-600">{{ $lpj->nomor_lpj }}</p>
+                        <p class="font-mono font-semibold text-blue-600">{{ $lpj->nomor_lpj }}</p>
                     </div>
                     <div>
                         <p class="text-secondary-500">Uraian Kegiatan</p>
@@ -114,7 +114,7 @@
                     @else
                         <div>
                             <label class="block text-sm font-medium text-secondary-700 mb-2">Nomor Pencairan Dana</label>
-                            <input type="text" name="nomor_pencairan" placeholder="Cari pencairan..." class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <input type="text" name="nomor_pencairan" placeholder="Cari pencairan..." class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             <input type="hidden" name="pencairan_dana_id" value="">
                         </div>
                     @endif
@@ -140,7 +140,7 @@
                     @elseif(!$pencairan)
                         <div>
                             <label class="block text-sm font-medium text-secondary-700 mb-2">Nomor Pengajuan Dana</label>
-                            <input type="text" name="nomor_pengajuan" placeholder="Cari pengajuan..." class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <input type="text" name="nomor_pengajuan" placeholder="Cari pengajuan..." class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             <input type="hidden" name="pengajuan_dana_id" value="">
                         </div>
                     @endif
@@ -148,7 +148,7 @@
                     <!-- Tanggal Refund -->
                     <div>
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Tanggal Refund <span class="text-red-500">*</span></label>
-                        <input type="date" name="tanggal_refund" value="{{ old('tanggal_refund') }}" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <input type="date" name="tanggal_refund" value="{{ old('tanggal_refund') }}" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                         @error('tanggal_refund')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -157,7 +157,7 @@
                     <!-- Jenis Refund -->
                     <div>
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Jenis Refund <span class="text-red-500">*</span></label>
-                        <select name="jenis_refund" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <select name="jenis_refund" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             <option value="">Pilih Jenis Refund</option>
                             <option value="kelebihan" {{ old('jenis_refund') == 'kelebihan' ? 'selected' : '' }}>Kelebihan Transfer</option>
                             <option value="dana_kembali" {{ old('jenis_refund') == 'dana_kembali' ? 'selected' : '' }}>Dana Kembali</option>
@@ -175,9 +175,9 @@
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-secondary-500 font-medium">Rp</span>
                             @if($lpj && $lpj->sisa_dana > 0)
-                                <input type="number" name="jumlah_refund" value="{{ old('jumlah_refund', $lpj->sisa_dana) }}" required min="0" max="{{ $lpj->sisa_dana }}" step="0.01" class="w-full pl-12 pr-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="0">
+                                <input type="number" name="jumlah_refund" value="{{ old('jumlah_refund', $lpj->sisa_dana) }}" required min="0" max="{{ $lpj->sisa_dana }}" step="0.01" class="w-full pl-12 pr-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200" placeholder="0">
                             @else
-                                <input type="number" name="jumlah_refund" value="{{ old('jumlah_refund') }}" required min="0" step="0.01" class="w-full pl-12 pr-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="0">
+                                <input type="number" name="jumlah_refund" value="{{ old('jumlah_refund') }}" required min="0" step="0.01" class="w-full pl-12 pr-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200" placeholder="0">
                             @endif
                         </div>
                         @if($lpj && $lpj->sisa_dana > 0)
@@ -191,7 +191,7 @@
                     <!-- Rekening Tujuan -->
                     <div>
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Rekening Tujuan</label>
-                        <select name="rekening_perusahaan_id" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <select name="rekening_perusahaan_id" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             <option value="">Pilih Rekening Perusahaan</option>
                             @foreach($rekeningPerusahaan ?? [] as $rekening)
                                 <option value="{{ $rekening->id }}" {{ old('rekening_perusahaan_id') == $rekening->id ? 'selected' : '' }} {{ $rekening->is_default ? 'selected' : '' }}>
@@ -207,7 +207,7 @@
                     <!-- Rekening Pengirim -->
                     <div>
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Rekening Pengirim</label>
-                        <input type="text" name="rekening_pengirim" value="{{ old('rekening_pengirim') }}" placeholder="Nomor rekening pengirim" class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <input type="text" name="rekening_pengirim" value="{{ old('rekening_pengirim') }}" placeholder="Nomor rekening pengirim" class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                         @error('rekening_pengirim')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -216,7 +216,7 @@
                     <!-- Nama Pengirim -->
                     <div>
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Nama Pengirim</label>
-                        <input type="text" name="nama_pengirim" value="{{ old('nama_pengirim') }}" placeholder="Nama pemilik rekening pengirim" class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <input type="text" name="nama_pengirim" value="{{ old('nama_pengirim') }}" placeholder="Nama pemilik rekening pengirim" class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                         @error('nama_pengirim')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -225,7 +225,7 @@
                     <!-- Alasan Refund -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Alasan Refund <span class="text-red-500">*</span></label>
-                        <textarea name="alasan_refund" rows="4" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Jelaskan alasan pengembalian dana...">{{ old('alasan_refund') }}</textarea>
+                        <textarea name="alasan_refund" rows="4" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200" placeholder="Jelaskan alasan pengembalian dana...">{{ old('alasan_refund') }}</textarea>
                         @error('alasan_refund')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -234,13 +234,13 @@
                     <!-- Bukti Transfer (Optional) -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Bukti Transfer</label>
-                        <div class="flex justify-center px-6 pt-5 pb-6 border-2 border-secondary-300 border-dashed rounded-xl hover:border-primary-400 transition-colors">
+                        <div class="flex justify-center px-6 pt-5 pb-6 border-2 border-secondary-300 border-dashed rounded-xl hover:border-orange-400 transition-colors">
                             <div class="space-y-1 text-center">
                                 <svg class="mx-auto h-8 w-8 text-secondary-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                     <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                                 <div class="flex text-sm text-secondary-600">
-                                    <label class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none">
+                                    <label class="relative cursor-pointer bg-white rounded-md font-medium text-orange-500 hover:text-orange-600 focus-within:outline-none">
                                         <span>Pilih file</span>
                                         <input type="file" name="bukti_transfer" id="bukti_transfer" class="sr-only" accept=".pdf,.jpg,.jpeg,.png" onchange="displayFileName(this)">
                                     </label>
@@ -261,7 +261,7 @@
                 <a href="{{ route('refund.index') }}" class="px-6 py-3 bg-white border border-secondary-300 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
                     Batal
                 </a>
-                <button type="submit" class="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
+                <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-soft hover:shadow-medium">
                     <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>

@@ -99,7 +99,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
                                         {{ $user->role->name ?? '-' }}
                                     </span>
                                 </td>
@@ -108,9 +108,9 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     @if($user->is_active)
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Aktif</span>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Aktif</span>
                                     @else
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">Non-Aktif</span>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">Non-Aktif</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
@@ -122,7 +122,7 @@
                                             </svg>
                                         </a>
                                         @if($permissions['edit'] ?? false)
-                                            <a href="{{ route('users.edit', $user) }}" class="p-2 text-secondary-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
+                                            <a href="{{ route('users.edit', $user) }}" class="p-2 text-secondary-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                 </svg>

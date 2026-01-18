@@ -28,9 +28,9 @@
             @enderror
 
             <!-- Pengajuan Dana Info (Read-only) -->
-            <div class="mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6">
+            <div class="mb-8 bg-gradient-to-r from-blue-50 to-orange-50 border border-blue-100 rounded-2xl p-6">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                    <span class="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="w-8 h-8 bg-primary-100 text-blue-600 rounded-lg flex items-center justify-center mr-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
@@ -38,19 +38,41 @@
                     Informasi Pengajuan Dana
                 </h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-1">Nomor Pengajuan</p>
-                        <p class="font-mono text-lg font-semibold text-primary-600">{{ $pengajuan->nomor_pengajuan }}</p>
+                        <p class="font-mono text-lg font-semibold text-blue-600">{{ $pengajuan->nomor_pengajuan }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-1">Tanggal Pengajuan</p>
+                        <p class="font-medium text-secondary-900">{{ $pengajuan->tanggal_pengajuan ? $pengajuan->tanggal_pengajuan->format('d/m/Y') : '-' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-1">Jenis Pengajuan</p>
+                        <p class="font-medium text-secondary-900">{{ ucfirst(str_replace('_', ' ', $pengajuan->jenis_pengajuan)) }}</p>
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-1">Judul Pengajuan</p>
                         <p class="font-medium text-secondary-900">{{ $pengajuan->judul_pengajuan }}</p>
                     </div>
                     <div>
+                        <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-1">Jenis Penerima</p>
+                        <p class="font-medium text-secondary-900">{{ ucfirst($pengajuan->penerima_manfaat_type ?? '-') }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-1">Nama Penerima</p>
+                        <p class="font-medium text-secondary-900">{{ $pengajuan->penerima_manfaat_name ?? '-' }}</p>
+                    </div>
+                    <div>
                         <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-1">Divisi</p>
                         <p class="font-medium text-secondary-900">{{ $pengajuan->divisi->nama_divisi ?? '-' }}</p>
                     </div>
+                    @if($pengajuan->subProgram)
+                    <div>
+                        <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-1">Sub Program</p>
+                        <p class="font-medium text-secondary-900">{{ $pengajuan->subProgram->nama_sub_program }}</p>
+                    </div>
+                    @endif
                     @if($pengajuan->programKerja)
                     <div>
                         <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-1">Program Kerja</p>
@@ -59,13 +81,86 @@
                     @endif
                     <div>
                         <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-1">Total Pengajuan</p>
-                        <p class="text-2xl font-bold text-primary-600">{{ formatRupiah($pengajuan->total_pengajuan) }}</p>
+                        <p class="text-2xl font-bold text-blue-600">{{ formatRupiah($pengajuan->total_pengajuan) }}</p>
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-1">Diajukan Oleh</p>
                         <p class="font-medium text-secondary-900">{{ $pengajuan->createdBy->name }}</p>
                     </div>
                 </div>
+
+                @if($pengajuan->deskripsi)
+                <div class="mt-4 pt-4 border-t border-blue-200">
+                    <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-2">Deskripsi Pengajuan</p>
+                    <p class="text-sm text-secondary-700 bg-white p-3 rounded-lg border border-blue-200">{{ $pengajuan->deskripsi }}</p>
+                </div>
+                @endif
+
+                {{-- Informasi Rekening Penerima Manfaat (Vendor) --}}
+                @if($pengajuan->penerima_manfaat_type === 'vendor' && isset($vendor) && $vendor)
+                <div class="mt-4 pt-4 border-t border-blue-200">
+                    <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-3">Informasi Rekening Penerima (Vendor)</p>
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <p class="text-xs text-secondary-500 mb-1">Nama Vendor</p>
+                                <p class="font-semibold text-secondary-900">{{ $vendor->nama_vendor }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-secondary-500 mb-1">Bank</p>
+                                <p class="font-medium text-secondary-900">{{ $vendor->bank->nama_bank ?? '-' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-secondary-500 mb-1">Nomor Rekening</p>
+                                <p class="font-mono font-semibold text-blue-600">{{ $vendor->nomor_rekening ?? '-' }}</p>
+                            </div>
+                            @if($vendor->atas_nama)
+                            <div class="md:col-span-3">
+                                <p class="text-xs text-secondary-500 mb-1">Atas Nama</p>
+                                <p class="font-medium text-secondary-900">{{ $vendor->atas_nama }}</p>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                @if($pengajuan->penerima_manfaat_detail)
+                <div class="mt-4 pt-4 border-t border-blue-200">
+                    <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-2">Detail Penerima Manfaat</p>
+                    <p class="text-sm text-secondary-700 bg-white p-3 rounded-lg border border-blue-200">{{ $pengajuan->penerima_manfaat_detail }}</p>
+                </div>
+                @endif
+
+                @if($pengajuan->jenis_pengajuan === 'honorarium' && $pengajuan->honorariumDetails && $pengajuan->honorariumDetails->isNotEmpty())
+                <div class="mt-4 pt-4 border-t border-blue-200">
+                    <p class="text-xs font-semibold text-secondary-500 uppercase tracking-wider mb-3">Informasi Rekening Penerima</p>
+                    <div class="bg-purple-50 border border-purple-200 rounded-xl p-4">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-purple-100">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left font-semibold text-secondary-700">Nama Penerima</th>
+                                        <th class="px-3 py-2 text-left font-semibold text-secondary-700">Bank</th>
+                                        <th class="px-3 py-2 text-left font-semibold text-secondary-700">Nomor Rekening</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-purple-100">
+                                    @foreach($pengajuan->honorariumDetails as $honorarium)
+                                    @if($honorarium->nomor_rekening)
+                                    <tr>
+                                        <td class="px-3 py-2 font-medium text-secondary-900">{{ $honorarium->penerima_nama }}</td>
+                                        <td class="px-3 py-2 text-secondary-600">{{ $honorarium->nama_bank ?? '-' }}</td>
+                                        <td class="px-3 py-2 font-mono text-sm font-semibold text-blue-600">{{ $honorarium->nomor_rekening }}</td>
+                                    </tr>
+                                    @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 @if($pengajuan->details && $pengajuan->details->isNotEmpty())
                 <div class="mt-6 pt-6 border-t border-blue-200">
@@ -113,7 +208,7 @@
                                 <tr>
                                     <td class="px-4 py-2 font-medium text-secondary-900">{{ $honorarium->penerima_nama }}</td>
                                     <td class="px-4 py-2 text-secondary-600">{{ $honorarium->jabatan }}</td>
-                                    <td class="px-4 py-2 text-right font-semibold text-primary-600">{{ formatRupiah($honorarium->jumlah_honor) }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold text-blue-600">{{ formatRupiah($honorarium->jumlah_honor) }}</td>
                                     <td class="px-4 py-2 text-secondary-600 font-mono text-xs">{{ $honorarium->nomor_rekening ?? '-' }}</td>
                                 </tr>
                                 @endforeach
@@ -127,7 +222,7 @@
             <!-- Detail Pencairan -->
             <div class="mb-8">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                    <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-blue-500/30 shadow-md rounded-lg flex items-center justify-center mr-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -168,7 +263,7 @@
                                         </td>
                                         <td class="px-3 py-2 font-medium text-secondary-900">{{ $honorarium->penerima_nama }}</td>
                                         <td class="px-3 py-2 text-secondary-600">{{ $honorarium->jabatan }}</td>
-                                        <td class="px-3 py-2 text-right font-semibold text-primary-600">{{ formatRupiah($honorarium->jumlah_honor) }}</td>
+                                        <td class="px-3 py-2 text-right font-semibold text-blue-600">{{ formatRupiah($honorarium->jumlah_honor) }}</td>
                                         <td class="px-3 py-2 text-secondary-600 font-mono text-xs">{{ $honorarium->nomor_rekening ?? '-' }}</td>
                                         <td class="px-2 py-2 text-center">
                                             <input type="file" name="lampiran_honorarium[{{ $honorarium->id }}]"
@@ -192,7 +287,7 @@
                             </div>
                             <div>
                                 <span class="text-sm text-purple-700">Total: </span>
-                                <span id="selected-total" class="text-lg font-bold text-primary-600">{{ formatRupiah(0) }}</span>
+                                <span id="selected-total" class="text-lg font-bold text-blue-600">{{ formatRupiah(0) }}</span>
                             </div>
                         </div>
                     </div>
@@ -206,7 +301,7 @@
                                 value="{{ old('jumlah_pencairan_display', number_format($pengajuan->total_pengajuan, 0, ',', '.')) }}"
                                 data-max="{{ $pengajuan->total_pengajuan }}"
                                 required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-green-50 font-semibold text-primary-600"
+                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-green-50 font-semibold text-blue-600"
                                 placeholder="0">
                             <input type="hidden" name="jumlah_pencairan" id="jumlah_pencairan" value="{{ old('jumlah_pencairan', $pengajuan->total_pengajuan) }}">
                             <p class="mt-1 text-xs text-secondary-500">Maksimal: {{ formatRupiah($pengajuan->total_pengajuan) }}</p>
@@ -217,7 +312,7 @@
                         <div>
                             <x-input-label for="tanggal_pencairan" value="Tanggal Pencairan *" />
                             <input type="date" name="tanggal_pencairan" id="tanggal_pencairan" value="{{ old('tanggal_pencairan', \Carbon\Carbon::now()->format('Y-m-d')) }}" required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             <x-input-error :messages="$errors->get('tanggal_pencairan')" class="mt-2" />
                         </div>
                     </div>
@@ -229,13 +324,13 @@
                     <div>
                         <x-input-label for="tanggal_pencairan" value="Tanggal Pencairan *" />
                         <input type="date" name="tanggal_pencairan" id="tanggal_pencairan" value="{{ old('tanggal_pencairan', \Carbon\Carbon::now()->format('Y-m-d')) }}" required
-                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                         <x-input-error :messages="$errors->get('tanggal_pencairan')" class="mt-2" />
                     </div>
                     <div>
                         <x-input-label for="metode_pencairan" value="Metode Pencairan *" />
                         <select name="metode_pencairan" id="metode_pencairan" required
-                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             <option value="">Pilih Metode</option>
                             <option value="transfer" {{ old('metode_pencairan', 'transfer') === 'transfer' ? 'selected' : '' }}>Transfer Bank</option>
                             <option value="cash" {{ old('metode_pencairan') === 'cash' ? 'selected' : '' }}>Uang Tunai</option>
@@ -247,7 +342,7 @@
                 <div class="mt-4">
                     <x-input-label for="metode_pencairan" value="Metode Pencairan *" />
                     <select name="metode_pencairan" id="metode_pencairan" required
-                        class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                         <option value="">Pilih Metode</option>
                         <option value="transfer" {{ old('metode_pencairan', 'transfer') === 'transfer' ? 'selected' : '' }}>Transfer Bank</option>
                         <option value="cash" {{ old('metode_pencairan') === 'cash' ? 'selected' : '' }}>Uang Tunai</option>
@@ -261,7 +356,7 @@
             <!-- Informasi Rekening (untuk transfer) -->
             <div id="rekening-section" class="mb-8">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                    <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-blue-500/30 shadow-md rounded-lg flex items-center justify-center mr-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
@@ -282,7 +377,7 @@
                         <div>
                             <x-input-label for="rekening_perusahaan_id" value="Pilih Rekening Sumber *" />
                             <select name="rekening_perusahaan_id" id="rekening_perusahaan_id"
-                                class="mt-1 block w-full px-4 py-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                                class="mt-1 block w-full px-4 py-3 border border-blue-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-white">
                                 <option value="">-- Pilih Rekening Perusahaan --</option>
                                 @foreach($rekeningPerusahaan ?? [] as $rekening)
                                     <option value="{{ $rekening->id }}" {{ old('rekening_perusahaan_id') == $rekening->id ? 'selected' : ($rekening->is_default ? 'selected' : '') }}>
@@ -312,7 +407,7 @@
                         <div>
                             <x-input-label for="rekening_perusahaan_id" value="Pilih Rekening Sumber *" />
                             <select name="rekening_perusahaan_id" id="rekening_perusahaan_id" required
-                                class="mt-1 block w-full px-4 py-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                                class="mt-1 block w-full px-4 py-3 border border-blue-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-white">
                                 <option value="">-- Pilih Rekening Perusahaan --</option>
                                 @foreach($rekeningPerusahaan ?? [] as $rekening)
                                     <option value="{{ $rekening->id }}" {{ old('rekening_perusahaan_id') == $rekening->id ? 'selected' : ($rekening->is_default ? 'selected' : '') }}>
@@ -337,15 +432,18 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
                             </svg>
                             Rekening Tujuan
+                            @if($pengajuan->penerima_manfaat_type === 'vendor' && isset($vendor) && $vendor)
+                                <span class="ml-2 text-xs text-green-600">(Terisi otomatis dari data vendor)</span>
+                            @endif
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <x-input-label for="bank_id" value="Nama Bank Tujuan" />
                                 <select name="bank_id" id="bank_id"
-                                    class="mt-1 block w-full px-4 py-3 border border-green-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white">
+                                    class="mt-1 block w-full px-4 py-3 border border-green-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-white">
                                     <option value="">-- Pilih Bank --</option>
                                     @foreach($banks ?? [] as $bank)
-                                        <option value="{{ $bank->id }}" {{ old('bank_id') == $bank->id ? 'selected' : '' }}>
+                                        <option value="{{ $bank->id }}" {{ old('bank_id', isset($vendor) && $vendor ? $vendor->bank_id : null) == $bank->id ? 'selected' : '' }}>
                                             {{ $bank->nama_bank }}
                                         </option>
                                 @endforeach
@@ -355,16 +453,16 @@
 
                         <div>
                             <x-input-label for="nomor_rekening" value="Nomor Rekening Tujuan" />
-                            <input type="text" name="nomor_rekening" id="nomor_rekening" value="{{ old('nomor_rekening') }}"
-                                class="mt-1 block w-full px-4 py-3 border border-green-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+                            <input type="text" name="nomor_rekening" id="nomor_rekening" value="{{ old('nomor_rekening', isset($vendor) && $vendor ? $vendor->nomor_rekening : '') }}"
+                                class="mt-1 block w-full px-4 py-3 border border-green-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-white"
                                 placeholder="Nomor rekening tujuan">
                             <x-input-error :messages="$errors->get('nomor_rekening')" class="mt-2" />
                         </div>
 
                         <div class="md:col-span-2">
                             <x-input-label for="atas_nama" value="Atas Nama Tujuan" />
-                            <input type="text" name="atas_nama" id="atas_nama" value="{{ old('atas_nama') }}"
-                                class="mt-1 block w-full px-4 py-3 border border-green-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+                            <input type="text" name="atas_nama" id="atas_nama" value="{{ old('atas_nama', isset($vendor) && $vendor ? $vendor->atas_nama : '') }}"
+                                class="mt-1 block w-full px-4 py-3 border border-green-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-white"
                                 placeholder="Nama pemilik rekening tujuan">
                             <x-input-error :messages="$errors->get('atas_nama')" class="mt-2" />
                         </div>
@@ -373,10 +471,57 @@
                 @endif
             </div>
 
+            <!-- Lampiran dari Pengajuan -->
+            @if(isset($pengajuan->attachments) && $pengajuan->attachments->count() > 0)
+            <div class="mb-8">
+                <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
+                    <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                    </span>
+                    Lampiran dari Pengajuan
+                </h2>
+                <div class="bg-green-50 border border-green-200 rounded-xl p-6">
+                    <p class="text-sm text-green-800 mb-4">Dokumen lampiran yang diupload saat pengajuan dana:</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach($pengajuan->attachments as $attachment)
+                        <a href="{{ asset('storage/' . $attachment->path) }}"
+                           target="_blank"
+                           class="flex items-center p-3 bg-white border border-green-200 rounded-lg hover:bg-green-50 hover:border-green-400 transition-colors">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                @if(str_contains($attachment->mime_type ?? '', 'image'))
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                @elseif(str_contains($attachment->mime_type ?? '', 'pdf'))
+                                    <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                @else
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                @endif
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-secondary-900 truncate">{{ $attachment->filename }}</p>
+                                <p class="text-xs text-secondary-500">{{ number_format($attachment->size / 1024, 2) }} KB</p>
+                            </div>
+                            <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <!-- Lampiran -->
             <div class="mb-8">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                    <span class="w-8 h-8 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-blue-500/30 shadow-md rounded-lg flex items-center justify-center mr-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                         </svg>
@@ -392,7 +537,7 @@
                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <div class="flex text-sm text-secondary-600">
-                                <label for="lampiran" class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
+                                <label for="lampiran" class="relative cursor-pointer bg-white rounded-md font-medium text-orange-500 hover:text-orange-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
                                     <span>Pilih file</span>
                                     <input id="lampiran" name="lampiran[]" type="file" class="sr-only" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple>
                                 </label>
@@ -415,7 +560,7 @@
             <!-- Catatan -->
             <div class="mb-8">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                    <span class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-blue-500/30 shadow-md rounded-lg flex items-center justify-center mr-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
@@ -426,7 +571,7 @@
                 <div>
                     <x-input-label for="catatan" value="Catatan Pencairan" />
                     <textarea name="catatan" id="catatan" rows="3"
-                        class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                         placeholder="Tambahkan catatan untuk pencairan ini...">{{ old('catatan') }}</textarea>
                     <x-input-error :messages="$errors->get('catatan')" class="mt-2" />
                 </div>
@@ -437,7 +582,7 @@
                 <a href="{{ route('pencairan-dana.select-pengajuan') }}" class="px-6 py-3 border border-secondary-200 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
                     Kembali
                 </a>
-                <button type="submit" class="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
+                <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-soft hover:shadow-medium">
                     <span class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

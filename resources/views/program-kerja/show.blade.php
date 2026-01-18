@@ -42,10 +42,10 @@
             <div class="flex items-center justify-between">
                 <div>
                     <div class="text-sm text-secondary-500 mb-1">Total Pagu</div>
-                    <div class="text-xl font-bold text-primary-600">{{ formatRupiah($statistics['total_pagu']) }}</div>
+                    <div class="text-xl font-bold text-blue-600">{{ formatRupiah($statistics['total_pagu']) }}</div>
                 </div>
-                <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
@@ -96,12 +96,12 @@
     <div class="bg-white rounded-2xl shadow-soft p-6 mb-8">
         <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-medium text-secondary-700">Pagu Terpakai</span>
-            <span class="text-sm font-semibold {{ $statistics['persentase_terpakai'] > 90 ? 'text-red-600' : ($statistics['persentase_terpakai'] > 70 ? 'text-amber-600' : 'text-green-600') }}">
+            <span class="text-sm font-semibold {{ $statistics['persentase_terpakai'] > 90 ? 'text-red-600' : ($statistics['persentase_terpakai'] > 70 ? 'text-orange-600' : 'text-blue-600') }}">
                 {{ $statistics['persentase_terpakai'] }}%
             </span>
         </div>
         <div class="w-full bg-secondary-200 rounded-full h-3">
-            <div class="h-3 rounded-full {{ $statistics['persentase_terpakai'] > 90 ? 'bg-red-500' : ($statistics['persentase_terpakai'] > 70 ? 'bg-amber-500' : 'bg-green-500') }}" style="width: {{ min($statistics['persentase_terpakai'], 100) }}%"></div>
+            <div class="h-3 rounded-full {{ $statistics['persentase_terpakai'] > 90 ? 'bg-red-500' : ($statistics['persentase_terpakai'] > 70 ? 'bg-orange-500' : 'bg-blue-500') }}" style="width: {{ min($statistics['persentase_terpakai'], 100) }}%"></div>
         </div>
         <div class="flex justify-between mt-2 text-xs text-secondary-500">
             <span>{{ formatRupiah($statistics['total_detail_anggaran']) }} terpakai</span>
@@ -159,7 +159,7 @@
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-secondary-900">Sub Program</h3>
             @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
-                <button onclick="toggleAddSubProgramForm()" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
+                <button onclick="toggleAddSubProgramForm()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-soft hover:shadow-medium">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -206,7 +206,7 @@
                     <div class="bg-secondary-50 px-6 py-4 flex items-center justify-between">
                         <div class="flex items-center space-x-4">
                             <div>
-                                <span class="font-mono text-sm font-semibold text-primary-600">{{ $subProgram->kode_sub_program }}</span>
+                                <span class="font-mono text-sm font-semibold text-blue-600">{{ $subProgram->kode_sub_program }}</span>
                             </div>
                             <div>
                                 <h4 class="font-semibold text-secondary-900">{{ $subProgram->nama_sub_program }}</h4>
@@ -218,7 +218,7 @@
                                 <div class="font-semibold text-secondary-900">{{ formatRupiah($subProgram->pagu_anggaran) }}</div>
                             </div>
                             @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
-                                <button onclick="openSubProgramModal({{ $subProgram->id }}, '{{ $subProgram->nama_sub_program }}', {{ $subProgram->pagu_anggaran }})" class="p-2 text-secondary-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
+                                <button onclick="openSubProgramModal({{ $subProgram->id }}, '{{ $subProgram->nama_sub_program }}', {{ $subProgram->pagu_anggaran }})" class="p-2 text-secondary-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
@@ -233,7 +233,7 @@
                                     </button>
                                 </form>
                             @endif
-                            <button onclick="openDetailAnggaranModal({{ $subProgram->id }}, '{{ $subProgram->nama_sub_program }}')" class="inline-flex items-center px-3 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm">
+                            <button onclick="openDetailAnggaranModal({{ $subProgram->id }}, '{{ $subProgram->nama_sub_program }}')" class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
@@ -244,8 +244,8 @@
 
                     <!-- Detail Anggaran List -->
                     <div class="bg-white">
-                        <div class="px-6 py-3 bg-indigo-50 border-t border-indigo-100">
-                            <h5 class="text-sm font-semibold text-indigo-900 flex items-center gap-2">
+                        <div class="px-6 py-3 bg-blue-50 border-t border-blue-100">
+                            <h5 class="text-sm font-semibold text-blue-900 flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                 </svg>
@@ -261,7 +261,7 @@
                                             <div class="flex-1">
                                                 <div class="flex items-center gap-3">
                                                     <span class="font-semibold text-secondary-900">{{ $detail->nama_detail }}</span>
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
                                                         {{ $detail->frekuensi }}
                                                     </span>
                                                     <span class="text-xs text-secondary-500">{{ $detail->jumlah_periode }} periode</span>
@@ -277,7 +277,7 @@
                                             </div>
                                             @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
                                                 <div class="flex items-center gap-1">
-                                                    <button onclick="openDetailAnggaranEditModal({{ $detail->id }}, '{{ $detail->nama_detail }}', '{{ $detail->frekuensi }}', {{ $detail->jumlah_periode }}, {{ $detail->nominal_per_periode }}, {{ $subProgram->id }})" class="p-1.5 text-secondary-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
+                                                    <button onclick="openDetailAnggaranEditModal({{ $detail->id }}, '{{ $detail->nama_detail }}', '{{ $detail->frekuensi }}', {{ $detail->jumlah_periode }}, {{ $detail->nominal_per_periode }}, {{ $subProgram->id }})" class="p-1.5 text-secondary-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                         </svg>
@@ -307,25 +307,25 @@
                                                 <div class="space-y-1">
                                                     @foreach($detail->estimasiPengeluarans as $estimasi)
                                                         <div class="flex items-center justify-between px-2 py-1 text-xs rounded
-                                                            @if($estimasi->status === 'selesai') bg-green-50
-                                                            @elseif($estimasi->status === 'pending') bg-amber-50
-                                                            @else bg-slate-50 @endif">
+                                                            @if($estimasi->status === 'selesai') bg-blue-50
+                                                            @elseif($estimasi->status === 'pending') bg-orange-50
+                                                            @else bg-gray-50 @endif">
                                                             <div class="flex items-center gap-2">
                                                                 <span class="text-secondary-600">{{ $estimasi->tanggal_rencana_realisasi->format('M Y') }}</span>
                                                                 <span class="font-medium text-secondary-800">{{ formatRupiah($estimasi->nominal_rencana) }}</span>
                                                                 @if($estimasi->nominal_realisasi)
-                                                                    <span class="text-green-600">→ {{ formatRupiah($estimasi->nominal_realisasi) }}</span>
+                                                                    <span class="text-blue-600">→ {{ formatRupiah($estimasi->nominal_realisasi) }}</span>
                                                                 @endif
                                                                 <span class="px-1.5 py-0.5 rounded-full text-xs
-                                                                    @if($estimasi->status === 'selesai') bg-green-200 text-green-800
-                                                                    @elseif($estimasi->status === 'pending') bg-amber-200 text-amber-800
-                                                                    @else bg-slate-200 text-slate-800 @endif">
+                                                                    @if($estimasi->status === 'selesai') bg-blue-200 text-blue-800
+                                                                    @elseif($estimasi->status === 'pending') bg-orange-200 text-orange-800
+                                                                    @else bg-gray-200 text-gray-800 @endif">
                                                                     {{ $estimasi->status }}
                                                                 </span>
                                                             </div>
                                                             @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
                                                                 <div class="flex items-center gap-1">
-                                                                    <button onclick="openEstimasiModal({{ $estimasi->id }}, '{{ $estimasi->tanggal_rencana_realisasi->format('Y-m-d') }}', {{ $estimasi->nominal_rencana }}, '{{ addslashes($estimasi->catatan ?? '') }}', {{ $detail->id }}, {{ $subProgram->id }})" class="text-primary-600 hover:text-primary-800 text-xs font-medium">Edit</button>
+                                                                    <button onclick="openEstimasiModal({{ $estimasi->id }}, '{{ $estimasi->tanggal_rencana_realisasi->format('Y-m-d') }}', {{ $estimasi->nominal_rencana }}, '{{ addslashes($estimasi->catatan ?? '') }}', {{ $detail->id }}, {{ $subProgram->id }})" class="text-blue-600 hover:text-blue-800 text-xs font-medium">Edit</button>
                                                                 </div>
                                                             @endif
                                                         </div>
@@ -429,7 +429,7 @@
                     <span class="text-sm text-primary-600" id="modalTotalPreview">Total: Rp 0</span>
                     <div class="flex gap-2">
                         <button type="button" onclick="closeDetailAnggaranModal()" class="px-4 py-2 border border-secondary-300 text-secondary-700 rounded-lg hover:bg-secondary-50 transition-colors text-sm">Batal</button>
-                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm">Simpan</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">Simpan</button>
                     </div>
                 </div>
             </div>

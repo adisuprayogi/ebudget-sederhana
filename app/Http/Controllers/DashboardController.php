@@ -106,6 +106,14 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
+        // My pending approvals (for current user)
+        $myPendingApprovals = Approval::with(['pengajuanDana.divisi', 'pengajuanDana.createdBy'])
+            ->where('approver_id', auth()->id())
+            ->where('status', 'pending')
+            ->latest()
+            ->take(5)
+            ->get();
+
         // Recent activities
         $recentPengajuan = PengajuanDana::with(['divisi', 'createdBy'])
             ->latest()
@@ -151,6 +159,7 @@ class DashboardController extends Controller
             'refundProcessed',
             'highValuePengajuan',
             'pendingApprovals',
+            'myPendingApprovals',
             'recentPengajuan',
             'divisis',
             'monthlyPengajuan'
@@ -233,6 +242,14 @@ class DashboardController extends Controller
         ->take(10)
             ->get();
 
+        // My pending approvals (for current user)
+        $myPendingApprovals = Approval::with(['pengajuanDana.divisi', 'pengajuanDana.createdBy'])
+            ->where('approver_id', auth()->id())
+            ->where('status', 'pending')
+            ->latest()
+            ->take(5)
+            ->get();
+
         // Recent pengajuan
         $recentPengajuan = PengajuanDana::with(['divisi', 'createdBy'])
             ->latest()
@@ -280,6 +297,7 @@ class DashboardController extends Controller
             'pencairanNeedVerification' => $pencairanNeedVerification,
             'lpjNeedVerification' => $lpjNeedVerification,
             'refundNeedVerification' => $refundNeedVerification,
+            'myPendingApprovals' => $myPendingApprovals,
             'recentPengajuan' => $recentPengajuan,
             'divisis' => $divisisWithData
         ];
@@ -352,6 +370,14 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // My pending approvals (for current user)
+        $myPendingApprovals = Approval::with(['pengajuanDana.divisi', 'pengajuanDana.createdBy'])
+            ->where('approver_id', $user->id)
+            ->where('status', 'pending')
+            ->latest()
+            ->take(5)
+            ->get();
+
         return compact(
             'activePeriode',
             'totalPagu',
@@ -367,6 +393,7 @@ class DashboardController extends Controller
             'lpjNeedRefund',
             'pengajuanDivisi',
             'myPengajuan',
+            'myPendingApprovals',
             'divisi'
         );
     }

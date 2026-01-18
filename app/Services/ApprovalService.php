@@ -6,6 +6,7 @@ use App\Models\PengajuanDana;
 use App\Models\Approval;
 use App\Models\User;
 use App\Models\ApprovalConfig;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -61,9 +62,12 @@ class ApprovalService
 
                 $approvals[] = $approval;
 
-                // Send email notification only for first (pending) approval
+                // Send notification only for first (pending) approval
                 if ($firstApproval) {
-                    self::sendApprovalNotification($approval, $pengajuan);
+                    // Database notification
+                    NotificationService::createApprovalNotification($approval, $pengajuan);
+                    // Email notification (placeholder - currently commented out)
+                    // self::sendApprovalNotification($approval, $pengajuan);
                     $firstApproval = false;
                 }
             }
@@ -139,7 +143,9 @@ class ApprovalService
                 ]);
 
                 // Send notification to pengaju
-                self::sendRejectedNotification($pengajuan, $approval, $notes);
+                NotificationService::createRejectedNotification($pengajuan, $approval, $notes);
+                // Email notification (placeholder - currently commented out)
+                // self::sendRejectedNotification($pengajuan, $approval, $notes);
 
             } else {
                 // Action is 'disetujui' - activate next approval in sequence
@@ -165,7 +171,11 @@ class ApprovalService
                     ]);
 
                     // Send notification to next approver
-                    self::sendApprovalNotification($nextApproval, $pengajuan);
+                    NotificationService::createApprovalNotification($nextApproval, $pengajuan);
+                    // Also notify pengaju that their pengajuan is approved at this level
+                    NotificationService::createApprovedLevelNotification($pengajuan, $approval);
+                    // Email notification (placeholder - currently commented out)
+                    // self::sendApprovalNotification($nextApproval, $pengajuan);
                 } else {
                     // No more approvals, all completed - set to menunggu_pencairan
                     $pengajuan->update([
@@ -179,11 +189,11 @@ class ApprovalService
                         'new_status' => 'menunggu_pencairan',
                     ]);
 
-                    // Send notification to pengaju
-                    self::sendApprovedNotification($pengajuan);
-
-                    // Notify staff keuangan for pencairan
-                    self::notifyStaffKeuangan($pengajuan);
+                    // Send notification to pengaju and staff keuangan
+                    NotificationService::createAllApprovedNotification($pengajuan);
+                    // Email notification (placeholder - currently commented out)
+                    // self::sendApprovedNotification($pengajuan);
+                    // self::notifyStaffKeuangan($pengajuan);
                 }
             }
 

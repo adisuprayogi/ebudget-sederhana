@@ -30,7 +30,8 @@ class RekeningPerusahaanController extends Controller
         $rekenings = RekeningPerusahaan::with('bank')
             ->orderBy('is_default', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate(15)
+            ->onEachSide(1);
 
         return view('rekening-perusahaan.index', [
             'rekenings' => $rekenings,

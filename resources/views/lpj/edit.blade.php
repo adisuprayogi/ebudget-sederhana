@@ -33,7 +33,7 @@
         <!-- Info Pengajuan & Pencairan -->
         <div class="mb-6 bg-white rounded-2xl shadow-soft p-6">
             <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                <span class="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center mr-3">
+                <span class="w-8 h-8 bg-primary-100 text-blue-600 rounded-lg flex items-center justify-center mr-3">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
@@ -45,7 +45,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                     <p class="text-sm text-secondary-500">Nomor Pengajuan</p>
-                    <p class="font-mono font-semibold text-primary-600">{{ $lpj->pencairanDana->pengajuanDana->nomor_pengajuan }}</p>
+                    <p class="font-mono font-semibold text-blue-600">{{ $lpj->pencairanDana->pengajuanDana->nomor_pengajuan }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-secondary-500">Judul Pengajuan</p>
@@ -53,11 +53,11 @@
                 </div>
                 <div>
                     <p class="text-sm text-secondary-500">Nomor Pencairan</p>
-                    <p class="font-mono font-semibold text-primary-600">{{ $lpj->pencairanDana->nomor_pencairan }}</p>
+                    <p class="font-mono font-semibold text-blue-600">{{ $lpj->pencairanDana->nomor_pencairan }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-secondary-500">Total Pencairan</p>
-                    <p class="font-bold text-lg text-primary-600">{{ formatRupiah($lpj->pencairanDana->jumlah_pencairan) }}</p>
+                    <p class="font-bold text-lg text-blue-600">{{ formatRupiah($lpj->pencairanDana->jumlah_pencairan) }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-secondary-500">Divisi</p>
@@ -87,7 +87,7 @@
             <!-- Informasi LPJ -->
             <div class="mb-8">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                    <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-blue-500/30 shadow-md rounded-lg flex items-center justify-center mr-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -99,7 +99,7 @@
                     <div>
                         <x-input-label for="uraian_kegiatan" value="Uraian Kegiatan" />
                         <textarea name="uraian_kegiatan" id="uraian_kegiatan" rows="2"
-                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                             placeholder="{{ $lpj->pencairanDana->pengajuanDana->judul_pengajuan ?? '' }}">{{ old('uraian_kegiatan', $lpj->uraian_kegiatan) }}</textarea>
                         <x-input-error :messages="$errors->get('uraian_kegiatan')" class="mt-2" />
                     </div>
@@ -107,7 +107,7 @@
                     <div>
                         <x-input-label for="catatan" value="Catatan" />
                         <textarea name="catatan" id="catatan" rows="2"
-                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                             placeholder="Catatan tambahan...">{{ old('catatan', $lpj->catatan) }}</textarea>
                         <x-input-error :messages="$errors->get('catatan')" class="mt-2" />
                     </div>
@@ -117,7 +117,7 @@
             <!-- Rincian Realisasi LPJ -->
             <div class="mb-8">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                    <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-blue-500/30 shadow-md rounded-lg flex items-center justify-center mr-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
@@ -162,7 +162,7 @@
                                 <input type="date" name="details[{{ $index }}][tanggal_realisasi]"
                                     value="{{ old("details.$index.tanggal_realisasi", $detail->tanggal_realisasi?->format('Y-m-d')) }}"
                                     required
-                                    class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm">
+                                    class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-sm">
                             </div>
 
                             <div>
@@ -171,7 +171,7 @@
                                     value="{{ old("details.$index.volume_realisasi", $detail->volume_realisasi) }}"
                                     min="0" step="0.01"
                                     oninput="calculateSubtotal({{ $index }})"
-                                    class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                    class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                                     placeholder="0">
                                 <p class="text-xs text-secondary-500 mt-1">Satuan: {{ $detail->satuan ?? '' }}</p>
                             </div>
@@ -182,7 +182,7 @@
                                     value="{{ old("details.$index.harga_satuan", $detail->harga_satuan) }}"
                                     min="0" step="0.01"
                                     oninput="calculateSubtotal({{ $index }})"
-                                    class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                    class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                                     placeholder="0">
                             </div>
 
@@ -199,12 +199,12 @@
                                 <label class="block text-sm font-medium text-secondary-700 mb-1">Lampiran</label>
                                 @if($detail->file_lampiran)
                                     <p class="text-xs text-secondary-500 mb-1">
-                                        <a href="{{ Storage::url($detail->file_lampiran) }}" target="_blank" class="text-primary-600 hover:underline">File ada</a>
+                                        <a href="{{ Storage::url($detail->file_lampiran) }}" target="_blank" class="text-blue-600 hover:underline">File ada</a>
                                     </p>
                                 @endif
                                 <input type="file" name="lampiran_{{ $index }}"
                                     accept=".pdf,.jpg,.jpeg,.png"
-                                    class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm">
+                                    class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-sm">
                                 <p class="text-xs text-secondary-500 mt-1">PDF, JPG, PNG (max 5MB)</p>
                             </div>
                         </div>
@@ -212,7 +212,7 @@
                         <div class="mt-3">
                             <label class="block text-sm font-medium text-secondary-700 mb-1">Keterangan</label>
                             <textarea name="details[{{ $index }}][keterangan]" rows="2"
-                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-sm"
                                 placeholder="Keterangan tambahan...">{{ old("details.$index.keterangan", $detail->keterangan) }}</textarea>
                         </div>
                     </div>
@@ -220,10 +220,10 @@
                 </div>
 
                 <!-- Total Summary -->
-                <div class="mt-6 p-4 bg-primary-50 rounded-xl border border-primary-200">
+                <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200 border border-primary-200">
                     <div class="flex items-center justify-between">
                         <span class="font-medium text-secondary-900">Total Realisasi:</span>
-                        <span id="total_realisasi" class="text-xl font-bold text-primary-600">{{ formatRupiah($lpj->detailLpjs->sum('subtotal_realisasi')) }}</span>
+                        <span id="total_realisasi" class="text-xl font-bold text-blue-600">{{ formatRupiah($lpj->detailLpjs->sum('subtotal_realisasi')) }}</span>
                     </div>
                     <div class="flex items-center justify-between mt-2">
                         <span class="font-medium text-secondary-900">Sisa Dana:</span>
@@ -244,7 +244,7 @@
                 <a href="{{ route('lpj.show', $lpj) }}" class="px-6 py-3 border border-secondary-200 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
                     Batal
                 </a>
-                <button type="submit" class="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
+                <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-soft hover:shadow-medium">
                     <span class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

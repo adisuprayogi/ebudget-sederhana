@@ -31,6 +31,7 @@ class NotificationController extends Controller
         }
 
         $notifications = $query->paginate($request->per_page ?? 15)
+            ->onEachSide(1)
             ->withQueryString();
 
         // Get unread count

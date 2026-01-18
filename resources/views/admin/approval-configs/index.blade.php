@@ -1,102 +1,220 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Konfigurasi Approval</h1>
-                <p class="text-gray-600 mt-1">Atur flow approval untuk setiap jenis pengajuan</p>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Konfigurasi Approval</h1>
+                    <p class="text-gray-500 text-sm mt-0.5">Atur flow approval untuk setiap jenis pengajuan</p>
+                </div>
             </div>
-            <a href="{{ route('admin.approval-configs.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <a href="{{ route('admin.approval-configs.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:scale-[1.02]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
                 Tambah Konfigurasi
             </a>
         </div>
     </x-slot>
 
-    <div class="py-8">
-        <!-- Tabs -->
-        <div class="mb-6 border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8">
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <!-- Total Configs -->
+        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg shadow-indigo-500/30 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-3">
+                    <p class="text-indigo-100 text-sm font-medium">Total Config</p>
+                    <div class="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.572-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-3xl font-bold">{{ $configs->total() }}</p>
+            </div>
+        </div>
+
+        <!-- Active Configs -->
+        <div class="bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl p-5 text-white shadow-lg shadow-emerald-500/30 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-3">
+                    <p class="text-emerald-100 text-sm font-medium">Config Aktif</p>
+                    <div class="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-3xl font-bold">{{ \App\Models\ApprovalConfig::where('is_active', true)->count() }}</p>
+            </div>
+        </div>
+
+        <!-- Pengajuan Dana -->
+        <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-5 text-white shadow-lg shadow-blue-500/30 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-3">
+                    <p class="text-blue-100 text-sm font-medium">Pengajuan Dana</p>
+                    <div class="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-3xl font-bold">{{ \App\Models\ApprovalConfig::where('jenis_pengajuan', 'pengajuan_dana')->count() }}</p>
+            </div>
+        </div>
+
+        <!-- LPJ & Refund -->
+        <div class="bg-gradient-to-br from-rose-500 to-pink-600 rounded-2xl p-5 text-white shadow-lg shadow-rose-500/30 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-3">
+                    <p class="text-rose-100 text-sm font-medium">LPJ & Refund</p>
+                    <div class="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10h7a2 2 0 002-2V9a2 2 0 00-2-2h-7a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-3xl font-bold">{{ \App\Models\ApprovalConfig::whereIn('jenis_pengajuan', ['lpj', 'refund'])->count() }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
+        <div class="border-b border-gray-200">
+            <nav class="flex">
                 <a href="{{ route('admin.approval-configs.index', ['jenis' => 'pengajuan_dana']) }}"
-                   class="py-4 px-1 border-b-2 font-medium text-sm {{ $jenisPengajuan === 'pengajuan_dana' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                   class="flex-1 py-4 px-6 text-center font-medium text-sm transition-colors border-b-2 {{ $jenisPengajuan === 'pengajuan_dana' ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+                    <svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
                     Pengajuan Dana
                 </a>
                 <a href="{{ route('admin.approval-configs.index', ['jenis' => 'lpj']) }}"
-                   class="py-4 px-1 border-b-2 font-medium text-sm {{ $jenisPengajuan === 'lpj' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                    Laporan Pertanggungjawaban
+                   class="flex-1 py-4 px-6 text-center font-medium text-sm transition-colors border-b-2 {{ $jenisPengajuan === 'lpj' ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+                    <svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10h7a2 2 0 002-2V9a2 2 0 00-2-2h-7a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Laporan LPJ
                 </a>
                 <a href="{{ route('admin.approval-configs.index', ['jenis' => 'refund']) }}"
-                   class="py-4 px-1 border-b-2 font-medium text-sm {{ $jenisPengajuan === 'refund' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                   class="flex-1 py-4 px-6 text-center font-medium text-sm transition-colors border-b-2 {{ $jenisPengajuan === 'refund' ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+                    <svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
                     Refund
                 </a>
                 <a href="{{ route('admin.approval-configs.index', ['jenis' => 'pencairan_dana']) }}"
-                   class="py-4 px-1 border-b-2 font-medium text-sm {{ $jenisPengajuan === 'pencairan_dana' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                   class="flex-1 py-4 px-6 text-center font-medium text-sm transition-colors border-b-2 {{ $jenisPengajuan === 'pencairan_dana' ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+                    <svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
                     Pencairan Dana
                 </a>
             </nav>
         </div>
+    </div>
 
-        <!-- Approval Configs Table -->
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <!-- Approval Configs Table -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gray-50 border-b border-gray-200">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                     <tr>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Minimal Nominal</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Level Approval</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Urutan</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
+                        <th class="px-5 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wide">Minimal Nominal</th>
+                        <th class="px-5 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wide">Level Approval</th>
+                        <th class="px-5 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wide">Urutan</th>
+                        <th class="px-5 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wide">Status</th>
+                        <th class="px-5 py-3.5 text-right text-xs font-bold text-gray-700 uppercase tracking-wide">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-100">
                     @forelse($configs as $config)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4">
-                                <span class="font-semibold text-gray-900">
+                        <tr class="hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-150 group">
+                            <td class="px-5 py-4">
+                                <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-sm shadow-md shadow-indigo-500/20">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
                                     {{ number_format($config->minimal_nominal, 0, ',', '.') }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-4">
                                 @php
-                                    $levelLabels = [
-                                        'kepala_divisi' => 'Kepala Divisi',
-                                        'direktur_keuangan' => 'Direktur Keuangan',
-                                        'direktur_utama' => 'Direktur Utama',
+                                    $levelInfo = [
+                                        'kepala_divisi' => ['label' => 'Kepala Divisi', 'color' => 'emerald', 'icon' => 'users'],
+                                        'direktur_keuangan' => ['label' => 'Direktur Keuangan', 'color' => 'blue', 'icon' => 'currency-dollar'],
+                                        'direktur_utama' => ['label' => 'Direktur Utama', 'color' => 'amber', 'icon' => 'star'],
                                     ];
+                                    $info = $levelInfo[$config->level] ?? ['label' => $config->level, 'color' => 'gray', 'icon' => 'user'];
                                 @endphp
-                                <span class="text-sm text-gray-700">{{ $levelLabels[$config->level] ?? $config->level }}</span>
+                                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-{{ $info['color'] }}-100 text-{{ $info['color'] }}-700 border border-{{ $info['color'] }}-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        @if($info['icon'] === 'users')
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        @elseif($info['icon'] === 'currency-dollar')
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        @elseif($info['icon'] === 'star')
+                                            <path fill="currentColor" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        @else
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        @endif
+                                    </svg>
+                                    {{ $info['label'] }}
+                                </span>
                             </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                            <td class="px-5 py-4">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/20">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9l14 0M6 15l14 0" />
+                                    </svg>
                                     Level {{ $config->urutan }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-4">
                                 @if($config->is_active)
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-md shadow-emerald-500/20">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
                                         Aktif
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-md shadow-gray-400/20">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
                                         Nonaktif
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex items-center justify-end space-x-2">
+                            <td class="px-5 py-4 text-right">
+                                <div class="flex items-center justify-end gap-1.5">
                                     <form method="POST" action="{{ route('admin.approval-configs.toggle-status', $config) }}" class="inline">
                                         @csrf
-                                        <button type="submit" class="p-2 {{ $config->is_active ? 'text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50' : 'text-green-600 hover:text-green-800 hover:bg-green-50' }} rounded-lg" title="{{ $config->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                        <button type="submit" class="p-2 {{ $config->is_active ? 'text-amber-600 hover:text-amber-800 hover:bg-amber-100' : 'text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100' }} rounded-xl transition-all" title="{{ $config->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
                                             @if($config->is_active)
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                                 </svg>
                                             @else
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                             @endif
                                         </button>
                                     </form>
-                                    <a href="{{ route('admin.approval-configs.edit', $config) }}" class="p-2 text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg" title="Edit">
+                                    <a href="{{ route('admin.approval-configs.edit', $config) }}" class="p-2 text-gray-500 hover:text-amber-600 hover:bg-amber-100 rounded-xl transition-all" title="Edit">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
@@ -104,7 +222,7 @@
                                     <form method="POST" action="{{ route('admin.approval-configs.destroy', $config) }}" class="inline" onsubmit="return confirm('Yakin ingin menghapus konfigurasi approval ini?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg" title="Hapus">
+                                        <button type="submit" class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-xl transition-all" title="Hapus">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
@@ -115,12 +233,15 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="5" class="px-5 py-16 text-center">
                                 <div class="flex flex-col items-center">
-                                    <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                    </svg>
-                                    <p class="text-gray-500">Belum ada konfigurasi approval untuk jenis ini</p>
+                                    <div class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-4">
+                                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                    </div>
+                                    <p class="text-gray-500 font-medium text-lg">Belum ada konfigurasi</p>
+                                    <p class="text-gray-400 text-sm mt-1">Mulai dengan menambah konfigurasi approval</p>
                                 </div>
                             </td>
                         </tr>
@@ -128,25 +249,30 @@
                 </tbody>
             </table>
         </div>
+    </div>
 
-        <!-- Pagination -->
-        @if($configs->hasPages())
-            <div class="mt-6">
-                {{ $configs->links() }}
-            </div>
-        @endif
-
-        <!-- Info Box -->
-        <div class="mt-6 bg-blue-50 rounded-lg p-4">
-            <div class="flex items-start space-x-3">
-                <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Info Box -->
+    <div class="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-5 border border-indigo-100">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <div class="text-sm text-blue-800">
-                    <p class="font-medium">Tentang Konfigurasi Approval</p>
-                    <p class="text-blue-600 mt-1">Konfigurasi approval menentukan siapa yang perlu melakukan approval berdasarkan nominal pengajuan. Approval akan diproses secara berurutan dari urutan terkecil ke terbesar yang sesuai dengan nominal pengajuan.</p>
-                </div>
+            </div>
+            <div class="text-sm text-indigo-900">
+                <p class="font-bold text-base mb-1">Tentang Konfigurasi Approval</p>
+                <p class="text-indigo-700">Konfigurasi approval menentukan siapa yang perlu melakukan approval berdasarkan nominal pengajuan. Approval akan diproses secara berurutan dari urutan terkecil ke terbesar yang sesuai dengan nominal pengajuan.</p>
             </div>
         </div>
     </div>
+
+    <!-- Pagination -->
+    @if($configs->hasPages())
+        <div class="mt-6 flex items-center justify-between">
+            <div class="text-sm text-gray-500">
+                Menampilkan <span class="font-semibold text-gray-700">{{ $configs->firstItem() ?? 0 }}</span> sampai <span class="font-semibold text-gray-700">{{ $configs->lastItem() ?? 0 }}</span> dari <span class="font-semibold text-gray-700">{{ $configs->total() }}</span> data
+            </div>
+            {{ $configs->links('pagination::tailwind', ['theme' => 'purple']) }}
+        </div>
+    @endif
 </x-app-layout>

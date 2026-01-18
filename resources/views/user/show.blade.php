@@ -7,7 +7,7 @@
             </div>
             <div class="flex items-center space-x-3">
                 @if($permissions['edit'] ?? false)
-                    <a href="{{ route('users.edit', $user) }}" class="inline-flex items-center px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all duration-200">
+                    <a href="{{ route('users.edit', $user) }}" class="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all duration-200">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
@@ -43,9 +43,9 @@
                         </div>
                         <div class="text-right">
                             @if($user->is_active)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">Aktif</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">Aktif</span>
                             @else
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-slate-100 text-slate-700">Non-Aktif</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-700">Non-Aktif</span>
                             @endif
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                         <div>
                             <label class="text-sm text-secondary-500">Role</label>
                             <div class="mt-1">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">
                                     {{ $user->role->name ?? '-' }}
                                 </span>
                             </div>

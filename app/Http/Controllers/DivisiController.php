@@ -30,7 +30,11 @@ class DivisiController extends Controller
             $query->where('is_active', $request->is_active);
         }
 
-        $divisis = $query->withCount('users')->orderBy('kode_divisi')->paginate(15)->withQueryString();
+        $divisis = $query->withCount('users')
+            ->orderBy('kode_divisi')
+            ->paginate(15)
+            ->onEachSide(1)
+            ->withQueryString();
 
         return view('admin.divisi.index', compact('divisis'));
     }

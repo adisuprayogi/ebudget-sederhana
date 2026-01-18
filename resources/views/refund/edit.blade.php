@@ -65,7 +65,7 @@
                         <!-- Tanggal Refund -->
                         <div>
                             <label class="block text-sm font-medium text-secondary-700 mb-2">Tanggal Refund <span class="text-red-500">*</span></label>
-                            <input type="date" name="tanggal_refund" value="{{ old('tanggal_refund', $refund->tanggal_refund?->format('Y-m-d')) }}" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <input type="date" name="tanggal_refund" value="{{ old('tanggal_refund', $refund->tanggal_refund?->format('Y-m-d')) }}" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             @error('tanggal_refund')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -74,7 +74,7 @@
                         <!-- Jenis Refund -->
                         <div>
                             <label class="block text-sm font-medium text-secondary-700 mb-2">Jenis Refund <span class="text-red-500">*</span></label>
-                            <select name="jenis_refund" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <select name="jenis_refund" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                                 <option value="">Pilih Jenis Refund</option>
                                 <option value="kelebihan" {{ old('jenis_refund', $refund->jenis_refund) == 'kelebihan' ? 'selected' : '' }}>Kelebihan Transfer</option>
                                 <option value="dana_kembali" {{ old('jenis_refund', $refund->jenis_refund) == 'dana_kembali' ? 'selected' : '' }}>Dana Kembali</option>
@@ -91,7 +91,7 @@
                             <label class="block text-sm font-medium text-secondary-700 mb-2">Jumlah Refund <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-secondary-500 font-medium">Rp</span>
-                                <input type="number" name="jumlah_refund" value="{{ old('jumlah_refund', $refund->jumlah_refund) }}" required min="0" step="0.01" class="w-full pl-12 pr-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="0">
+                                <input type="number" name="jumlah_refund" value="{{ old('jumlah_refund', $refund->jumlah_refund) }}" required min="0" step="0.01" class="w-full pl-12 pr-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200" placeholder="0">
                             </div>
                             @error('jumlah_refund')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -101,7 +101,7 @@
                         <!-- Rekening Tujuan -->
                         <div>
                             <label class="block text-sm font-medium text-secondary-700 mb-2">Rekening Tujuan</label>
-                            <input type="text" name="rekening_tujuan" value="{{ old('rekening_tujuan', $refund->rekening_tujuan) }}" placeholder="Nomor rekening tujuan pengembalian" class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <input type="text" name="rekening_tujuan" value="{{ old('rekening_tujuan', $refund->rekening_tujuan) }}" placeholder="Nomor rekening tujuan pengembalian" class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                             @error('rekening_tujuan')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -110,7 +110,7 @@
                         <!-- Alasan Refund -->
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-secondary-700 mb-2">Alasan Refund <span class="text-red-500">*</span></label>
-                            <textarea name="alasan_refund" rows="4" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Jelaskan alasan pengembalian dana...">{{ old('alasan_refund', $refund->alasan_refund) }}</textarea>
+                            <textarea name="alasan_refund" rows="4" required class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200" placeholder="Jelaskan alasan pengembalian dana...">{{ old('alasan_refund', $refund->alasan_refund) }}</textarea>
                             @error('alasan_refund')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -122,21 +122,21 @@
                             @if($refund->bukti_transfer)
                                 <div class="mt-1 flex items-center justify-between bg-secondary-50 rounded-xl px-4 py-3">
                                     <div class="flex items-center">
-                                        <svg class="w-5 h-5 text-primary-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                         </svg>
                                         <span class="text-sm text-secondary-700">{{ basename($refund->bukti_transfer) }}</span>
                                     </div>
-                                    <a href="{{ asset('storage/' . $refund->bukti_transfer) }}" target="_blank" class="text-primary-600 hover:underline text-sm">Lihat</a>
+                                    <a href="{{ asset('storage/' . $refund->bukti_transfer) }}" target="_blank" class="text-blue-600 hover:underline text-sm">Lihat</a>
                                 </div>
                             @endif
-                            <div class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-secondary-300 border-dashed rounded-xl hover:border-primary-400 transition-colors">
+                            <div class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-secondary-300 border-dashed rounded-xl hover:border-orange-400 transition-colors">
                                 <div class="space-y-1 text-center">
                                     <svg class="mx-auto h-8 w-8 text-secondary-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                     <div class="flex text-sm text-secondary-600">
-                                        <label class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none">
+                                        <label class="relative cursor-pointer bg-white rounded-md font-medium text-orange-500 hover:text-orange-600 focus-within:outline-none">
                                             <span>Ganti file</span>
                                             <input type="file" name="bukti_transfer" class="sr-only" accept=".pdf,.jpg,.jpeg,.png">
                                         </label>
@@ -156,7 +156,7 @@
                     <a href="{{ route('refund.show', $refund) }}" class="px-6 py-3 bg-white border border-secondary-300 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
                         Batal
                     </a>
-                    <button type="submit" class="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
+                    <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-soft hover:shadow-medium">
                         <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>

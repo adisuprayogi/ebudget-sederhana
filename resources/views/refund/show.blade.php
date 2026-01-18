@@ -7,7 +7,7 @@
             </div>
             <div class="flex items-center space-x-3">
                 @if(in_array($refund->status, ['draft', 'rejected']))
-                    <a href="{{ route('refund.edit', $refund) }}" class="inline-flex items-center px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all duration-200">
+                    <a href="{{ route('refund.edit', $refund) }}" class="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all duration-200">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
@@ -17,7 +17,7 @@
                 @if($refund->status === 'draft')
                     <form method="POST" action="{{ route('refund.submit', $refund) }}" class="inline">
                         @csrf
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                             </svg>
@@ -27,7 +27,7 @@
                 @endif
                 @if($refund->status === 'menunggu_approval' && auth()->user()->hasAnyRole(['staff_keuangan', 'direktur_keuangan', 'direktur_utama']))
                     <div x-data="{ open: false }">
-                        <button type="button" @click="open = true" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200">
+                        <button type="button" @click="open = true" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -46,15 +46,15 @@
                                                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                                     <h3 class="text-lg font-medium text-secondary-900 mb-4">Setujui Refund</h3>
                                                     <input type="hidden" name="status" value="approved">
-                                                    <div class="mb-4 bg-green-50 border border-green-200 rounded-xl p-4">
+                                                    <div class="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
                                                         <div class="flex items-start">
-                                                            <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <svg class="w-6 h-6 text-blue-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
                                                             <div>
-                                                                <p class="text-sm font-medium text-green-900">Apakah Anda yakin ingin menyetujui refund ini?</p>
-                                                                <p class="text-sm text-green-700 mt-1">Nomor: <span class="font-semibold">{{ $refund->nomor_refund }}</span></p>
-                                                                <p class="text-sm text-green-700">Jumlah: <span class="font-semibold">{{ formatRupiah($refund->jumlah_refund) }}</span></p>
+                                                                <p class="text-sm font-medium text-blue-900">Apakah Anda yakin ingin menyetujui refund ini?</p>
+                                                                <p class="text-sm text-blue-700 mt-1">Nomor: <span class="font-semibold">{{ $refund->nomor_refund }}</span></p>
+                                                                <p class="text-sm text-blue-700">Jumlah: <span class="font-semibold">{{ formatRupiah($refund->jumlah_refund) }}</span></p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -63,8 +63,8 @@
                                                         <textarea name="catatan_approval" rows="3" class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Tambahkan catatan approval..."></textarea>
                                                     </div>
                                                 </div>
-                                                <div class="bg-secondary-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                                                    <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                                    <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
                                                         Ya, Setujui
                                                     </button>
                                                     <button type="button" @click="open = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-secondary-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-secondary-700 hover:bg-secondary-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
@@ -131,7 +131,7 @@
                         </template>
                     </div>
                 @endif
-                <a href="{{ route('refund.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-secondary-300 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
+                <a href="{{ route('refund.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
@@ -147,11 +147,11 @@
             <div class="bg-white rounded-2xl shadow-soft p-6">
                 <div class="text-sm text-secondary-500 mb-1">Status</div>
                 @if($refund->status === 'draft')
-                    <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-slate-100 text-slate-700">Draft</div>
+                    <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-700">Draft</div>
                 @elseif($refund->status === 'menunggu_approval')
-                    <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-amber-100 text-amber-700">Menunggu Approval</div>
+                    <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-orange-100 text-orange-700">Menunggu Approval</div>
                 @elseif($refund->status === 'approved')
-                    <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">Disetujui</div>
+                    <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">Disetujui</div>
                 @elseif($refund->status === 'processed')
                     <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">Selesai</div>
                 @elseif($refund->status === 'rejected')
@@ -164,11 +164,11 @@
             </div>
             <div class="bg-white rounded-2xl shadow-soft p-6">
                 <div class="text-sm text-secondary-500 mb-1">Jenis Refund</div>
-                <div class="text-xl font-bold text-primary-600">{{ ucfirst(str_replace('_', ' ', $refund->jenis_refund)) }}</div>
+                <div class="text-xl font-bold text-blue-600">{{ ucfirst(str_replace('_', ' ', $refund->jenis_refund)) }}</div>
             </div>
             <div class="bg-white rounded-2xl shadow-soft p-6">
                 <div class="text-sm text-secondary-500 mb-1">Jumlah Refund</div>
-                <div class="text-xl font-bold text-primary-600">{{ formatRupiah($refund->jumlah_refund) }}</div>
+                <div class="text-xl font-bold text-blue-600">{{ formatRupiah($refund->jumlah_refund) }}</div>
             </div>
         </div>
 
@@ -184,7 +184,7 @@
                 <div>
                     <label class="text-sm text-secondary-500">Jenis Refund</label>
                     <div class="mt-1">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">
                             {{ ucfirst(str_replace('_', ' ', $refund->jenis_refund)) }}
                         </span>
                     </div>
@@ -222,7 +222,7 @@
 
                 <div>
                     <label class="text-sm text-secondary-500">Jumlah Refund</label>
-                    <div class="mt-1 text-2xl font-bold text-primary-600">{{ formatRupiah($refund->jumlah_refund) }}</div>
+                    <div class="mt-1 text-2xl font-bold text-blue-600">{{ formatRupiah($refund->jumlah_refund) }}</div>
                 </div>
                 <div>
                     <label class="text-sm text-secondary-500">Rekening Tujuan</label>
@@ -270,7 +270,7 @@
 
         <!-- Approval Info -->
         @if($refund->catatan_approval)
-            <div class="bg-white rounded-2xl shadow-soft p-8 mb-6 @if($refund->status === 'rejected') border-l-4 border-red-500 @else border-l-4 border-green-500 @endif">
+            <div class="bg-white rounded-2xl shadow-soft p-8 mb-6 @if($refund->status === 'rejected') border-l-4 border-red-500 @else border-l-4 border-blue-500 @endif">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4">
                     @if($refund->status === 'rejected') Catatan Penolakan @else Catatan Approval @endif
                 </h2>
@@ -283,17 +283,17 @@
 
         <!-- Process Info -->
         @if($refund->status === 'processed')
-            <div class="bg-white rounded-2xl shadow-soft p-8 mb-6 border-l-4 border-green-500">
+            <div class="bg-white rounded-2xl shadow-soft p-8 mb-6 border-l-4 border-blue-500">
                 <h2 class="text-lg font-semibold text-secondary-900 mb-4">Refund Selesai</h2>
-                <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
                     <div class="flex items-start">
-                        <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-blue-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
-                            <p class="text-sm font-medium text-green-900">Refund telah disetujui dan selesai diproses</p>
-                            <p class="text-sm text-green-700 mt-1">Disetujui oleh: {{ $refund->approvedBy->name ?? '-' }}</p>
-                            <p class="text-sm text-green-700">Tanggal: {{ \Carbon\Carbon::parse($refund->approved_at)->format('d F Y, H:i') }}</p>
+                            <p class="text-sm font-medium text-blue-900">Refund telah disetujui dan selesai diproses</p>
+                            <p class="text-sm text-blue-700 mt-1">Disetujui oleh: {{ $refund->approvedBy->name ?? '-' }}</p>
+                            <p class="text-sm text-blue-700">Tanggal: {{ \Carbon\Carbon::parse($refund->approved_at)->format('d F Y, H:i') }}</p>
                         </div>
                     </div>
                 </div>

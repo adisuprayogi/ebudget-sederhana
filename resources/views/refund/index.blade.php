@@ -47,10 +47,10 @@
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-6 text-white shadow-soft">
+            <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 text-white shadow-soft">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-green-100 text-sm font-medium">Disetujui/Selesai</p>
+                        <p class="text-blue-100 text-sm font-medium">Disetujui/Selesai</p>
                         <p class="text-3xl font-bold mt-1">{{ ($statistics['approved_count'] ?? 0) + ($statistics['processed_count'] ?? 0) }}</p>
                     </div>
                     <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -61,10 +61,10 @@
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-2xl p-6 text-white shadow-soft">
+            <div class="bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl p-6 text-white shadow-soft">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-indigo-100 text-sm font-medium">Total Nilai</p>
+                        <p class="text-orange-100 text-sm font-medium">Total Nilai</p>
                         <p class="text-2xl font-bold mt-1">{{ formatRupiah($statistics['total_amount'] ?? 0) }}</p>
                     </div>
                     <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -102,13 +102,13 @@
         <!-- Tabs -->
         <div class="bg-white rounded-2xl shadow-soft overflow-hidden mb-6">
             <div class="flex flex-wrap border-b border-secondary-200 overflow-x-auto">
-                <button onclick="showTab('draft')" id="tab-draft" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-slate-500 text-slate-600 bg-slate-50 transition-colors">
+                <button onclick="showTab('draft')" id="tab-draft" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-gray-500 text-gray-600 bg-gray-50 transition-colors">
                     <div class="flex items-center justify-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <span class="hidden md:inline">Draft</span>
-                        <span class="bg-slate-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['draft'] ?? 0 }}</span>
+                        <span class="bg-gray-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['draft'] ?? 0 }}</span>
                     </div>
                 </button>
                 <button onclick="showTab('menunggu-approval')" id="tab-menunggu-approval" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-secondary-600 hover:bg-secondary-50 transition-colors">
@@ -126,7 +126,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span class="hidden md:inline">Disetujui</span>
-                        <span class="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['approved'] ?? 0 }}</span>
+                        <span class="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['approved'] ?? 0 }}</span>
                     </div>
                 </button>
                 <button onclick="showTab('processed')" id="tab-processed" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-secondary-600 hover:bg-secondary-50 transition-colors">
@@ -135,7 +135,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                         <span class="hidden md:inline">Selesai</span>
-                        <span class="bg-teal-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['processed'] ?? 0 }}</span>
+                        <span class="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['processed'] ?? 0 }}</span>
                     </div>
                 </button>
                 <button onclick="showTab('rejected')" id="tab-rejected" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-secondary-600 hover:bg-secondary-50 transition-colors">
@@ -158,8 +158,8 @@
                 </div>
             @else
                 <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
-                    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
@@ -196,8 +196,8 @@
                 </div>
             @else
                 <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
-                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -215,8 +215,8 @@
                 </div>
             @else
                 <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
-                    <div class="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
@@ -254,7 +254,7 @@
 
                 // Remove active state from all tabs
                 document.querySelectorAll('[id^="tab-"]').forEach(function(el) {
-                    el.classList.remove('border-slate-500', 'border-amber-500', 'border-green-500', 'border-teal-500', 'border-red-500', 'text-slate-600', 'text-amber-600', 'text-green-600', 'text-teal-600', 'text-red-600', 'bg-slate-50', 'bg-amber-50', 'bg-green-50', 'bg-teal-50', 'bg-red-50');
+                    el.classList.remove('border-gray-500', 'border-orange-500', 'border-blue-500', 'text-gray-600', 'text-orange-600', 'text-blue-600', 'bg-gray-50', 'bg-orange-50', 'bg-blue-50', 'bg-red-50', 'text-red-600', 'border-red-500');
                     el.classList.add('border-transparent', 'text-secondary-600');
                 });
 
@@ -266,13 +266,13 @@
                 activeTab.classList.remove('border-transparent', 'text-secondary-600');
 
                 if (tabName === 'draft') {
-                    activeTab.classList.add('border-slate-500', 'text-slate-600', 'bg-slate-50');
+                    activeTab.classList.add('border-gray-500', 'text-gray-600', 'bg-gray-50');
                 } else if (tabName === 'menunggu-approval') {
-                    activeTab.classList.add('border-amber-500', 'text-amber-600', 'bg-amber-50');
+                    activeTab.classList.add('border-orange-500', 'text-orange-600', 'bg-orange-50');
                 } else if (tabName === 'approved') {
-                    activeTab.classList.add('border-green-500', 'text-green-600', 'bg-green-50');
+                    activeTab.classList.add('border-blue-500', 'text-blue-600', 'bg-blue-50');
                 } else if (tabName === 'processed') {
-                    activeTab.classList.add('border-teal-500', 'text-teal-600', 'bg-teal-50');
+                    activeTab.classList.add('border-blue-500', 'text-blue-600', 'bg-blue-50');
                 } else if (tabName === 'rejected') {
                     activeTab.classList.add('border-red-500', 'text-red-600', 'bg-red-50');
                 }

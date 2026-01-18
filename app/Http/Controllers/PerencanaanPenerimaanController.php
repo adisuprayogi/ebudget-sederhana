@@ -71,6 +71,7 @@ class PerencanaanPenerimaanController extends Controller
 
         $perencanaanPenerimaans = $query->orderBy('created_at', 'desc')
             ->paginate($request->per_page ?? 15)
+            ->onEachSide(1)
             ->withQueryString();
 
         // Get filter options

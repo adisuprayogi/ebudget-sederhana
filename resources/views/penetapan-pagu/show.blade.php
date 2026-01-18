@@ -7,7 +7,7 @@
             </div>
             <div class="flex items-center space-x-3">
                 @if(auth()->user()->hasAnyRole(['direktur_keuangan', 'direktur_utama']))
-                    <a href="{{ route('penetapan-pagu.edit', $penetapanPagu) }}" class="inline-flex items-center px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600">
+                    <a href="{{ route('penetapan-pagu.edit', $penetapanPagu) }}" class="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
@@ -33,11 +33,11 @@
             </div>
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="text-sm text-gray-500 mb-1">Terpakai</div>
-                <div class="text-2xl font-bold text-amber-600">{{ formatRupiah($statistics['total_terpakai'] ?? 0) }}</div>
+                <div class="text-2xl font-bold text-orange-600">{{ formatRupiah($statistics['total_terpakai'] ?? 0) }}</div>
             </div>
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="text-sm text-gray-500 mb-1">Sisa Pagu</div>
-                <div class="text-2xl font-bold text-green-600">{{ formatRupiah($statistics['sisa_pagu'] ?? 0) }}</div>
+                <div class="text-2xl font-bold text-blue-600">{{ formatRupiah($statistics['sisa_pagu'] ?? 0) }}</div>
             </div>
         </div>
 
@@ -74,11 +74,11 @@
                 </div>
                 <div class="flex justify-between items-center py-3 border-b border-gray-100">
                     <span class="text-gray-600">Total Terpakai</span>
-                    <span class="font-semibold text-amber-600">{{ formatRupiah($statistics['total_terpakai'] ?? 0) }}</span>
+                    <span class="font-semibold text-orange-600">{{ formatRupiah($statistics['total_terpakai'] ?? 0) }}</span>
                 </div>
                 <div class="flex justify-between items-center py-3">
                     <span class="text-gray-600">Sisa Pagu</span>
-                    <span class="font-bold text-green-600">{{ formatRupiah($statistics['sisa_pagu'] ?? 0) }}</span>
+                    <span class="font-bold text-blue-600">{{ formatRupiah($statistics['sisa_pagu'] ?? 0) }}</span>
                 </div>
             </div>
 
@@ -89,16 +89,16 @@
                     <span>{{ number_format($statistics['persentase_terpakai'] ?? 0, 1) }}%</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-3">
-                    <div class="h-3 rounded-full transition-all duration-300 @if(($statistics['persentase_terpakai'] ?? 0) >= 90) bg-red-500 @elseif(($statistics['persentase_terpakai'] ?? 0) >= 70) bg-amber-500 @else bg-green-500 @endif" style="width: {{ min($statistics['persentase_terpakai'] ?? 0, 100) }}%"></div>
+                    <div class="h-3 rounded-full transition-all duration-300 @if(($statistics['persentase_terpakai'] ?? 0) >= 90) bg-red-500 @elseif(($statistics['persentase_terpakai'] ?? 0) >= 70) bg-orange-500 @else bg-blue-500 @endif" style="width: {{ min($statistics['persentase_terpakai'] ?? 0, 100) }}%"></div>
                 </div>
             </div>
 
             @if(($statistics['persentase_terpakai'] ?? 0) >= 90)
-                <div class="mt-4 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r">
-                    <svg class="h-5 w-5 text-amber-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="mt-4 flex items-start p-4 bg-orange-50 border-l-4 border-orange-400 rounded-r">
+                    <svg class="h-5 w-5 text-orange-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <p class="text-sm text-amber-700">Pagu hampir habis terpakai. Pertimbangkan untuk menambah pagu jika diperlukan.</p>
+                    <p class="text-sm text-orange-700">Pagu hampir habis terpakai. Pertimbangkan untuk menambah pagu jika diperlukan.</p>
                 </div>
             @endif
         </div>

@@ -25,8 +25,8 @@
                         <div class="text-sm text-secondary-500 mb-1">Total Divisi</div>
                         <div class="text-2xl font-bold text-secondary-900">{{ $penetapanPagus->count() }}</div>
                     </div>
-                    <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
@@ -38,8 +38,8 @@
                         <div class="text-sm text-secondary-500 mb-1">Total Pagu</div>
                         <div class="text-2xl font-bold text-primary-600">{{ formatRupiah($penetapanPagus->sum('jumlah_pagu')) }}</div>
                     </div>
-                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -62,17 +62,17 @@
         </div>
 
         <!-- Periode Anggaran Info -->
-        <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-soft p-6 mb-8 text-white">
+        <div class="bg-gradient-to-r from-blue-500 to-orange-500 rounded-2xl shadow-soft p-6 mb-8 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <div class="text-sm text-primary-100 mb-1">Periode Anggaran Aktif</div>
+                    <div class="text-sm text-blue-100 mb-1">Periode Anggaran Aktif</div>
                     <div class="text-2xl font-bold">{{ $activePeriode->nama_periode }}</div>
-                    <div class="text-primary-100 mt-1">
+                    <div class="text-blue-100 mt-1">
                         {{ $activePeriode->tanggal_mulai_perencanaan_anggaran->translatedFormat('d F Y') }} - {{ $activePeriode->tanggal_selesai_perencanaan_anggaran->translatedFormat('d F Y') }}
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-sm text-primary-100 mb-1">Total Pagu Periode</div>
+                    <div class="text-sm text-orange-100 mb-1">Total Pagu Periode</div>
                     <div class="text-2xl font-bold">{{ formatRupiah($penetapanPagus->sum('jumlah_pagu')) }}</div>
                 </div>
             </div>
@@ -86,13 +86,13 @@
                         <div class="p-6">
                             <div class="flex items-start justify-between mb-4">
                                 <div class="flex items-center">
-                                    <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mr-4 group-hover:bg-primary-200 transition-colors">
-                                        <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
+                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-secondary-900 group-hover:text-primary-600 transition-colors">{{ $penetapanPagu->divisi->nama_divisi }}</h3>
+                                        <h3 class="font-semibold text-secondary-900 group-hover:text-blue-600 transition-colors">{{ $penetapanPagu->divisi->nama_divisi }}</h3>
                                         <div class="text-sm text-secondary-500">{{ $penetapanPagu->divisi->singkatan ?? '' }}</div>
                                     </div>
                                 </div>
@@ -105,13 +105,13 @@
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm text-secondary-500">Program Kerja</span>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
                                         {{ $penetapanPagu->divisi->program_kerjas_count ?? 0 }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm text-secondary-500">Sub Program</span>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
                                         {{ $penetapanPagu->divisi->sub_programs_count ?? 0 }}
                                     </span>
                                 </div>
@@ -125,12 +125,12 @@
                                     <div class="pt-3 border-t border-secondary-100">
                                         <div class="flex justify-between items-center mb-2">
                                             <span class="text-sm text-secondary-500">Pagu Terpakai</span>
-                                            <span class="text-sm font-semibold {{ $percentage > 90 ? 'text-red-600' : ($percentage > 70 ? 'text-amber-600' : 'text-green-600') }}">
+                                            <span class="text-sm font-semibold {{ $percentage > 90 ? 'text-red-600' : ($percentage > 70 ? 'text-orange-600' : 'text-blue-600') }}">
                                                 {{ round($percentage, 1) }}%
                                             </span>
                                         </div>
                                         <div class="w-full bg-secondary-200 rounded-full h-2">
-                                            <div class="h-2 rounded-full {{ $percentage > 90 ? 'bg-red-500' : ($percentage > 70 ? 'bg-amber-500' : 'bg-green-500') }}" style="width: {{ $percentage }}%"></div>
+                                            <div class="h-2 rounded-full {{ $percentage > 90 ? 'bg-red-500' : ($percentage > 70 ? 'bg-orange-500' : 'bg-blue-500') }}" style="width: {{ $percentage }}%"></div>
                                         </div>
                                         <div class="flex justify-between items-center mt-2">
                                             <span class="text-xs text-secondary-400">{{ formatRupiah($usedPagu) }}</span>
@@ -142,7 +142,7 @@
                         </div>
                         <div class="px-6 py-3 bg-secondary-50 border-t border-secondary-100 flex items-center justify-between">
                             <span class="text-sm text-secondary-600">Kelola Program</span>
-                            <svg class="w-5 h-5 text-secondary-400 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-secondary-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </div>

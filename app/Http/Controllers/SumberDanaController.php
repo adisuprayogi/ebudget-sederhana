@@ -31,7 +31,10 @@ class SumberDanaController extends Controller
                   ->orWhere('nama_sumber', 'like', "%{$search}%");
         }
 
-        $sumberDanas = $query->orderBy('kode_sumber')->paginate($request->per_page ?? 15)->withQueryString();
+        $sumberDanas = $query->orderBy('kode_sumber')
+            ->paginate($request->per_page ?? 15)
+            ->onEachSide(1)
+            ->withQueryString();
 
         return view('sumber-dana.index', [
             'sumberDanas' => $sumberDanas,

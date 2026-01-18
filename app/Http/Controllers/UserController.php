@@ -54,6 +54,7 @@ class UserController extends Controller
 
         $users = $query->orderBy('full_name')
             ->paginate($request->per_page ?? 15)
+            ->onEachSide(1)
             ->withQueryString();
 
         // Get filter options

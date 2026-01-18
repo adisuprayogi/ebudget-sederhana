@@ -30,23 +30,23 @@
     <div class="max-w-7xl mx-auto px-4 py-8">
         <!-- Active Periode Info Banner -->
         @if(isset($activePeriode))
-            <div class="mb-6 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-soft p-6 text-white">
+            <div class="mb-6 bg-gradient-to-r from-blue-50 to-orange-50 border border-blue-100 rounded-2xl shadow-soft p-6">
                 <div class="flex items-center">
-                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mr-4 shadow-blue-500/30 shadow-lg">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
                     <div class="flex-1">
-                        <div class="text-sm text-primary-100 mb-1">Periode Anggaran Aktif (Fase Penggunaan)</div>
-                        <div class="text-xl font-bold">{{ $activePeriode->nama_periode }}</div>
-                        <div class="text-primary-100 mt-1">
+                        <div class="text-sm text-blue-600 mb-1 font-medium">Periode Anggaran Aktif (Fase Penggunaan)</div>
+                        <div class="text-xl font-bold text-blue-900">{{ $activePeriode->nama_periode }}</div>
+                        <div class="text-blue-700 mt-1">
                             {{ $activePeriode->tanggal_mulai_penggunaan_anggaran->translatedFormat('d F Y') }} - {{ $activePeriode->tanggal_selesai_penggunaan_anggaran->translatedFormat('d F Y') }}
                         </div>
                     </div>
                     <div class="text-right">
-                        <div class="text-sm text-primary-100 mb-1">Tahun Anggaran</div>
-                        <div class="text-2xl font-bold">{{ $activePeriode->tahun_anggaran }}</div>
+                        <div class="text-sm text-blue-600 mb-1 font-medium">Tahun Anggaran</div>
+                        <div class="text-2xl font-bold text-blue-900">{{ $activePeriode->tahun_anggaran }}</div>
                     </div>
                 </div>
             </div>
@@ -96,7 +96,7 @@
                 <!-- Informasi Dasar -->
                 <div class="bg-white rounded-2xl shadow-soft p-6">
                     <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center mr-3">
+                        <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg flex items-center justify-center mr-3 shadow-blue-500/30 shadow-md">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -108,7 +108,7 @@
                         <div>
                             <x-input-label for="judul_pengajuan" value="Judul Pengajuan *" />
                             <input type="text" name="judul_pengajuan" id="judul_pengajuan" value="{{ old('judul_pengajuan') }}" required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                                 placeholder="Contoh: Pengadaan ATK Bulan Desember 2025">
                             <x-input-error :messages="$errors->get('judul_pengajuan')" class="mt-2" />
                         </div>
@@ -116,7 +116,7 @@
                         <div>
                             <x-input-label for="program_kerja_id" value="Program Kerja *" />
                             <select name="program_kerja_id" id="program_kerja_id" required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                                 <option value="">Pilih Program Kerja</option>
                                 @foreach($programKerjas as $program)
                                     <option value="{{ $program->id }}" data-divisi-id="{{ $program->divisi_id }}" {{ old('program_kerja_id') == $program->id ? 'selected' : '' }}>
@@ -130,7 +130,7 @@
                         <div>
                             <x-input-label for="sub_program_id" value="Sub Program *" />
                             <select name="sub_program_id" id="sub_program_id" required disabled
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100">
+                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 disabled:bg-gray-100">
                                 <option value="">Pilih Program Kerja</option>
                             </select>
                             <x-input-error :messages="$errors->get('sub_program_id')" class="mt-2" />
@@ -141,7 +141,7 @@
                             <div>
                                 <x-input-label for="detail_anggaran_id" value="Detail Anggaran *" />
                                 <select name="detail_anggaran_id" id="detail_anggaran_id" required disabled
-                                    class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100">
+                                    class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 disabled:bg-gray-100">
                                     <option value="">Pilih Sub Program Terlebih Dahulu</option>
                                 </select>
                                 <div id="detail-anggaran-sisa" class="mt-1 text-sm text-gray-600"></div>
@@ -158,7 +158,7 @@
                         <div class="md:col-span-2">
                             <x-input-label for="deskripsi" value="Deskripsi *" />
                             <textarea name="deskripsi" id="deskripsi" rows="3" required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                                 placeholder="Jelaskan secara singkat tujuan pengajuan dana ini">{{ old('deskripsi') }}</textarea>
                             <x-input-error :messages="$errors->get('deskripsi')" class="mt-2" />
                         </div>
@@ -170,7 +170,7 @@
                     <div class="bg-white rounded-2xl shadow-soft p-6">
                         <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center justify-between">
                             <div class="flex items-center">
-                                <span class="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mr-3">
+                                <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg flex items-center justify-center mr-3 shadow-blue-500/30 shadow-md">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
@@ -481,7 +481,7 @@
                         <div>
                             <x-input-label for="attachments" value="Lampiran Dokumen *" />
                             <input type="file" name="attachments[]" id="attachments" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm file:mr-4 file:py-2 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-600 file:text-white hover:file:bg-primary-700">
+                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-sm file:mr-4 file:py-2 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
                             <p class="mt-1 text-xs text-secondary-500">PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG (Maks 2MB per file, Maks 5 file)</p>
                             <x-input-error :messages="$errors->get('attachments')" class="mt-2" />
                         </div>
@@ -503,7 +503,7 @@
                 <button type="button" onclick="resetForm()" class="px-6 py-3 border border-red-300 text-red-600 rounded-xl hover:bg-red-50 transition-all duration-200">
                     Reset Form
                 </button>
-                <button type="button" id="submit-pengajuan-btn" onclick="submitForm()" class="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200 shadow-soft hover:shadow-medium">
+                <button type="button" id="submit-pengajuan-btn" onclick="submitForm()" class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-soft hover:shadow-medium">
                     <span class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />

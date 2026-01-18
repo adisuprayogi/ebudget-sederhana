@@ -20,4 +20,14 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
         ]);
     }
+
+    /**
+     * Run the production seeder (hanya 1 user superadmin)
+     */
+    public function runProduction(): void
+    {
+        $this->call([
+            ProductionSeeder::class,
+        ]);
+    }
 }

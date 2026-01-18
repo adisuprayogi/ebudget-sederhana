@@ -63,13 +63,13 @@
                                         ];
                                         $jenisColors = [
                                             'kegiatan' => 'bg-blue-100 text-blue-700',
-                                            'pengadaan' => 'bg-green-100 text-green-700',
-                                            'pembayaran' => 'bg-yellow-100 text-yellow-700',
-                                            'honorarium' => 'bg-purple-100 text-purple-700',
+                                            'pengadaan' => 'bg-blue-100 text-blue-700',
+                                            'pembayaran' => 'bg-orange-100 text-orange-700',
+                                            'honorarium' => 'bg-blue-100 text-blue-700',
                                             'sewa' => 'bg-orange-100 text-orange-700',
-                                            'konsumsi' => 'bg-pink-100 text-pink-700',
-                                            'konsumi' => 'bg-pink-100 text-pink-700',
-                                            'reimbursement' => 'bg-teal-100 text-teal-700',
+                                            'konsumsi' => 'bg-blue-100 text-blue-700',
+                                            'konsumi' => 'bg-blue-100 text-blue-700',
+                                            'reimbursement' => 'bg-blue-100 text-blue-700',
                                             'lainnya' => 'bg-gray-100 text-gray-700',
                                         ];
                                         $statusLabels = [

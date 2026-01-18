@@ -10,15 +10,15 @@
                 <div class="flex items-center space-x-3">
                     <h1 class="text-2xl font-bold text-secondary-900">{{ $pencairan->nomor_pencairan }}</h1>
                     @if($pencairan->status === 'menunggu')
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
                             Menunggu Konfirmasi
                         </span>
                     @elseif($pencairan->status === 'menunggu_lpj')
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
                             Menunggu LPJ
                         </span>
                     @elseif($pencairan->status === 'selesai')
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
                             Selesai
                         </span>
                     @elseif($pencairan->status === 'revisi')
@@ -26,7 +26,7 @@
                             Perlu Revisi
                         </span>
                     @elseif($pencairan->status === 'cancelled')
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
                             Batal
                         </span>
                     @else
@@ -38,7 +38,7 @@
                 <p class="text-secondary-600 mt-1">Pencairan dana untuk {{ $pencairan->pengajuanDana->judul_pengajuan ?? '-' }}</p>
             </div>
             @if($permissions['edit'])
-                <a href="{{ route('pencairan-dana.edit', $pencairan) }}" class="inline-flex items-center px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all duration-200 shadow-soft hover:shadow-medium">
+                <a href="{{ route('pencairan-dana.edit', $pencairan) }}" class="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all duration-200 shadow-soft hover:shadow-medium">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
@@ -59,30 +59,30 @@
     <div class="py-8">
         <!-- Alert Messages -->
         @if($pencairan->status === 'menunggu')
-            <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-amber-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="mb-6 bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-orange-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <div class="text-amber-700 text-sm">
+                <div class="text-orange-700 text-sm">
                     Pencairan ini <strong>menunggu konfirmasi</strong> dari pengaju. Silakan konfirmasi apakah Anda sudah menerima dana.
                 </div>
             </div>
         @elseif($pencairan->status === 'menunggu_lpj')
-            <div class="mb-6 bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-indigo-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <div class="text-indigo-700 text-sm">
+                <div class="text-blue-700 text-sm">
                     Pencairan ini <strong>telah diverifikasi</strong> dan menunggu Laporan Pertanggung Jawaban (LPJ).
                     @if($pencairan->verified_at) - Diverifikasi pada {{ \Carbon\Carbon::parse($pencairan->verified_at)->format('d/m/Y H:i') }}@endif
                 </div>
             </div>
         @elseif($pencairan->status === 'selesai')
-            <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <div class="text-green-700 text-sm">
+                <div class="text-blue-700 text-sm">
                     Pencairan <strong>berhasil diselesaikan</strong>.
                     @if($pencairan->verified_at) pada {{ \Carbon\Carbon::parse($pencairan->verified_at)->format('d/m/Y H:i') }}@endif.
                 </div>
@@ -98,11 +98,11 @@
                 </div>
             </div>
         @elseif($pencairan->status === 'cancelled')
-            <div class="mb-6 bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-start">
-                <svg class="w-5 h-5 text-slate-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-gray-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                 </svg>
-                <div class="text-slate-700 text-sm">
+                <div class="text-gray-700 text-sm">
                     Pencairan ini <strong>dibatalkan</strong>.
                     @if($pencairan->cancellation_reason) - {{ $pencairan->cancellation_reason }}@endif
                 </div>
@@ -171,7 +171,7 @@
                 <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
                     <div class="px-6 py-4 border-b border-secondary-200">
                         <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
-                            <span class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                            <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
@@ -219,7 +219,7 @@
                 <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
                     <div class="px-6 py-4 border-b border-secondary-200">
                         <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
-                            <span class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                            <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
@@ -314,11 +314,11 @@
                                             Transfer Bank
                                         </span>
                                     @elseif($pencairan->metode_pencairan === 'cash')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                                             Tunai
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                                             Reimburse
                                         </span>
                                     @endif
@@ -351,7 +351,7 @@
                 <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
                     <div class="px-6 py-4 border-b border-secondary-200">
                         <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
-                            <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-3">
+                            <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                 </svg>
@@ -390,8 +390,8 @@
 
                         <!-- Rekening Tujuan (hanya untuk non-honorarium) -->
                         @if($pengajuan->jenis_pengajuan !== 'honorarium')
-                        <div class="p-4 bg-green-50 border border-green-200 rounded-xl">
-                            <h3 class="text-sm font-semibold text-green-800 mb-3 flex items-center">
+                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                            <h3 class="text-sm font-semibold text-blue-800 mb-3 flex items-center">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
                                 </svg>
@@ -399,22 +399,22 @@
                             </h3>
                             <dl class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
-                                    <dt class="text-xs text-green-600">Bank</dt>
-                                    <dd class="text-sm font-medium text-secondary-900">{{ $pencairan->nama_bank ?? '-' }}</dd>
+                                    <dt class="text-xs text-blue-600">Bank</dt>
+                                    <dd class="text-sm font-medium text-gray-900">{{ $pencairan->nama_bank ?? '-' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-xs text-green-600">Nomor Rekening</dt>
-                                    <dd class="text-sm font-medium font-secondary-900">{{ $pencairan->nomor_rekening ?? '-' }}</dd>
+                                    <dt class="text-xs text-blue-600">Nomor Rekening</dt>
+                                    <dd class="text-sm font-medium text-gray-900">{{ $pencairan->nomor_rekening ?? '-' }}</dd>
                                 </div>
                                 <div class="md:col-span-2">
-                                    <dt class="text-xs text-green-600">Atas Nama</dt>
-                                    <dd class="text-sm font-medium text-secondary-900">{{ $pencairan->atas_nama ?? '-' }}</dd>
+                                    <dt class="text-xs text-blue-600">Atas Nama</dt>
+                                    <dd class="text-sm font-medium text-gray-900">{{ $pencairan->atas_nama ?? '-' }}</dd>
                                 </div>
                             </dl>
                         </div>
                         @else
-                        <div class="p-4 bg-green-50 border border-green-200 rounded-xl">
-                            <p class="text-sm text-green-700">
+                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                            <p class="text-sm text-blue-700">
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -431,7 +431,7 @@
                 <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
                     <div class="px-6 py-4 border-b border-secondary-200">
                         <h2 class="text-lg font-semibold text-secondary-900 flex items-center">
-                            <span class="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mr-3">
+                            <span class="w-8 h-8 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                 </svg>
@@ -507,7 +507,7 @@
                             <p class="text-sm text-secondary-500">Status</p>
                             <p class="text-sm font-medium">
                                 @if($pencairan->status === 'pending')
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                                         Menunggu
                                     </span>
                                 @elseif($pencairan->status === 'processed')
@@ -515,7 +515,7 @@
                                         Diproses
                                     </span>
                                 @elseif($pencairan->status === 'completed')
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                                         Selesai
                                     </span>
                                 @endif
@@ -559,7 +559,7 @@
                                 <label class="block text-sm font-medium text-secondary-700 mb-1">Catatan (opsional)</label>
                                 <textarea name="notes" rows="2" class="w-full rounded-xl border-secondary-200 focus:border-primary-500 focus:ring-primary-500" placeholder="Tambahkan catatan..."></textarea>
                             </div>
-                            <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200">
+                            <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>

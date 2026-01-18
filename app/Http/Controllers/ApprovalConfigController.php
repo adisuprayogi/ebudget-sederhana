@@ -20,7 +20,8 @@ class ApprovalConfigController extends Controller
         $configs = ApprovalConfig::jenisPengajuan($jenisPengajuan)
             ->orderByRaw("FIELD(level, 'staff_keuangan', 'kepala_divisi', 'direktur_keuangan', 'direktur_utama')")
             ->orderBy('minimal_nominal', 'desc')
-            ->paginate(15);
+            ->paginate(15)
+            ->onEachSide(1);
 
         return view('admin.approval-configs.index', compact('configs', 'jenisPengajuan'));
     }

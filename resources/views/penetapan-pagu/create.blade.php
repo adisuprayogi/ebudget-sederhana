@@ -25,7 +25,7 @@
                     <!-- Periode Anggaran -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Periode Anggaran <span class="text-red-500">*</span></label>
-                        <select name="periode_anggaran_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <select name="periode_anggaran_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
                             <option value="">Pilih Periode Anggaran</option>
                             @foreach($periodeAnggarans ?? [] as $periode)
                                 <option value="{{ $periode->id }}" {{ old('periode_anggaran_id') == $periode->id ? 'selected' : '' }}>
@@ -41,7 +41,7 @@
                     <!-- Divisi -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Divisi <span class="text-red-500">*</span></label>
-                        <select name="divisi_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <select name="divisi_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
                             <option value="">Pilih Divisi</option>
                             @foreach($divisis ?? [] as $divisi)
                                 <option value="{{ $divisi->id }}" {{ old('divisi_id') == $divisi->id ? 'selected' : '' }}>
@@ -59,7 +59,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Pagu <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">Rp</span>
-                            <input type="text" id="jumlah_pagu_display" class="currency-input w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right" placeholder="0" data-target="jumlah_pagu">
+                            <input type="text" id="jumlah_pagu_display" class="currency-input w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-right" placeholder="0" data-target="jumlah_pagu">
                             <input type="hidden" name="jumlah_pagu" id="jumlah_pagu" value="{{ old('jumlah_pagu') }}">
                         </div>
                         <p class="mt-2 text-sm text-gray-500">Total dana yang dialokasikan untuk divisi ini</p>
@@ -72,7 +72,7 @@
                 <!-- Catatan -->
                 <div class="mt-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Catatan</label>
-                    <textarea name="catatan" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Tambahkan catatan atau keterangan tambahan...">{{ old('catatan') }}</textarea>
+                    <textarea name="catatan" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" placeholder="Tambahkan catatan atau keterangan tambahan...">{{ old('catatan') }}</textarea>
                     @error('catatan')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror

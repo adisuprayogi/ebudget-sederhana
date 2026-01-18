@@ -81,7 +81,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm font-medium text-secondary-900">Rp {{ number_format($lpj->pencairanDana->jumlah_pencairan ?? 0, 0, ',', '.') }}</td>
                                 <td class="px-6 py-4 text-sm text-secondary-900">Rp {{ number_format($lpj->total_digunakan, 0, ',', '.') }}</td>
-                                <td class="px-6 py-4 text-sm font-semibold @if($lpj->sisa_dana > 0) text-green-600 @else text-red-600 @endif">Rp {{ number_format($lpj->sisa_dana, 0, ',', '.') }}</td>
+                                <td class="px-6 py-4 text-sm font-semibold @if($lpj->sisa_dana > 0) text-blue-600 @else text-red-600 @endif">Rp {{ number_format($lpj->sisa_dana, 0, ',', '.') }}</td>
                                 <td class="px-6 py-4 text-sm text-secondary-600">{{ $lpj->approved_at ? \Carbon\Carbon::parse($lpj->approved_at)->format('d/m/Y') : '-' }}</td>
                                 <td class="px-6 py-4 text-center">
                                     <a href="{{ route('refund.create', ['lpj_id' => $lpj->id]) }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
@@ -107,8 +107,8 @@
             </div>
         @else
             <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
-                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>

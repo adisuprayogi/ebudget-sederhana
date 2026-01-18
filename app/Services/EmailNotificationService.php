@@ -8,6 +8,16 @@ use App\Models\PencairanDana;
 use App\Models\LaporanPertanggungJawaban;
 use App\Models\Refund;
 use App\Models\User;
+use App\Mail\ApprovalRequestMail;
+use App\Mail\PengajuanApprovedMail;
+use App\Mail\PengajuanRejectedMail;
+use App\Mail\ReadyForPencairanMail;
+use App\Mail\PencairanProcessedMail;
+use App\Mail\LpjReminderMail;
+use App\Mail\LpjSubmittedMail;
+use App\Mail\RefundProcessedMail;
+use App\Mail\DailySummaryMail;
+use App\Mail\TestMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -39,7 +49,7 @@ class EmailNotificationService
                 'pengajuan_url' => route('pengajuan-dana.show', $pengajuan->id),
             ];
 
-            // Mail::to($approver->email)->send(new ApprovalRequestMail($data));
+            Mail::to($approver->email)->send(new ApprovalRequestMail($data));
 
             Log::info('Approval request email sent', [
                 'to' => $approver->email,
@@ -81,7 +91,7 @@ class EmailNotificationService
                 'pengajuan_url' => route('pengajuan-dana.show', $pengajuan->id),
             ];
 
-            // Mail::to($pengaju->email)->send(new PengajuanApprovedMail($data));
+            Mail::to($pengaju->email)->send(new PengajuanApprovedMail($data));
 
             Log::info('Pengajuan approved email sent', [
                 'to' => $pengaju->email,
@@ -125,7 +135,7 @@ class EmailNotificationService
                 'pengajuan_url' => route('pengajuan-dana.show', $pengajuan->id),
             ];
 
-            // Mail::to($pengaju->email)->send(new PengajuanRejectedMail($data));
+            Mail::to($pengaju->email)->send(new PengajuanRejectedMail($data));
 
             Log::info('Pengajuan rejected email sent', [
                 'to' => $pengaju->email,
@@ -173,7 +183,7 @@ class EmailNotificationService
             ];
 
             foreach ($staffKeuangan as $staff) {
-                // Mail::to($staff->email)->send(new ReadyForPencairanMail($data));
+                Mail::to($staff->email)->send(new ReadyForPencairanMail($data));
             }
 
             Log::info('Ready for pencairan emails sent', [
@@ -217,7 +227,7 @@ class EmailNotificationService
                 'pengajuan_url' => route('pengajuan-dana.show', $pengajuan->id),
             ];
 
-            // Mail::to($pengaju->email)->send(new PencairanProcessedMail($data));
+            Mail::to($pengaju->email)->send(new PencairanProcessedMail($data));
 
             Log::info('Pencairan processed email sent', [
                 'to' => $pengaju->email,
@@ -267,7 +277,7 @@ class EmailNotificationService
                 'pengajuan_url' => route('pengajuan-dana.show', $pengajuan->id),
             ];
 
-            // Mail::to($pengaju->email)->send(new LpjReminderMail($data));
+            Mail::to($pengaju->email)->send(new LpjReminderMail($data));
 
             Log::info('LPJ reminder email sent', [
                 'to' => $pengaju->email,
@@ -315,7 +325,7 @@ class EmailNotificationService
             ];
 
             foreach ($staffKeuangan as $staff) {
-                // Mail::to($staff->email)->send(new LpjSubmittedMail($data));
+                Mail::to($staff->email)->send(new LpjSubmittedMail($data));
             }
 
             Log::info('LPJ submitted emails sent', [
@@ -359,7 +369,7 @@ class EmailNotificationService
                 'pengajuan_url' => route('pengajuan-dana.show', $pengajuan->id),
             ];
 
-            // Mail::to($pengaju->email)->send(new RefundProcessedMail($data));
+            Mail::to($pengaju->email)->send(new RefundProcessedMail($data));
 
             Log::info('Refund processed email sent', [
                 'to' => $pengaju->email,
@@ -412,7 +422,7 @@ class EmailNotificationService
                 'dashboard_url' => route('dashboard'),
             ];
 
-            // Mail::to($direkturKeuangan->email)->send(new DailySummaryMail($data));
+            Mail::to($direkturKeuangan->email)->send(new DailySummaryMail($data));
 
             Log::info('Daily summary email sent', [
                 'to' => $direkturKeuangan->email,
@@ -448,7 +458,7 @@ class EmailNotificationService
                 'app_url' => config('app.url'),
             ];
 
-            // Mail::to($testEmail)->send(new TestMail($data));
+            Mail::to($testEmail)->send(new TestMail($data));
 
             Log::info('Test email sent', ['to' => $testEmail]);
             return true;
@@ -488,7 +498,9 @@ class EmailNotificationService
             }
 
             foreach ($recipients as $recipient) {
+                // Untuk custom email, perlu membuat Mail class sendiri
                 // Mail::to($recipient)->send(new CustomMail($subject, $template, $data));
+                Log::info('Custom email would be sent to: ' . $recipient);
             }
 
             Log::info('Custom emails sent', [

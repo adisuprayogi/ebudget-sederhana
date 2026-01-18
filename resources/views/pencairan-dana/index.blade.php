@@ -47,10 +47,10 @@
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-6 text-white shadow-soft">
+            <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 text-white shadow-soft">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-green-100 text-sm font-medium">Berhasil Dicairkan</p>
+                        <p class="text-blue-100 text-sm font-medium">Berhasil Dicairkan</p>
                         <p class="text-3xl font-bold mt-1">{{ $statistics['completed_count'] ?? 0 }}</p>
                     </div>
                     <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -61,10 +61,10 @@
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-2xl p-6 text-white shadow-soft">
+            <div class="bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl p-6 text-white shadow-soft">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-indigo-100 text-sm font-medium">Total Nilai</p>
+                        <p class="text-orange-100 text-sm font-medium">Total Nilai</p>
                         <p class="text-2xl font-bold mt-1">{{ formatRupiah($statistics['total_amount'] ?? 0) }}</p>
                     </div>
                     <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -119,14 +119,14 @@
         <!-- Tabs -->
         <div class="bg-white rounded-2xl shadow-soft overflow-hidden mb-6">
             <div class="flex flex-wrap border-b border-secondary-200 overflow-x-auto">
-                <button onclick="showTab('menunggu')" id="tab-menunggu" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-purple-500 text-purple-600 bg-purple-50 transition-colors">
+                <button onclick="showTab('menunggu')" id="tab-menunggu" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-blue-500 text-blue-600 bg-blue-50 transition-colors">
                     <div class="flex items-center justify-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span class="hidden md:inline">Menunggu Verifikasi</span>
                         <span class="md:hidden">Verifikasi</span>
-                        <span class="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['menunggu'] ?? 0 }}</span>
+                        <span class="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['menunggu'] ?? 0 }}</span>
                     </div>
                 </button>
                 <button onclick="showTab('pending')" id="tab-pending" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-secondary-600 hover:bg-secondary-50 transition-colors">
@@ -146,7 +146,7 @@
                         </svg>
                         <span class="hidden md:inline">Diproses</span>
                         <span class="md:hidden">Diproses</span>
-                        <span class="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['processed'] ?? 0 }}</span>
+                        <span class="bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['processed'] ?? 0 }}</span>
                     </div>
                 </button>
                 <button onclick="showTab('selesai')" id="tab-selesai" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-secondary-600 hover:bg-secondary-50 transition-colors">
@@ -156,7 +156,7 @@
                         </svg>
                         <span class="hidden md:inline">Selesai</span>
                         <span class="md:hidden">Selesai</span>
-                        <span class="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['selesai'] ?? 0 }}</span>
+                        <span class="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['selesai'] ?? 0 }}</span>
                     </div>
                 </button>
                 <button onclick="showTab('revisi')" id="tab-revisi" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-secondary-600 hover:bg-secondary-50 transition-colors">
@@ -176,7 +176,7 @@
                         </svg>
                         <span class="hidden md:inline">Dibatalkan</span>
                         <span class="md:hidden">Batal</span>
-                        <span class="bg-slate-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['cancelled'] ?? 0 }}</span>
+                        <span class="bg-gray-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['cancelled'] ?? 0 }}</span>
                     </div>
                 </button>
             </div>
@@ -218,8 +218,8 @@
                                         <td class="px-6 py-4">
                                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
                                                 @if($pencairan->metode_pencairan === 'transfer') bg-blue-100 text-blue-700
-                                                @elseif($pencairan->metode_pencairan === 'cash') bg-green-100 text-green-700
-                                                @else bg-purple-100 text-purple-700 @endif">
+                                                @elseif($pencairan->metode_pencairan === 'cash') bg-blue-100 text-blue-700
+                                                @else bg-blue-100 text-blue-700 @endif">
                                                 {{ ucfirst($pencairan->metode_pencairan) }}
                                             </span>
                                         </td>
@@ -252,8 +252,8 @@
                 </div>
             @else
                 <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
-                    <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -299,8 +299,8 @@
                                         <td class="px-6 py-4">
                                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
                                                 @if($pencairan->metode_pencairan === 'transfer') bg-blue-100 text-blue-700
-                                                @elseif($pencairan->metode_pencairan === 'cash') bg-green-100 text-green-700
-                                                @else bg-purple-100 text-purple-700 @endif">
+                                                @elseif($pencairan->metode_pencairan === 'cash') bg-blue-100 text-blue-700
+                                                @else bg-blue-100 text-blue-700 @endif">
                                                 {{ ucfirst($pencairan->metode_pencairan) }}
                                             </span>
                                         </td>
@@ -316,7 +316,7 @@
                                                     </svg>
                                                 </a>
                                                 @if(auth()->user()->hasRole('staff_keuangan'))
-                                                    <a href="{{ route('pencairan-dana.edit', $pencairan) }}" class="p-2 text-secondary-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
+                                                    <a href="{{ route('pencairan-dana.edit', $pencairan) }}" class="p-2 text-secondary-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
                                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                         </svg>
@@ -387,8 +387,8 @@
                                         <td class="px-6 py-4">
                                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
                                                 @if($pencairan->metode_pencairan === 'transfer') bg-blue-100 text-blue-700
-                                                @elseif($pencairan->metode_pencairan === 'cash') bg-green-100 text-green-700
-                                                @else bg-purple-100 text-purple-700 @endif">
+                                                @elseif($pencairan->metode_pencairan === 'cash') bg-blue-100 text-blue-700
+                                                @else bg-blue-100 text-blue-700 @endif">
                                                 {{ ucfirst($pencairan->metode_pencairan) }}
                                             </span>
                                         </td>
@@ -421,8 +421,8 @@
                 </div>
             @else
                 <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
-                    <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                     </div>
@@ -468,8 +468,8 @@
                                         <td class="px-6 py-4">
                                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
                                                 @if($pencairan->metode_pencairan === 'transfer') bg-blue-100 text-blue-700
-                                                @elseif($pencairan->metode_pencairan === 'cash') bg-green-100 text-green-700
-                                                @else bg-purple-100 text-purple-700 @endif">
+                                                @elseif($pencairan->metode_pencairan === 'cash') bg-blue-100 text-blue-700
+                                                @else bg-blue-100 text-blue-700 @endif">
                                                 {{ ucfirst($pencairan->metode_pencairan) }}
                                             </span>
                                         </td>
@@ -502,8 +502,8 @@
                 </div>
             @else
                 <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
-                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -549,8 +549,8 @@
                                         <td class="px-6 py-4">
                                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
                                                 @if($pencairan->metode_pencairan === 'transfer') bg-blue-100 text-blue-700
-                                                @elseif($pencairan->metode_pencairan === 'cash') bg-green-100 text-green-700
-                                                @else bg-purple-100 text-purple-700 @endif">
+                                                @elseif($pencairan->metode_pencairan === 'cash') bg-blue-100 text-blue-700
+                                                @else bg-blue-100 text-blue-700 @endif">
                                                 {{ ucfirst($pencairan->metode_pencairan) }}
                                             </span>
                                         </td>
@@ -566,7 +566,7 @@
                                                     </svg>
                                                 </a>
                                                 @if(auth()->user()->hasRole('staff_keuangan'))
-                                                    <a href="{{ route('pencairan-dana.retry', $pencairan) }}" class="p-2 text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors" title="Buat Ulang">
+                                                    <a href="{{ route('pencairan-dana.retry', $pencairan) }}" class="p-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors" title="Buat Ulang">
                                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                         </svg>
@@ -668,8 +668,8 @@
                 </div>
             @else
                 <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
-                    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -688,7 +688,7 @@
 
                 // Remove active state from all tabs
                 document.querySelectorAll('[id^="tab-"]').forEach(function(el) {
-                    el.classList.remove('border-purple-500', 'border-amber-500', 'border-blue-500', 'border-green-500', 'border-red-500', 'border-slate-500', 'text-purple-600', 'text-amber-600', 'text-blue-600', 'text-green-600', 'text-red-600', 'text-slate-600', 'bg-purple-50', 'bg-amber-50', 'bg-blue-50', 'bg-green-50', 'bg-red-50', 'bg-slate-50');
+                    el.classList.remove('border-blue-500', 'border-orange-500', 'border-gray-500', 'text-blue-600', 'text-orange-600', 'text-gray-600', 'bg-blue-50', 'bg-orange-50', 'bg-gray-50', 'bg-red-50', 'text-red-600', 'border-red-500');
                     el.classList.add('border-transparent', 'text-secondary-600');
                 });
 
@@ -700,17 +700,17 @@
                 activeTab.classList.remove('border-transparent', 'text-secondary-600');
 
                 if (tabName === 'menunggu') {
-                    activeTab.classList.add('border-purple-500', 'text-purple-600', 'bg-purple-50');
-                } else if (tabName === 'pending') {
-                    activeTab.classList.add('border-amber-500', 'text-amber-600', 'bg-amber-50');
-                } else if (tabName === 'processed') {
                     activeTab.classList.add('border-blue-500', 'text-blue-600', 'bg-blue-50');
+                } else if (tabName === 'pending') {
+                    activeTab.classList.add('border-orange-500', 'text-orange-600', 'bg-orange-50');
+                } else if (tabName === 'processed') {
+                    activeTab.classList.add('border-orange-500', 'text-orange-600', 'bg-orange-50');
                 } else if (tabName === 'selesai') {
-                    activeTab.classList.add('border-green-500', 'text-green-600', 'bg-green-50');
+                    activeTab.classList.add('border-blue-500', 'text-blue-600', 'bg-blue-50');
                 } else if (tabName === 'revisi') {
                     activeTab.classList.add('border-red-500', 'text-red-600', 'bg-red-50');
                 } else if (tabName === 'cancelled') {
-                    activeTab.classList.add('border-slate-500', 'text-slate-600', 'bg-slate-50');
+                    activeTab.classList.add('border-gray-500', 'text-gray-600', 'bg-gray-50');
                 }
             }
         </script>
