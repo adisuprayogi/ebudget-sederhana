@@ -1,376 +1,256 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-3xl font-black gradient-text">Dashboard Kepala Divisi</h1>
-                <p class="text-secondary-600 mt-1">Kelola anggaran dan pengajuan dana divisi {{ $data['divisi']->nama_divisi }}</p>
-            </div>
-            <div class="flex items-center space-x-4">
-                <div class="hidden sm:flex items-center space-x-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-xl border border-secondary-200/50">
-                    <svg class="w-4 h-4 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span class="text-sm font-semibold text-secondary-900">{{ now()->locale('id')->isoFormat('DD MMMM YYYY') }}</span>
-                </div>
-            </div>
-        </div>
+        <x-dashboard.header :userName="Auth::user()->name" />
     </x-slot>
 
-    @if($data['activePeriode'])
-    <!-- Periode Info Banner -->
-    <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-soft p-6 mb-8 text-white">
-        <div class="flex items-center justify-between">
-            <div>
-                <div class="text-sm text-primary-100 mb-1">Periode Anggaran Aktif</div>
-                <div class="text-2xl font-bold">{{ $data['activePeriode']->nama_periode }}</div>
-                <div class="text-primary-100 mt-1">
-                    {{ $data['activePeriode']->tanggal_mulai_perencanaan_anggaran->translatedFormat('d F Y') }} - {{ $data['activePeriode']->tanggal_selesai_perencanaan_anggaran->translatedFormat('d F Y') }}
-                </div>
-            </div>
-            <div class="text-right">
-                <div class="text-sm text-primary-100 mb-1">Divisi</div>
-                <div class="text-2xl font-bold">{{ $data['divisi']->nama_divisi }}</div>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    <!-- Pagu Overview -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 mb-8">
-        <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 text-white shadow-soft">
+    <div class="space-y-4">
+        @if($data['activePeriode'])
+        <!-- Periode Info Banner -->
+        <div class="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl p-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-blue-100 text-sm font-medium">Total Pagu</p>
-                    <p class="text-2xl font-bold mt-1">{{ formatRupiah($data['totalPagu']) }}</p>
+                    <p class="text-xs text-blue-100 mb-0.5">Periode Anggaran Aktif</p>
+                    <p class="text-lg font-bold text-white">{{ $data['activePeriode']->nama_periode }}</p>
+                    <p class="text-xs text-blue-100 mt-0.5">
+                        {{ $data['activePeriode']->tanggal_mulai_perencanaan_anggaran->translatedFormat('d F Y') }} - {{ $data['activePeriode']->tanggal_selesai_perencanaan_anggaran->translatedFormat('d F Y') }}
+                    </p>
                 </div>
-                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                <div class="text-right">
+                    <p class="text-xs text-cyan-100 mb-0.5">Divisi</p>
+                    <p class="text-lg font-bold text-white">{{ $data['divisi']->nama_divisi }}</p>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-4 gap-3">
+            <!-- Total Pagu -->
+            <div class="bg-white rounded-xl border border-blue-100 p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">{{ formatRupiah($data['totalPagu']) }}</p>
+                        <p class="text-xs text-gray-500">Total Pagu</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terpakai -->
+            <div class="bg-white rounded-xl border border-blue-100 p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">{{ formatRupiah($data['terpakai']) }}</p>
+                        <p class="text-xs text-gray-500">Terpakai ({{ $data['totalPagu'] > 0 ? round(($data['terpakai'] / $data['totalPagu']) * 100, 1) : 0 }}%)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sisa Pagu -->
+            <div class="bg-white rounded-xl border border-blue-100 p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">{{ formatRupiah($data['sisaPagu']) }}</p>
+                        <p class="text-xs text-gray-500">Sisa Pagu</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menunggu Approval -->
+            <div class="bg-white rounded-xl border border-blue-100 p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-cyan-50 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xl font-semibold text-gray-900">{{ $data['pengajuanMenunggu'] }}</p>
+                        <p class="text-xs text-gray-500">Menunggu Approval</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl p-6 text-white shadow-soft">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-amber-100 text-sm font-medium">Terpakai</p>
-                    <p class="text-2xl font-bold mt-1">{{ formatRupiah($data['terpakai']) }}</p>
-                </div>
-                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 text-white shadow-soft">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-blue-100 text-sm font-medium">Sisa Pagu</p>
-                    <p class="text-2xl font-bold mt-1">{{ formatRupiah($data['sisaPagu']) }}</p>
-                </div>
-                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+        <!-- Notifications -->
+        <div class="grid grid-cols-3 gap-3">
+            <!-- Pencairan Menunggu -->
+            <div class="bg-white rounded-xl border border-blue-100 p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xl font-semibold text-gray-900">{{ $data['pencairanMenunggu'] }}</p>
+                        <p class="text-xs text-gray-500">Pencairan Menunggu</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Pagu Usage Progress -->
-    <div class="bg-white rounded-2xl shadow-soft p-6 mb-8">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold text-secondary-900">Penggunaan Pagu Anggaran</h3>
-            <span class="text-2xl font-bold {{ ($data['terpakai'] / $data['totalPagu']) * 100 > 90 ? 'text-red-600' : (($data['terpakai'] / $data['totalPagu']) * 100 > 70 ? 'text-orange-600' : 'text-blue-600') }}">
-                {{ round(($data['terpakai'] / $data['totalPagu']) * 100, 1) }}%
-            </span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
-            <div class="h-4 rounded-full bg-gradient-to-r {{ ($data['terpakai'] / $data['totalPagu']) * 100 > 90 ? 'from-red-500 to-red-600' : (($data['terpakai'] / $data['totalPagu']) * 100 > 70 ? 'from-orange-500 to-orange-600' : 'from-blue-500 to-blue-600') }}" style="width: {{ min(($data['terpakai'] / $data['totalPagu']) * 100, 100) }}%"></div>
-        </div>
-        <div class="flex justify-between text-sm text-gray-600">
-            <span>{{ formatRupiah($data['terpakai']) }} terpakai</span>
-            <span>{{ formatRupiah($data['sisaPagu']) }} tersedia</span>
-        </div>
-    </div>
-
-    <!-- Pengajuan Statistics -->
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 lg:gap-6 mb-8">
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-amber-500">
-            <p class="text-secondary-500 text-sm font-medium">Menunggu Approval</p>
-            <p class="text-3xl font-bold text-amber-600 mt-1">{{ $data['pengajuanMenunggu'] }}</p>
-        </div>
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-blue-500">
-            <p class="text-secondary-500 text-sm font-medium">Disetujui</p>
-            <p class="text-3xl font-bold text-blue-600 mt-1">{{ $data['pengajuanDisetujui'] }}</p>
-        </div>
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-red-500">
-            <p class="text-secondary-500 text-sm font-medium">Ditolak</p>
-            <p class="text-3xl font-bold text-red-600 mt-1">{{ $data['pengajuanDitolak'] }}</p>
-        </div>
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-blue-500">
-            <p class="text-secondary-500 text-sm font-medium">Total Pengajuan</p>
-            <p class="text-3xl font-bold text-blue-600 mt-1">{{ $data['pengajuanTotal'] }}</p>
-        </div>
-    </div>
-
-    <!-- Menunggu Approval Saya -->
-    @if(isset($data['myPendingApprovals']) && $data['myPendingApprovals']->count() > 0)
-    <div class="bg-gradient-to-r from-blue-400 to-blue-600 rounded-2xl shadow-soft p-6 mb-8 text-white">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+            <!-- LPJ Belum Dibuat -->
+            <a href="{{ route('lpj.create') }}" class="bg-white rounded-xl border border-blue-100 p-4 hover:border-amber-200 transition-all">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xl font-semibold text-gray-900">{{ $data['lpjBelumDibuat'] }}</p>
+                        <p class="text-xs text-gray-500">LPJ Belum Dibuat</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-lg font-bold">Menunggu Approval Saya</h3>
-                    <p class="text-blue-100 text-sm">{{ $data['myPendingApprovals']->count() }} pengajuan memerlukan persetujuan Anda</p>
-                </div>
-            </div>
-            <a href="{{ route('approvals.index') }}" class="bg-white text-blue-600 px-4 py-2 rounded-xl font-semibold hover:bg-blue-50 transition-colors">
-                Lihat Semua
             </a>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @foreach($data['myPendingApprovals'] as $approval)
-                <a href="{{ route('approvals.show', $approval) }}" class="bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-colors block">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="font-bold">{{ $approval->pengajuanDana->nomor_pengajuan }}</span>
-                        <span class="text-xs bg-white/20 px-2 py-1 rounded-full">{{ $approval->level }}</span>
+
+            <!-- Perlu Refund -->
+            <div class="bg-white rounded-xl border border-blue-100 p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-violet-50 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
                     </div>
-                    <p class="text-sm text-blue-100 mb-2">{{ $approval->pengajuanDana->judul_pengajuan }}</p>
-                    <div class="flex justify-between items-center text-sm">
-                        <span>{{ $approval->pengajuanDana->createdBy->full_name ?? '-' }}</span>
-                        <span class="font-bold">{{ formatRupiah($approval->pengajuanDana->total_pengajuan) }}</span>
+                    <div>
+                        <p class="text-xl font-semibold text-gray-900">{{ $data['lpjNeedRefund'] }}</p>
+                        <p class="text-xs text-gray-500">Perlu Refund</p>
                     </div>
-                </a>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
-    <!-- Notifications -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 mb-8">
-        <!-- Pencairan Menunggu -->
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-blue-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-secondary-500 text-sm font-medium">Pencairan Menunggu</p>
-                    <p class="text-2xl font-bold text-blue-600 mt-1">{{ $data['pencairanMenunggu'] }}</p>
-                </div>
-                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
                 </div>
             </div>
         </div>
 
-        <!-- LPJ Belum Dibuat -->
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-orange-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-secondary-500 text-sm font-medium">LPJ Belum Dibuat</p>
-                    <p class="text-2xl font-bold text-orange-600 mt-1">{{ $data['lpjBelumDibuat'] }}</p>
+        <!-- My Pending Approvals -->
+        @if(isset($data['myPendingApprovals']) && $data['myPendingApprovals']->count() > 0)
+            <div class="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-white">Awaiting Your Approval</p>
+                            <p class="text-xs text-blue-100">{{ $data['myPendingApprovals']->count() }} pengajuan</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('approvals.index') }}" class="px-4 py-2 bg-white text-blue-600 text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors">View All</a>
                 </div>
-                <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- LPJ Need Refund -->
-        <div class="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-blue-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-secondary-500 text-sm font-medium">Perlu Refund</p>
-                    <p class="text-2xl font-bold text-blue-600 mt-1">{{ $data['lpjNeedRefund'] }}</p>
-                </div>
-                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <a href="{{ route('program-kerja.divisi-show', $data['divisi']) }}" class="flex items-center p-6 bg-white rounded-2xl shadow-soft hover:shadow-medium transition-all group">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 group-hover:scale-110 transition-transform">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-            </div>
-            <div class="ml-5">
-                <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-600">Program Kerja</h3>
-                <p class="text-sm text-gray-500 mt-1">Kelola program kerja divisi</p>
-            </div>
-            <svg class="w-5 h-5 text-gray-400 ml-auto group-hover:text-blue-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-        </a>
-
-        <a href="{{ route('pengajuan-dana.create') }}" class="flex items-center p-6 bg-white rounded-2xl shadow-soft hover:shadow-medium transition-all group">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 group-hover:scale-110 transition-transform">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-            </div>
-            <div class="ml-5">
-                <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-600">Buat Pengajuan</h3>
-                <p class="text-sm text-gray-500 mt-1">Ajukan dana baru</p>
-            </div>
-            <svg class="w-5 h-5 text-gray-400 ml-auto group-hover:text-blue-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-        </a>
-
-        <a href="{{ route('pengajuan-dana.index') }}" class="flex items-center p-6 bg-white rounded-2xl shadow-soft hover:shadow-medium transition-all group">
-            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 group-hover:scale-110 transition-transform">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-            </div>
-            <div class="ml-5">
-                <h3 class="text-lg font-bold text-gray-900 group-hover:text-orange-600">Lihat Semua Pengajuan</h3>
-                <p class="text-sm text-gray-500 mt-1">Daftar pengajuan divisi</p>
-            </div>
-            <svg class="w-5 h-5 text-gray-400 ml-auto group-hover:text-orange-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-        </a>
-    </div>
-
-    <!-- Recent Pengajuan -->
-    <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-bold text-secondary-900">Pengajuan Divisi Terbaru</h3>
-            <a href="{{ route('pengajuan-dana.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Lihat Semua →</a>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nomor</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Judul</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Pengaju</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Total</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    @foreach($data['pengajuanDivisi'] as $pengajuan)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4">
-                                <span class="text-sm text-gray-700">{{ $pengajuan->tanggal_pengajuan ? $pengajuan->tanggal_pengajuan->format('d/m/Y') : '-' }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="font-medium text-gray-900">{{ $pengajuan->nomor_pengajuan ?? '-' }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <p class="font-medium text-gray-900">{{ $pengajuan->judul_pengajuan }}</p>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="text-sm text-gray-700">{{ $pengajuan->user->full_name ?? '-' }}</span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <span class="font-bold text-gray-900">{{ formatRupiah($pengajuan->total_pengajuan) }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold
-                                    @if($pengajuan->status == 'menunggu_approval') bg-amber-100 text-amber-800
-                                    @elseif($pengajuan->status == 'disetujui') bg-green-100 text-green-800
-                                    @elseif($pengajuan->status == 'ditolak') bg-red-100 text-red-800
-                                    @elseif($pengajuan->status == 'revisi') bg-blue-100 text-blue-800
-                                    @else bg-gray-100 text-gray-800
-                                    @endif">
-                                    {{ ucfirst(str_replace('_', ' ', $pengajuan->status)) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <a href="{{ route('pengajuan-dana.show', $pengajuan) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Detail</a>
-                            </td>
-                        </tr>
+                <div class="grid grid-cols-3 gap-3">
+                    @foreach($data['myPendingApprovals'] as $approval)
+                        <a href="{{ route('approvals.show', $approval) }}" class="p-3 bg-white rounded-xl hover:bg-blue-50 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="font-semibold text-gray-900 text-xs">{{ $approval->pengajuanDana->nomor_pengajuan }}</span>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Lvl {{ $approval->level }}</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-2">{{ $approval->pengajuanDana->judul_pengajuan }}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500">{{ $approval->pengajuanDana->createdBy->full_name ?? '-' }}</span>
+                                <span class="text-xs font-semibold text-gray-900">{{ formatRupiah($approval->pengajuanDana->total_pengajuan) }}</span>
+                            </div>
+                        </a>
                     @endforeach
-                </tbody>
-            </table>
-            @if($data['pengajuanDivisi']->count() == 0)
-                <div class="text-center py-8 text-gray-500">
-                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 3h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    </svg>
-                    <p>Belum ada pengajuan dana untuk divisi ini.</p>
                 </div>
-            @endif
-        </div>
-    </div>
+            </div>
+        @endif
 
-    <!-- My Pengajuan -->
-    <div class="mt-8 bg-white rounded-2xl shadow-soft overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-bold text-secondary-900">Pengajuan Saya</h3>
-            <a href="{{ route('pengajuan-dana.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Lihat Semua →</a>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nomor</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Judul</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Total</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    @foreach($data['myPengajuan'] as $pengajuan)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4">
-                                <span class="text-sm text-gray-700">{{ $pengajuan->tanggal_pengajuan ? $pengajuan->tanggal_pengajuan->format('d/m/Y') : '-' }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="font-medium text-gray-900">{{ $pengajuan->nomor_pengajuan ?? '-' }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <p class="font-medium text-gray-900">{{ $pengajuan->judul_pengajuan }}</p>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <span class="font-bold text-gray-900">{{ formatRupiah($pengajuan->total_pengajuan) }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold
-                                    @if($pengajuan->status == 'menunggu_approval') bg-amber-100 text-amber-800
-                                    @elseif($pengajuan->status == 'disetujui') bg-green-100 text-green-800
-                                    @elseif($pengajuan->status == 'ditolak') bg-red-100 text-red-800
-                                    @elseif($pengajuan->status == 'revisi') bg-blue-100 text-blue-800
-                                    @else bg-gray-100 text-gray-800
-                                    @endif">
-                                    {{ ucfirst(str_replace('_', ' ', $pengajuan->status)) }}
-                                </span>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            @if($data['myPengajuan']->count() == 0)
-                <div class="text-center py-8 text-gray-500">
-                    <p>Belum ada pengajuan dana yang dibuat.</p>
-                    <a href="{{ route('pengajuan-dana.create') }}" class="mt-2 text-blue-600 hover:text-blue-800 font-medium">
-                        Buat pengajuan pertama Anda →
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-xl border border-blue-100">
+            <div class="px-4 py-3 border-b border-blue-100">
+                <span class="text-sm font-semibold text-gray-900">Quick Actions</span>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-3 gap-3">
+                    <a href="{{ route('program-kerja.index') }}" class="flex flex-col items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-2">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-gray-700">Program Kerja</span>
+                    </a>
+
+                    <a href="{{ route('pengajuan-dana.create') }}" class="flex flex-col items-center p-3 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition-colors">
+                        <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mb-2">
+                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-gray-700">Create Pengajuan</span>
+                    </a>
+
+                    <a href="{{ route('pengajuan-dana.index') }}" class="flex flex-col items-center p-3 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors">
+                        <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mb-2">
+                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-gray-700">All Pengajuan</span>
                     </a>
                 </div>
-            @endif
+            </div>
+        </div>
+
+        <!-- Recent Pengajuan -->
+        <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
+            <div class="px-4 py-3 border-b border-blue-100 flex items-center justify-between">
+                <span class="text-sm font-semibold text-gray-900">Recent Pengajuan Divisi</span>
+                <a href="{{ route('pengajuan-dana.index') }}" class="text-blue-600 hover:text-blue-700 text-xs font-medium">View All →</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-blue-50 border-b border-blue-100">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-700 uppercase">Tanggal</th>
+                            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-700 uppercase">Nomor</th>
+                            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-700 uppercase">Judul</th>
+                            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-700 uppercase">Pengaju</th>
+                            <th class="px-4 py-2 text-right text-xs font-semibold text-blue-700 uppercase">Total</th>
+                            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-700 uppercase">Status</th>
+                            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-700 uppercase">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-blue-50">
+                        @foreach($data['pengajuanDivisi'] as $pengajuan)
+                            <tr class="hover:bg-blue-50/50 transition-colors">
+                                <td class="px-4 py-3"><span class="text-sm text-gray-700">{{ $pengajuan->tanggal_pengajuan ? $pengajuan->tanggal_pengajuan->format('d/m/Y') : '-' }}</span></td>
+                                <td class="px-4 py-3"><span class="font-medium text-gray-900 text-sm">{{ $pengajuan->nomor_pengajuan ?? '-' }}</span></td>
+                                <td class="px-4 py-3"><p class="font-medium text-gray-900 text-sm">{{ $pengajuan->judul_pengajuan }}</p></td>
+                                <td class="px-4 py-3"><span class="text-sm text-gray-700">{{ $pengajuan->user->full_name ?? '-' }}</span></td>
+                                <td class="px-4 py-3 text-right"><span class="font-semibold text-gray-900 text-sm">{{ formatRupiah($pengajuan->total_pengajuan) }}</span></td>
+                                <td class="px-4 py-3">
+                                    @php
+                                        $statusColors = ['menunggu_approval' => 'bg-amber-100 text-amber-700', 'disetujui' => 'bg-emerald-100 text-emerald-700', 'ditolak' => 'bg-red-100 text-red-700', 'revisi' => 'bg-blue-100 text-blue-700'];
+                                        $statusColor = $statusColors[$pengajuan->status] ?? 'bg-gray-100 text-gray-600';
+                                    @endphp
+                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full {{ $statusColor }}">{{ ucfirst(str_replace('_', ' ', $pengajuan->status)) }}</span>
+                                </td>
+                                <td class="px-4 py-3"><a href="{{ route('pengajuan-dana.show', $pengajuan) }}" class="text-blue-600 hover:text-blue-700 text-xs font-medium">Detail</a></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                @if($data['pengajuanDivisi']->count() == 0)
+                    <div class="text-center py-8 text-gray-500">
+                        <p>Belum ada pengajuan dana untuk divisi ini.</p>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 </x-app-layout>

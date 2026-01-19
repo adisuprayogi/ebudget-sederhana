@@ -397,4 +397,90 @@
     .loading-dots div:nth-child(3) {
         animation-delay: 0.2s;
     }
+
+    /* Dashboard specific animations */
+    @keyframes subtle-pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.8;
+        }
+    }
+
+    .animate-subtle-pulse {
+        animation: subtle-pulse 2s ease-in-out infinite;
+    }
+
+    /* Smooth card hover effect */
+    .dashboard-card {
+        @apply transition-all duration-300 ease-out;
+    }
+
+    .dashboard-card:hover {
+        @apply shadow-lg scale-[1.01];
+    }
+
+    /* Status dot pulse */
+    .status-dot-pulse {
+        @apply relative inline-flex;
+    }
+
+    .status-dot-pulse::before {
+        content: '';
+        @apply absolute inset-0 rounded-full animate-ping;
+    }
+
+    /* Smooth progress bar animation */
+    .progress-smooth {
+        @apply transition-all duration-700 ease-out;
+    }
+
+    /* Gradient border animation */
+    .gradient-border {
+        @apply relative overflow-hidden;
+    }
+
+    .gradient-border::before {
+        content: '';
+        @apply absolute inset-0 rounded-2xl p-[2px];
+        background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+        background-size: 300% 300%;
+        animation: gradient-rotation 4s linear infinite;
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+    }
+
+    @keyframes gradient-rotation {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    /* Staggered animation for list items */
+    .stagger-item {
+        @apply opacity-0 translate-y-2;
+        animation: stagger-in 0.4s ease-out forwards;
+    }
+
+    .stagger-item:nth-child(1) { animation-delay: 0.05s; }
+    .stagger-item:nth-child(2) { animation-delay: 0.1s; }
+    .stagger-item:nth-child(3) { animation-delay: 0.15s; }
+    .stagger-item:nth-child(4) { animation-delay: 0.2s; }
+    .stagger-item:nth-child(5) { animation-delay: 0.25s; }
+    .stagger-item:nth-child(6) { animation-delay: 0.3s; }
+
+    @keyframes stagger-in {
+        to {
+            @apply opacity-100 translate-y-0;
+        }
+    }
 }

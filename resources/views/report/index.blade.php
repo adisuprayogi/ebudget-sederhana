@@ -2,231 +2,243 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-secondary-900">Laporan & Analitik</h1>
-                <p class="text-secondary-600 mt-1">Dashboard laporan dan statistik keuangan</p>
+                <h1 class="text-xl font-semibold text-gray-900">Laporan & Analitik</h1>
+                <p class="text-sm text-gray-500 mt-0.5">{{ $selectedPeriode ? $selectedPeriode->nama_periode : 'Semua Periode' }}</p>
             </div>
         </div>
     </x-slot>
 
-    <div class="py-8">
-        <!-- Periode Anggaran Selector -->
-        <div class="bg-white rounded-2xl shadow-soft p-6 mb-8">
-            <form method="GET" action="{{ route('reports.index') }}">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-lg font-semibold text-secondary-900">Periode Anggaran</h2>
-                        <p class="text-sm text-secondary-500">Pilih periode untuk melihat laporan</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        @if($availablePeriodes->isNotEmpty())
-                            <select name="periode_anggaran_id" class="px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                                <option value="">-- Pilih Periode Anggaran --</option>
-                                @foreach($availablePeriodes as $periode)
-                                    @php
-                                        $isSelected = ($selectedPeriode && $selectedPeriode->id == $periode->id);
-                                        $isActive = ($activePeriode && $activePeriode->id == $periode->id);
-                                    @endphp
-                                    <option value="{{ $periode->id }}" {{ $isSelected ? 'selected' : '' }}>
-                                        {{ $periode->nama_periode }}
-                                        @if($isActive) <span class="text-xs text-primary-600">(Aktif)</span> @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                        @endif
-                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
-                            Filter
-                        </button>
-                        @if(request()->filled('periode_anggaran_id'))
-                            <a href="{{ route('reports.index') }}" class="px-4 py-2 border border-secondary-200 text-secondary-600 rounded-xl hover:bg-secondary-50 transition-colors">
-                                Reset
-                            </a>
-                        @endif
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <div class="text-sm text-secondary-500 mb-1">Total Pengajuan</div>
-                        <div class="text-2xl font-bold text-secondary-900">{{ $dashboardStats['total_pengajuan'] ?? 0 }}</div>
-                        <div class="text-sm text-primary-600 mt-1">{{ formatRupiah($dashboardStats['total_nominal_pengajuan'] ?? 0) }}</div>
-                    </div>
-                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                </div>
+    <!-- Periode Anggaran Selector -->
+    <div class="bg-white rounded-xl border border-blue-100 p-3 mb-4">
+        <form method="GET" action="{{ route('reports.index') }}" class="flex flex-wrap items-center gap-3">
+            <div class="flex-1 min-w-[200px]">
+                <select name="periode_anggaran_id" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white">
+                    <option value="">Semua Periode Anggaran</option>
+                    @foreach($availablePeriodes as $periode)
+                        @php
+                            $isSelected = ($selectedPeriode && $selectedPeriode->id == $periode->id);
+                            $isActive = ($activePeriode && $activePeriode->id == $periode->id);
+                        @endphp
+                        <option value="{{ $periode->id }}" {{ $isSelected ? 'selected' : '' }}>
+                            {{ $periode->nama_periode }}
+                            @if($isActive) (Aktif) @endif
+                        </option>
+                    @endforeach
+                </select>
             </div>
-            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <div class="text-sm text-secondary-500 mb-1">Total Pencairan</div>
-                        <div class="text-2xl font-bold text-secondary-900">{{ $dashboardStats['total_pencairan'] ?? 0 }}</div>
-                        <div class="text-sm text-green-600 mt-1">{{ formatRupiah($dashboardStats['total_nominal_pencairan'] ?? 0) }}</div>
-                    </div>
-                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <div class="text-sm text-secondary-500 mb-1">LPJ Masuk</div>
-                        <div class="text-2xl font-bold text-secondary-900">{{ $dashboardStats['total_lpj'] ?? 0 }}</div>
-                        <div class="text-sm text-amber-600 mt-1">{{ $dashboardStats['lpj_pending'] ?? 0 }} pending</div>
-                    </div>
-                    <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <div class="text-sm text-secondary-500 mb-1">Total Refund</div>
-                        <div class="text-2xl font-bold text-secondary-900">{{ $dashboardStats['total_refund'] ?? 0 }}</div>
-                        <div class="text-sm text-red-600 mt-1">{{ formatRupiah($dashboardStats['total_nominal_refund'] ?? 0) }}</div>
-                    </div>
-                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Report Categories -->
-        <h2 class="text-xl font-bold text-secondary-900 mb-6">Kategori Laporan</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Pengajuan Report -->
-            <a href="{{ route('reports.pengajuan', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
-                <div class="flex items-start">
-                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-secondary-900 mb-1">Laporan Pengajuan Dana</h3>
-                        <p class="text-sm text-secondary-500">Analisis pengajuan dana per divisi, jenis belanja, dan periode waktu</p>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Pencairan Report -->
-            <a href="{{ route('reports.pencairan', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
-                <div class="flex items-start">
-                    <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-secondary-900 mb-1">Laporan Pencairan Dana</h3>
-                        <p class="text-sm text-secondary-500">Status pencairan, jadwal pembayaran, dan analisis tren bulanan</p>
-                    </div>
-                </div>
-            </a>
-
-            <!-- LPJ Report -->
-            <a href="{{ route('reports.lpj', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
-                <div class="flex items-start">
-                    <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-secondary-900 mb-1">Laporan Pertanggungjawaban</h3>
-                        <p class="text-sm text-secondary-500">LPJ masuk, status verifikasi, dan item yang jatuh tempo</p>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Refund Report -->
-            <a href="{{ route('reports.refund', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
-                <div class="flex items-start">
-                    <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-secondary-900 mb-1">Laporan Refund</h3>
-                        <p class="text-sm text-secondary-500">Pengembalian dana, alasan refund, dan status proses</p>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Budget Realization -->
-            <a href="{{ route('reports.budget-realization', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
-                <div class="flex items-start">
-                    <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-secondary-900 mb-1">Realisasi Anggaran</h3>
-                        <p class="text-sm text-secondary-500">Perbandingan pagu vs realisasi per divisi dan program kerja</p>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Executive Summary -->
-            @if(auth()->user()->hasPermission('report.executive_summary'))
-                <a href="{{ route('reports.executive-summary', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-2xl shadow-soft p-6 hover:shadow-medium transition-all duration-200 group">
-                    <div class="flex items-start">
-                        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-secondary-900 mb-1">Eksekutif Summary</h3>
-                            <p class="text-sm text-secondary-500">Ringkasan eksekutif untuk manajemen puncak</p>
-                        </div>
-                    </div>
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filter
+            </button>
+            @if(request()->filled('periode_anggaran_id'))
+                <a href="{{ route('reports.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
+                    Reset
                 </a>
             @endif
-        </div>
+        </form>
+    </div>
 
-        <!-- Pending Items Alert -->
-        @if(($dashboardStats['pengajuan_pending'] ?? 0) > 0 || ($dashboardStats['lpj_pending'] ?? 0) > 0)
-            <div class="mt-8 bg-amber-50 border border-amber-200 rounded-2xl p-6">
-                <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <div class="ml-3 flex-1">
-                        <h3 class="text-lg font-medium text-amber-800">Item yang Memerlukan Perhatian</h3>
-                        <div class="mt-2 text-sm text-amber-700">
-                            @if(($dashboardStats['pengajuan_pending'] ?? 0) > 0)
-                                <p>{{ $dashboardStats['pengajuan_pending'] }} pengajuan dana menunggu approval</p>
-                            @endif
-                            @if(($dashboardStats['lpj_pending'] ?? 0) > 0)
-                                <p>{{ $dashboardStats['lpj_pending'] }} LPJ belum diverifikasi</p>
-                            @endif
-                        </div>
-                    </div>
-                    <a href="{{ route('pengajuan-dana.index', ['status' => 'proposed']) }}" class="ml-4 inline-flex items-center px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors">
-                        Lihat Detail
-                    </a>
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-4 gap-3 mb-4">
+        <div class="bg-white rounded-xl border border-blue-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xl font-semibold text-gray-900">{{ $dashboardStats['total_pengajuan'] ?? 0 }}</p>
+                    <p class="text-xs text-gray-500">Total Pengajuan</p>
                 </div>
             </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-blue-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xl font-semibold text-gray-900">{{ $dashboardStats['total_pencairan'] ?? 0 }}</p>
+                    <p class="text-xs text-gray-500">Total Pencairan</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-blue-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xl font-semibold text-gray-900">{{ $dashboardStats['total_lpj'] ?? 0 }}</p>
+                    <p class="text-xs text-gray-500">LPJ Masuk</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-blue-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-violet-50 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xl font-semibold text-gray-900">{{ $dashboardStats['total_refund'] ?? 0 }}</p>
+                    <p class="text-xs text-gray-500">Total Refund</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Categories -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- Pengajuan Report -->
+        <a href="{{ route('reports.pengajuan', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-xl border border-blue-100 p-4 hover:border-blue-300 hover:shadow-sm transition-all group">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-gray-900 text-sm">Laporan Pengajuan Dana</h3>
+                    <p class="text-xs text-gray-500 truncate">Analisis pengajuan dana per divisi, jenis belanja, dan periode waktu</p>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+        </a>
+
+        <!-- Pencairan Report -->
+        <a href="{{ route('reports.pencairan', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-xl border border-blue-100 p-4 hover:border-blue-300 hover:shadow-sm transition-all group">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-gray-900 text-sm">Laporan Pencairan Dana</h3>
+                    <p class="text-xs text-gray-500 truncate">Status pencairan, jadwal pembayaran, dan analisis tren bulanan</p>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 group-hover:text-emerald-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+        </a>
+
+        <!-- LPJ Report -->
+        <a href="{{ route('reports.lpj', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-xl border border-blue-100 p-4 hover:border-blue-300 hover:shadow-sm transition-all group">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-gray-900 text-sm">Laporan Pertanggungjawaban</h3>
+                    <p class="text-xs text-gray-500 truncate">LPJ masuk, status verifikasi, dan item yang jatuh tempo</p>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+        </a>
+
+        <!-- Refund Report -->
+        <a href="{{ route('reports.refund', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-xl border border-blue-100 p-4 hover:border-blue-300 hover:shadow-sm transition-all group">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-gray-900 text-sm">Laporan Refund</h3>
+                    <p class="text-xs text-gray-500 truncate">Pengembalian dana, alasan refund, dan status proses</p>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 group-hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+        </a>
+
+        <!-- Budget Realization -->
+        <a href="{{ route('reports.budget-realization', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-xl border border-blue-100 p-4 hover:border-blue-300 hover:shadow-sm transition-all group">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-violet-500 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-gray-900 text-sm">Realisasi Anggaran</h3>
+                    <p class="text-xs text-gray-500 truncate">Perbandingan pagu vs realisasi per divisi dan program kerja</p>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 group-hover:text-violet-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+        </a>
+
+        <!-- Executive Summary -->
+        @if(auth()->user()->hasPermission('report.executive_summary'))
+            <a href="{{ route('reports.executive-summary', ['periode_anggaran_id' => $selectedPeriode?->id]) }}" class="bg-white rounded-xl border border-blue-100 p-4 hover:border-blue-300 hover:shadow-sm transition-all group">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-gray-900 text-sm">Eksekutif Summary</h3>
+                        <p class="text-xs text-gray-500 truncate">Ringkasan eksekutif untuk manajemen puncak</p>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            </a>
         @endif
     </div>
+
+    <!-- Pending Items Alert -->
+    @if(($dashboardStats['pengajuan_pending'] ?? 0) > 0 || ($dashboardStats['lpj_pending'] ?? 0) > 0)
+        <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-semibold text-amber-800 text-sm">Item yang Memerlukan Perhatian</h3>
+                    <div class="text-xs text-amber-700 mt-0.5">
+                        @if(($dashboardStats['pengajuan_pending'] ?? 0) > 0)
+                            <span>{{ $dashboardStats['pengajuan_pending'] }} pengajuan dana menunggu approval</span>
+                        @endif
+                        @if(($dashboardStats['lpj_pending'] ?? 0) > 0)
+                            <span class="ml-2">{{ $dashboardStats['lpj_pending'] }} LPJ belum diverifikasi</span>
+                        @endif
+                    </div>
+                </div>
+                <a href="{{ route('approvals.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    Lihat Detail
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    @endif
 </x-app-layout>
