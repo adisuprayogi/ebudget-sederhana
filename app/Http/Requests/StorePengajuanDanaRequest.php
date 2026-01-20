@@ -33,7 +33,8 @@ class StorePengajuanDanaRequest extends FormRequest
             'tanggal_pengajuan' => 'nullable|date',
             'total_pengajuan' => 'required|numeric|min:1000',
             'deskripsi' => 'required|string|max:1000',
-            'catatan' => 'nullable|string|max:500',
+            'nama_bank' => 'nullable|string|max:100',
+            'rekening_tujuan' => 'nullable|string|max:200',
             // Global attachments (for all jenis pengajuan)
             'attachments' => 'nullable|array|max:5',
             'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:2048',
@@ -260,6 +261,8 @@ class StorePengajuanDanaRequest extends FormRequest
             'periode_selesai' => 'Periode Selesai',
             'total_pengajuan' => 'Total Pengajuan',
             'deskripsi' => 'Deskripsi',
+            'nama_bank' => 'Nama Bank',
+            'rekening_tujuan' => 'Rekening Tujuan',
             'penerima_manfaat_type' => 'Tipe Penerima Manfaat',
             'penerima_manfaat_id' => 'Penerima Manfaat',
             'penerima_manfaat_name' => 'Nama Penerima Manfaat',

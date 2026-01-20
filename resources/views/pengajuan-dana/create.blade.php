@@ -1,13 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center space-x-4">
-            <a href="{{ route('pengajuan-dana.select-jenis') }}" class="p-2 text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 rounded-lg transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('pengajuan-dana.select-jenis') }}" class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-secondary-900">
+                <h1 class="text-xl font-semibold text-gray-900">
                     Pengajuan {{ [
                         'kegiatan' => 'Kegiatan',
                         'pengadaan' => 'Pengadaan',
@@ -19,7 +19,7 @@
                         'lainnya' => 'Lainnya'
                     ][$jenisPengajuan] ?? 'Dana' }}
                 </h1>
-                <p class="text-secondary-600 mt-1">Formulir pengajuan dana untuk keperluan operasional</p>
+                <p class="text-xs text-gray-500 mt-0.5">Formulir pengajuan dana untuk keperluan operasional</p>
             </div>
         </div>
     </x-slot>
@@ -27,26 +27,26 @@
     <x-slot name="scripts">
     </x-slot>
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto">
         <!-- Active Periode Info Banner -->
         @if(isset($activePeriode))
-            <div class="mb-6 bg-gradient-to-r from-blue-50 to-orange-50 border border-blue-100 rounded-2xl shadow-soft p-6">
+            <div class="mb-4 bg-gradient-to-r from-blue-600 to-cyan-500 border border-blue-100 rounded-lg p-4">
                 <div class="flex items-center">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mr-4 shadow-blue-500/30 shadow-lg">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center mr-3 shadow-blue-500/30 shadow-lg">
+                        <svg class="w-4 h-4 text-blue-600 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
                     <div class="flex-1">
-                        <div class="text-sm text-blue-600 mb-1 font-medium">Periode Anggaran Aktif (Fase Penggunaan)</div>
-                        <div class="text-xl font-bold text-blue-900">{{ $activePeriode->nama_periode }}</div>
-                        <div class="text-blue-700 mt-1">
+                        <div class="text-xs text-blue-100 mb-0.5">Periode Anggaran Aktif (Fase Penggunaan)</div>
+                        <div class="text-sm font-bold text-white">{{ $activePeriode->nama_periode }}</div>
+                        <div class="text-xs text-blue-100 mt-1">
                             {{ $activePeriode->tanggal_mulai_penggunaan_anggaran->translatedFormat('d F Y') }} - {{ $activePeriode->tanggal_selesai_penggunaan_anggaran->translatedFormat('d F Y') }}
                         </div>
                     </div>
                     <div class="text-right">
-                        <div class="text-sm text-blue-600 mb-1 font-medium">Tahun Anggaran</div>
-                        <div class="text-2xl font-bold text-blue-900">{{ $activePeriode->tahun_anggaran }}</div>
+                        <div class="text-xs text-blue-100 mb-0.5">Tahun Anggaran</div>
+                        <div class="text-lg font-bold text-white">{{ $activePeriode->tahun_anggaran }}</div>
                     </div>
                 </div>
             </div>
@@ -56,7 +56,7 @@
             @csrf
 
             @if($errors->any())
-                <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -78,7 +78,7 @@
             @endif
 
             @if(session('error'))
-                <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -92,23 +92,23 @@
                 </div>
             @endif
 
-            <div class="space-y-6">
+            <div class="space-y-4">
                 <!-- Informasi Dasar -->
-                <div class="bg-white rounded-2xl shadow-soft p-6">
-                    <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg flex items-center justify-center mr-3 shadow-blue-500/30 shadow-md">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-white rounded-lg p-4">
+                    <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                        <span class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center flex items-center justify-center mr-2 ">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </span>
                         Informasi Dasar
                     </h2>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="judul_pengajuan" value="Judul Pengajuan *" />
                             <input type="text" name="judul_pengajuan" id="judul_pengajuan" value="{{ old('judul_pengajuan') }}" required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                                class="mt-1 block w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-orange-500 focus:border-orange-500 "
                                 placeholder="Contoh: Pengadaan ATK Bulan Desember 2025">
                             <x-input-error :messages="$errors->get('judul_pengajuan')" class="mt-2" />
                         </div>
@@ -116,7 +116,7 @@
                         <div>
                             <x-input-label for="program_kerja_id" value="Program Kerja *" />
                             <select name="program_kerja_id" id="program_kerja_id" required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+                                class="mt-1 block w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-orange-500 focus:border-orange-500 ">
                                 <option value="">Pilih Program Kerja</option>
                                 @foreach($programKerjas as $program)
                                     <option value="{{ $program->id }}" data-divisi-id="{{ $program->divisi_id }}" {{ old('program_kerja_id') == $program->id ? 'selected' : '' }}>
@@ -130,7 +130,7 @@
                         <div>
                             <x-input-label for="sub_program_id" value="Sub Program *" />
                             <select name="sub_program_id" id="sub_program_id" required disabled
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 disabled:bg-gray-100">
+                                class="mt-1 block w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-orange-500 focus:border-orange-500  disabled:bg-gray-100">
                                 <option value="">Pilih Program Kerja</option>
                             </select>
                             <x-input-error :messages="$errors->get('sub_program_id')" class="mt-2" />
@@ -141,7 +141,7 @@
                             <div>
                                 <x-input-label for="detail_anggaran_id" value="Detail Anggaran *" />
                                 <select name="detail_anggaran_id" id="detail_anggaran_id" required disabled
-                                    class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 disabled:bg-gray-100">
+                                    class="mt-1 block w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-orange-500 focus:border-orange-500  disabled:bg-gray-100">
                                     <option value="">Pilih Sub Program Terlebih Dahulu</option>
                                 </select>
                                 <div id="detail-anggaran-sisa" class="mt-1 text-sm text-gray-600"></div>
@@ -158,7 +158,7 @@
                         <div class="md:col-span-2">
                             <x-input-label for="deskripsi" value="Deskripsi *" />
                             <textarea name="deskripsi" id="deskripsi" rows="3" required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                                class="mt-1 block w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-orange-500 focus:border-orange-500 "
                                 placeholder="Jelaskan secara singkat tujuan pengajuan dana ini">{{ old('deskripsi') }}</textarea>
                             <x-input-error :messages="$errors->get('deskripsi')" class="mt-2" />
                         </div>
@@ -167,24 +167,24 @@
 
                 @if($jenisPengajuan === 'honorarium')
                     <!-- Daftar Penerima Honorarium -->
-                    <div class="bg-white rounded-2xl shadow-soft p-6">
-                        <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center justify-between">
+                    <div class="bg-white rounded-lg p-4">
+                        <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center justify-between">
                             <div class="flex items-center">
-                                <span class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg flex items-center justify-center mr-3 shadow-blue-500/30 shadow-md">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <span class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center flex items-center justify-center mr-2 ">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                 </span>
                                 Daftar Penerima Honorarium
                             </div>
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="window.honorariumForm().openImportModal()" class="px-4 py-2 bg-green-600 text-white rounded-xl text-sm hover:bg-green-700 transition-all">
+                                <button type="button" onclick="window.honorariumForm().openImportModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-all">
                                     <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
                                     Import Excel/CSV
                                 </button>
-                                <button type="button" onclick="window.honorariumForm().addRecipientRow()" class="px-4 py-2 bg-primary-600 text-white rounded-xl text-sm hover:bg-primary-700 transition-all">
+                                <button type="button" onclick="window.honorariumForm().addRecipientRow()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-all">
                                     + Tambah Penerima
                                 </button>
                             </div>
@@ -193,30 +193,30 @@
                         <!-- Table with Inline Edit -->
                         <div class="overflow-x-auto">
                             <table class="w-full" id="honorarium-table">
-                                <thead class="bg-secondary-50 border-b border-secondary-200">
+                                <thead class="bg-blue-50 border-b border-blue-100">
                                     <tr>
-                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase w-10">No</th>
-                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Tipe</th>
-                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Nama Penerima *</th>
-                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Jumlah Honor *</th>
-                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">No. Rekening *</th>
-                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Deskripsi</th>
-                                        <th class="px-3 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Lampiran</th>
-                                        <th class="px-3 py-3 text-center text-xs font-semibold text-secondary-600 uppercase w-24">Aksi</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase w-10">No</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Tipe</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Nama Penerima *</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Jumlah Honor *</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase">No. Rekening *</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Deskripsi</th>
+                                        <th class="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Lampiran</th>
+                                        <th class="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase w-24">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-secondary-100" id="honorarium-list-body">
+                                <tbody class="divide-y divide-blue-50" id="honorarium-list-body">
                                     <tr id="empty-row">
-                                        <td colspan="8" class="px-4 py-8 text-center text-secondary-500">
+                                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">
                                             Belum ada penerima. Klik "Tambah Penerima" atau "Import Excel/CSV" untuk menambahkan.
                                         </td>
                                     </tr>
                                 </tbody>
-                                <tfoot class="bg-secondary-50 border-t border-secondary-200">
+                                <tfoot class="bg-blue-50 border-t border-blue-100">
                                     <tr>
-                                        <td colspan="7" class="px-4 py-3 text-right text-sm font-semibold text-secondary-900">Total Pengajuan:</td>
-                                        <td class="px-4 py-3 text-right">
-                                            <span id="total-honorarium" class="text-xl font-bold text-primary-600">Rp 0</span>
+                                        <td colspan="7" class="px-3 py-2 text-right text-sm font-semibold text-gray-900">Total Pengajuan:</td>
+                                        <td class="px-3 py-2 text-right">
+                                            <span id="total-honorarium" class="text-xl font-bold text-blue-600">Rp 0</span>
                                             <input type="hidden" name="total_pengajuan" id="total_pengajuan" value="0">
                                         </td>
                                     </tr>
@@ -236,7 +236,7 @@
                                 <div class="flex items-center justify-between">
                                     <h3 class="text-lg font-semibold text-gray-900">Import Daftar Penerima</h3>
                                     <button type="button" onclick="window.honorariumForm().closeImportModal()" class="text-gray-400 hover:text-gray-600">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                         </svg>
                                     </button>
@@ -246,13 +246,13 @@
                             <!-- Content -->
                             <div class="p-6">
                                 <!-- Download Template -->
-                                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                                <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                                     <div class="flex items-start">
-                                        <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 text-blue-600 text-blue-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <div>
-                                            <p class="text-sm font-medium text-blue-700">Download Template Excel</p>
+                                            <p class="text-sm font-medium text-xs text-blue-100">Download Template Excel</p>
                                             <p class="text-xs text-blue-600 mt-1">Gunakan template ini untuk memastikan format data yang benar.</p>
                                             <button type="button" onclick="window.honorariumForm().downloadTemplate()" class="mt-2 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700">
                                                 Download Template
@@ -262,9 +262,9 @@
                                 </div>
 
                                 <!-- Download Daftar Karyawan -->
-                                <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+                                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                                     <div class="flex items-start">
-                                        <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 text-blue-600 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
                                         <div>
@@ -320,7 +320,7 @@
                                 <button type="button" onclick="window.honorariumForm().closeImportModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100">
                                     Batal
                                 </button>
-                                <button type="button" onclick="window.honorariumForm().processImport()" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                                <button type="button" onclick="window.honorariumForm().processImport()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                                     Import Data
                                 </button>
                             </div>
@@ -328,75 +328,75 @@
                     </div>
                 @else
                     <!-- Detail Pengajuan (Regular) -->
-                    <div class="bg-white rounded-2xl shadow-soft p-6">
-                    <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center justify-between">
+                    <div class="bg-white rounded-lg p-4">
+                    <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center justify-between">
                         <div class="flex items-center">
-                            <span class="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mr-3">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span class="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mr-2">
+                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
                             </span>
                             Rincian Pengajuan
                         </div>
-                        <button type="button" onclick="window.pengajuanForm().addDetail()" class="px-4 py-2 bg-primary-600 text-white rounded-xl text-sm hover:bg-primary-700 transition-all">
+                        <button type="button" onclick="window.pengajuanForm().addDetail()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-all">
                             + Tambah Item
                         </button>
                     </h2>
 
                     <div class="overflow-x-auto">
                         <table class="w-full" id="detail-table">
-                            <thead class="bg-secondary-50">
+                            <thead class="bg-blue-50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Detail Anggaran</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Uraian</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Volume</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Satuan</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Harga Satuan</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Jumlah</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-secondary-600 uppercase">Aksi</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Detail Anggaran</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Uraian</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Volume</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Satuan</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Harga Satuan</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Jumlah</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-secondary-100" id="detail-body">
+                            <tbody class="divide-y divide-blue-50" id="detail-body">
                                 <tr class="detail-row">
-                                    <td class="px-4 py-3 w-64">
-                                        <select name="details[0][detail_anggaran_id]" class="detail-anggaran-select w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm" disabled onchange="pengajuanForm().onDetailAnggaranChange(this)">
+                                    <td class="px-3 py-2 w-64">
+                                        <select name="details[0][detail_anggaran_id]" class="detail-anggaran-select w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" disabled onchange="pengajuanForm().onDetailAnggaranChange(this)">
                                             <option value="">Pilih Sub Program Terlebih Dahulu</option>
                                         </select>
-                                        <span class="detail-anggaran-sisa text-xs text-secondary-500 block mt-1"></span>
+                                        <span class="detail-anggaran-sisa text-xs text-gray-500 block mt-1"></span>
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-3 py-2">
                                         <input type="text" name="details[0][uraian]" placeholder="Nama barang/jasa" required oninput="pengajuanForm().saveFormState()"
-                                            class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm">
+                                            class="w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-3 py-2">
                                         <input type="number" name="details[0][volume]" value="1" min="1" required onchange="pengajuanForm().calculateTotal()"
-                                            class="w-24 px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm">
+                                            class="w-24 px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-3 py-2">
                                         <input type="text" name="details[0][satuan]" placeholder="pcs, kg, meter" required oninput="pengajuanForm().saveFormState()"
-                                            class="w-20 px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm">
+                                            class="w-20 px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-3 py-2">
                                         <input type="number" name="details[0][harga_satuan]" placeholder="0" required onchange="pengajuanForm().calculateTotal()"
-                                            class="w-32 px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm">
+                                            class="w-32 px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-3 py-2">
                                         <span class="detail-total font-semibold">Rp 0</span>
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-3 py-2">
                                         <button type="button" onclick="pengajuanForm().removeDetail(0)" class="text-red-600 hover:text-red-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
                                     </td>
                                 </tr>
                             </tbody>
-                            <tfoot class="bg-secondary-50">
+                            <tfoot class="bg-blue-50">
                                 <tr>
-                                    <td colspan="5" class="px-4 py-3 text-right font-semibold text-secondary-700">Total Pengajuan:</td>
-                                    <td colspan="2" class="px-4 py-3">
-                                        <span id="grand-total" class="text-xl font-bold text-primary-600">Rp 0</span>
+                                    <td colspan="5" class="px-3 py-2 text-right font-semibold text-gray-700">Total Pengajuan:</td>
+                                    <td colspan="2" class="px-3 py-2">
+                                        <span id="grand-total" class="text-xl font-bold text-blue-600">Rp 0</span>
                                         <input type="hidden" name="total_pengajuan" id="total_pengajuan_regular" value="0">
                                     </td>
                                 </tr>
@@ -408,10 +408,10 @@
 
                 @if($jenisPengajuan !== 'honorarium')
                 <!-- Penerima Manfaat -->
-                <div class="bg-white rounded-2xl shadow-soft p-6">
-                    <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-3">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-white rounded-lg p-4">
+                    <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                        <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-2">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         </span>
@@ -422,7 +422,7 @@
                         <div>
                             <x-input-label for="jenis_penerima" value="Jenis Penerima *" />
                             <select name="jenis_penerima" id="jenis_penerima" required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                class="mt-1 block w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Pilih Jenis</option>
                                 <option value="karyawan" {{ old('jenis_penerima') == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
                                 <option value="vendor" {{ old('jenis_penerima') == 'vendor' ? 'selected' : '' }}>Vendor</option>
@@ -435,7 +435,7 @@
                         <div id="penerima-karyawan-container" class="hidden">
                             <x-input-label for="penerima_manfaat_id" value="Nama Penerima *" />
                             <select name="penerima_manfaat_id" id="penerima_manfaat_id"
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                class="mt-1 block w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Pilih Karyawan</option>
                                 @foreach($users as $user)
                                     <option value="{{ $user->id }}" {{ old('penerima_manfaat_id') == $user->id ? 'selected' : '' }}>
@@ -450,27 +450,64 @@
                         <div id="penerima-manual-container" class="hidden">
                             <x-input-label for="penerima_manfaat_name" value="Nama Penerima *" />
                             <input type="text" name="penerima_manfaat_name" id="penerima_manfaat_name" value="{{ old('penerima_manfaat_name') }}"
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="mt-1 block w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Masukkan nama penerima">
                             <x-input-error :messages="$errors->get('penerima_manfaat_name')" class="mt-2" />
                         </div>
+                    </div>
+                </div>
+
+                <!-- Informasi Rekening -->
+                <div class="bg-white rounded-lg p-4 mt-4">
+                    <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                        <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-2">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                        </span>
+                        Informasi Rekening Tujuan
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label for="nama_bank" value="Nama Bank" />
+                            <select name="nama_bank" id="nama_bank" class="mt-1 block w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                                <option value="">-- Pilih Bank --</option>
+                                @foreach(\App\Models\Bank::orderBy('nama_bank')->get() as $bank)
+                                    <option value="{{ $bank->nama_bank }}" {{ old('nama_bank') == $bank->nama_bank ? 'selected' : '' }}>{{ $bank->nama_bank }}</option>
+                                @endforeach
+                                <option value="BCA">BCA</option>
+                                <option value="Bank Mandiri">Bank Mandiri</option>
+                                <option value="Bank BNI">Bank BNI</option>
+                                <option value="Bank BRI">Bank BRI</option>
+                                <option value="Bank CIMB Niaga">Bank CIMB Niaga</option>
+                                <option value="Bank Danamon">Bank Danamon</option>
+                                <option value="Bank Permata">Bank Permata</option>
+                                <option value="Bank Jago">Bank Jago</option>
+                                <option value="Jenius">Jenius</option>
+                                <option value="Digibank">Digibank</option>
+                                <option value="Bank Syariah Indonesia">Bank Syariah Indonesia</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('nama_bank')" class="mt-2" />
+                        </div>
 
                         <div>
-                            <x-input-label for="rekening_tujuan" value="Rekening Tujuan *" />
-                            <input type="text" name="rekening_tujuan" id="rekening_tujuan" value="{{ old('rekening_tujuan') }}" required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                placeholder="Nomor rekening tujuan transfer">
+                            <x-input-label for="rekening_tujuan" value="Nomor Rekening Tujuan" />
+                            <input type="text" name="rekening_tujuan" id="rekening_tujuan" value="{{ old('rekening_tujuan') }}"
+                                class="mt-1 block w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Contoh: 1234567890">
                             <x-input-error :messages="$errors->get('rekening_tujuan')" class="mt-2" />
+                            <p class="mt-1 text-xs text-gray-500">Nomor rekening tujuan untuk transfer dana</p>
                         </div>
                     </div>
                 </div>
                 @endif
 
                 <!-- Dokumen Lampiran (Global untuk seluruh pengajuan) -->
-                <div class="bg-white rounded-2xl shadow-soft p-6">
-                    <h2 class="text-lg font-semibold text-secondary-900 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mr-3">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-white rounded-lg p-4">
+                    <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                        <span class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mr-2">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.472 6.472a4 4 0 01-5.656 0L4 12m0 0l6-6m0 0l6.472 6.472a4 4 0 015.656 0L20 13m-6-6h.01" />
                             </svg>
                         </span>
@@ -481,8 +518,8 @@
                         <div>
                             <x-input-label for="attachments" value="Lampiran Dokumen *" />
                             <input type="file" name="attachments[]" id="attachments" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple required
-                                class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-sm file:mr-4 file:py-2 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
-                            <p class="mt-1 text-xs text-secondary-500">PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG (Maks 2MB per file, Maks 5 file)</p>
+                                class="mt-1 block w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-orange-500 focus:border-orange-500  text-sm file:mr-3 file:py-2 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                            <p class="mt-1 text-xs text-gray-500">PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG (Maks 2MB per file, Maks 5 file)</p>
                             <x-input-error :messages="$errors->get('attachments')" class="mt-2" />
                         </div>
                     </div>
@@ -496,16 +533,16 @@
             </div>
 
             <!-- Actions -->
-            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-secondary-200 mt-8">
-                <a href="{{ route('pengajuan-dana.index') }}" class="px-6 py-3 border border-secondary-200 text-secondary-700 rounded-xl hover:bg-secondary-50 transition-all duration-200">
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-blue-100 mt-8">
+                <a href="{{ route('pengajuan-dana.index') }}" class="px-3 py-2 border border-blue-100 text-gray-700 rounded-lg hover:bg-blue-50 ">
                     Batal
                 </a>
-                <button type="button" onclick="resetForm()" class="px-6 py-3 border border-red-300 text-red-600 rounded-xl hover:bg-red-50 transition-all duration-200">
+                <button type="button" onclick="resetForm()" class="px-3 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 ">
                     Reset Form
                 </button>
-                <button type="button" id="submit-pengajuan-btn" onclick="submitForm()" class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-soft hover:shadow-medium">
+                <button type="button" id="submit-pengajuan-btn" onclick="submitForm()" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700  shadow-soft hover:shadow-medium">
                     <span class="flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                         Simpan Pengajuan
@@ -763,34 +800,34 @@
                     const isDisabled = !document.getElementById('sub_program_id').value ? 'disabled' : '';
 
                     row.innerHTML = `
-                        <td class="px-4 py-3 w-64">
-                            <select name="details[${index}][detail_anggaran_id]" class="detail-anggaran-select w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm" ${isDisabled} onchange="pengajuanForm().onDetailAnggaranChange(this)">
+                        <td class="px-3 py-2 w-64">
+                            <select name="details[${index}][detail_anggaran_id]" class="detail-anggaran-select w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" ${isDisabled} onchange="pengajuanForm().onDetailAnggaranChange(this)">
                                 ${detailAnggaranOptions}
                             </select>
-                            <span class="detail-anggaran-sisa text-xs text-secondary-500 block mt-1"></span>
+                            <span class="detail-anggaran-sisa text-xs text-gray-500 block mt-1"></span>
                         </td>
-                        <td class="px-4 py-3">
+                        <td class="px-3 py-2">
                             <input type="text" name="details[${index}][uraian]" placeholder="Nama barang/jasa" required oninput="pengajuanForm().saveFormState()"
-                                class="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm">
+                                class="w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
                         </td>
-                        <td class="px-4 py-3">
+                        <td class="px-3 py-2">
                             <input type="number" name="details[${index}][volume]" value="1" min="1" required onchange="pengajuanForm().calculateTotal()"
-                                class="w-24 px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm">
+                                class="w-24 px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
                         </td>
-                        <td class="px-4 py-3">
+                        <td class="px-3 py-2">
                             <input type="text" name="details[${index}][satuan]" placeholder="pcs, kg, meter" required oninput="pengajuanForm().saveFormState()"
-                                class="w-20 px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm">
+                                class="w-20 px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
                         </td>
-                        <td class="px-4 py-3">
+                        <td class="px-3 py-2">
                             <input type="number" name="details[${index}][harga_satuan]" placeholder="0" required onchange="pengajuanForm().calculateTotal()"
-                                class="w-32 px-3 py-2 border border-secondary-200 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm">
+                                class="w-32 px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
                         </td>
-                        <td class="px-4 py-3">
+                        <td class="px-3 py-2">
                             <span class="detail-total font-semibold">Rp 0</span>
                         </td>
-                        <td class="px-4 py-3">
+                        <td class="px-3 py-2">
                             <button type="button" onclick="pengajuanForm().removeDetail(${index})" class="text-red-600 hover:text-red-800">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                             </button>
@@ -1081,38 +1118,38 @@
                         const row = document.createElement('tr');
                         row.id = `honorarium-row-${index}`;
                         row.innerHTML = `
-                            <td class="px-3 py-2 text-sm text-secondary-900">${this.rowCount}</td>
+                            <td class="px-3 py-2 text-sm text-gray-900">${this.rowCount}</td>
                             <td class="px-3 py-2">
-                                <select name="honorarium_details[${index}][penerima_manfaat_type]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" onchange="window.honorariumForm().togglePenerimaType(${index})">
+                                <select name="honorarium_details[${index}][penerima_manfaat_type]" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500" onchange="window.honorariumForm().togglePenerimaType(${index})">
                                     <option value="karyawan">Karyawan</option>
                                     <option value="non_karyawan">Non-Karyawan</option>
                                 </select>
                             </td>
                             <td class="px-3 py-2">
                                 <div id="karyawan-select-${index}">
-                                    <select name="honorarium_details[${index}][penerima_manfaat_id]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500">
+                                    <select name="honorarium_details[${index}][penerima_manfaat_id]" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500">
                                         ${userOptions}
                                     </select>
                                 </div>
                                 <div id="manual-input-${index}" class="hidden">
-                                    <input type="text" name="honorarium_details[${index}][penerima_manfaat_name]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="Nama penerima">
+                                    <input type="text" name="honorarium_details[${index}][penerima_manfaat_name]" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500" placeholder="Nama penerima">
                                 </div>
                             </td>
                             <td class="px-3 py-2">
-                                <input type="number" name="honorarium_details[${index}][jumlah_honor]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="0" min="0" required onchange="window.honorariumForm().calculateTotal()">
+                                <input type="number" name="honorarium_details[${index}][jumlah_honor]" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500" placeholder="0" min="0" required onchange="window.honorariumForm().calculateTotal()">
                             </td>
                             <td class="px-3 py-2">
-                                <input type="text" name="honorarium_details[${index}][nomor_rekening]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="Nomor rekening" required>
+                                <input type="text" name="honorarium_details[${index}][nomor_rekening]" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500" placeholder="Nomor rekening" required>
                             </td>
                             <td class="px-3 py-2">
-                                <textarea name="honorarium_details[${index}][deskripsi]" rows="1" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="Deskripsi"></textarea>
+                                <textarea name="honorarium_details[${index}][deskripsi]" rows="1" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500" placeholder="Deskripsi"></textarea>
                             </td>
                             <td class="px-3 py-2">
-                                <input type="file" name="honorarium_details[${index}][lampiran]" class="w-full text-xs border border-secondary-200 rounded-lg px-2 py-1 focus:ring-2 focus:ring-primary-500" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                <input type="file" name="honorarium_details[${index}][lampiran]" class="w-full text-xs border border-blue-100 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                             </td>
                             <td class="px-3 py-2 text-center">
                                 <button type="button" onclick="window.honorariumForm().removeRecipientRow(${index})" class="text-red-600 hover:text-red-800">
-                                    <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4 text-blue-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                 </button>
@@ -1414,38 +1451,38 @@
                                     const newRow = document.createElement('tr');
                                     newRow.id = `honorarium-row-${index}`;
                                     newRow.innerHTML = `
-                                        <td class="px-3 py-2 text-sm text-secondary-900">${this.rowCount}</td>
+                                        <td class="px-3 py-2 text-sm text-gray-900">${this.rowCount}</td>
                                         <td class="px-3 py-2">
-                                            <select name="honorarium_details[${index}][penerima_manfaat_type]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" onchange="window.honorariumForm().togglePenerimaType(${index})">
+                                            <select name="honorarium_details[${index}][penerima_manfaat_type]" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500" onchange="window.honorariumForm().togglePenerimaType(${index})">
                                                 <option value="karyawan" ${row.penerima_manfaat_type === 'karyawan' ? 'selected' : ''}>Karyawan</option>
                                                 <option value="non_karyawan" ${row.penerima_manfaat_type === 'non_karyawan' ? 'selected' : ''}>Non-Karyawan</option>
                                             </select>
                                         </td>
                                         <td class="px-3 py-2">
                                             <div id="karyawan-select-${index}" ${row.penerima_manfaat_type === 'non_karyawan' ? 'class="hidden"' : ''}>
-                                                <select name="honorarium_details[${index}][penerima_manfaat_id]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500">
+                                                <select name="honorarium_details[${index}][penerima_manfaat_id]" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500">
                                                     ${userOptions}
                                                 </select>
                                             </div>
                                             <div id="manual-input-${index}" ${row.penerima_manfaat_type === 'karyawan' ? 'class="hidden"' : ''}>
-                                                <input type="text" name="honorarium_details[${index}][penerima_manfaat_name]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" value="${row.penerima_manfaat_name || ''}" placeholder="Nama penerima">
+                                                <input type="text" name="honorarium_details[${index}][penerima_manfaat_name]" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500" value="${row.penerima_manfaat_name || ''}" placeholder="Nama penerima">
                                             </div>
                                         </td>
                                         <td class="px-3 py-2">
-                                            <input type="number" name="honorarium_details[${index}][jumlah_honor]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="0" min="0" required onchange="window.honorariumForm().calculateTotal()" value="${row.jumlah_honor || ''}">
+                                            <input type="number" name="honorarium_details[${index}][jumlah_honor]" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500" placeholder="0" min="0" required onchange="window.honorariumForm().calculateTotal()" value="${row.jumlah_honor || ''}">
                                         </td>
                                         <td class="px-3 py-2">
-                                            <input type="text" name="honorarium_details[${index}][nomor_rekening]" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="Nomor rekening" required value="${row.nomor_rekening || ''}">
+                                            <input type="text" name="honorarium_details[${index}][nomor_rekening]" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500" placeholder="Nomor rekening" required value="${row.nomor_rekening || ''}">
                                         </td>
                                         <td class="px-3 py-2">
-                                            <textarea name="honorarium_details[${index}][deskripsi]" rows="1" class="w-full text-sm border border-secondary-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary-500" placeholder="Deskripsi">${row.deskripsi || ''}</textarea>
+                                            <textarea name="honorarium_details[${index}][deskripsi]" rows="1" class="w-full text-sm border border-blue-100 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500" placeholder="Deskripsi">${row.deskripsi || ''}</textarea>
                                         </td>
                                         <td class="px-3 py-2">
-                                            <input type="file" name="honorarium_details[${index}][lampiran]" class="w-full text-xs border border-secondary-200 rounded-lg px-2 py-1 focus:ring-2 focus:ring-primary-500" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                            <input type="file" name="honorarium_details[${index}][lampiran]" class="w-full text-xs border border-blue-100 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                                         </td>
                                         <td class="px-3 py-2 text-center">
                                             <button type="button" onclick="window.honorariumForm().removeRecipientRow(${index})" class="text-red-600 hover:text-red-800">
-                                                <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="w-4 h-4 text-blue-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
                                             </button>

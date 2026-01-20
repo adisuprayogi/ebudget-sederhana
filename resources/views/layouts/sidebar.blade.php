@@ -231,6 +231,26 @@
                     <p class="text-xs font-semibold text-white/50 uppercase tracking-wider">Anggaran</p>
                 </div>
 
+                @if(auth()->user()->hasRole('kepala_divisi'))
+                <a href="{{ route('approvals.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('approvals.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Approval</span>
+                    @php
+                        $pendingApprovalCount = \App\Models\Approval::where('approver_id', auth()->id())
+                            ->where('status', 'pending')
+                            ->whereHas('pengajuanDana', function($q) {
+                                $q->whereNotIn('status', ['cancelled', 'draft', 'ditolak', 'rejected']);
+                            })
+                            ->count();
+                    @endphp
+                    @if($pendingApprovalCount > 0)
+                        <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">{{ $pendingApprovalCount }}</span>
+                    @endif
+                </a>
+                @endif
+
                 <a href="{{ route('program-kerja.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 {{ request()->routeIs('program-kerja.*') ? 'bg-white text-blue-700 shadow-lg' : 'text-white/90 hover:bg-white/10 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />

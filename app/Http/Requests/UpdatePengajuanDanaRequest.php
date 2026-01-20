@@ -49,6 +49,8 @@ class UpdatePengajuanDanaRequest extends FormRequest
             'periode_selesai' => 'sometimes|required|date|after_or_equal:periode_mulai',
             'total_pengajuan' => 'sometimes|required|numeric|min:1000',
             'deskripsi' => 'nullable|string|max:1000',
+            'nama_bank' => 'nullable|string|max:100',
+            'rekening_tujuan' => 'nullable|string|max:200',
 
             // Penerima manfaat validation
             'jenis_penerima' => 'sometimes|required|in:karyawan,vendor,lainnya',
@@ -266,6 +268,8 @@ class UpdatePengajuanDanaRequest extends FormRequest
             'periode_selesai' => 'Periode Selesai',
             'total_pengajuan' => 'Total Pengajuan',
             'deskripsi' => 'Deskripsi',
+            'nama_bank' => 'Nama Bank',
+            'rekening_tujuan' => 'Rekening Tujuan',
             'jenis_penerima' => 'Jenis Penerima',
             'penerima_manfaat_id' => 'Penerima Manfaat',
             'penerima_manfaat_name' => 'Nama Penerima Manfaat',

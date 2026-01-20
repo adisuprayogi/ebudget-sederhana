@@ -270,6 +270,8 @@ class PengajuanDanaController extends Controller
                 'tanggal_pengajuan' => $request->tanggal_pengajuan ?? now()->toDateString(),
                 'total_pengajuan' => $request->total_pengajuan,
                 'deskripsi' => $request->deskripsi,
+                'nama_bank' => $request->nama_bank,
+                'rekening_tujuan' => $request->rekening_tujuan,
                 'status' => 'draft',
                 'catatan' => $request->catatan,
                 'created_at' => now(),
@@ -286,7 +288,15 @@ class PengajuanDanaController extends Controller
             if ($request->jenis_pengajuan !== 'honorarium') {
                 $pengajuanData['periode_mulai'] = $request->periode_mulai;
                 $pengajuanData['periode_selesai'] = $request->periode_selesai;
-                $pengajuanData['penerima_manfaat_type'] = $request->jenis_penerima;
+
+                // Map form values to database ENUM values
+                $jenisPenerimaMap = [
+                    'karyawan' => 'pegawai',
+                    'vendor' => 'vendor',
+                    'lainnya' => 'non_pegawai',
+                ];
+                $pengajuanData['penerima_manfaat_type'] = $jenisPenerimaMap[$request->jenis_penerima] ?? $request->jenis_penerima;
+
                 $pengajuanData['penerima_manfaat_id'] = $request->penerima_manfaat_id;
                 $pengajuanData['penerima_manfaat_name'] = $request->penerima_manfaat_name;
                 $pengajuanData['penerima_manfaat_detail'] = $request->penerima_manfaat_detail;
@@ -473,6 +483,8 @@ class PengajuanDanaController extends Controller
                 'periode_selesai' => $request->periode_selesai ?? $pengajuanDana->periode_selesai,
                 'total_pengajuan' => $request->total_pengajuan ?? $pengajuanDana->total_pengajuan,
                 'deskripsi' => $request->deskripsi ?? $pengajuanDana->deskripsi,
+                'nama_bank' => $request->nama_bank ?? $pengajuanDana->nama_bank,
+                'rekening_tujuan' => $request->rekening_tujuan ?? $pengajuanDana->rekening_tujuan,
                 'penerima_manfaat_type' => $request->jenis_penerima ?? $pengajuanDana->penerima_manfaat_type,
                 'penerima_manfaat_id' => $request->penerima_manfaat_id ?? $pengajuanDana->penerima_manfaat_id,
                 'penerima_manfaat_name' => $request->penerima_manfaat_name ?? $pengajuanDana->penerima_manfaat_name,
@@ -582,9 +594,18 @@ class PengajuanDanaController extends Controller
 
         DB::beginTransaction();
         try {
+            // Delete related notifications
+            \App\Models\Notification::where('type', 'approval')
+                ->where('notifiable_type', \App\Models\PengajuanDana::class)
+                ->where('notifiable_id', $pengajuanDana->id)
+                ->delete();
+
+            // Delete related approvals
+            \App\Models\Approval::where('pengajuan_dana_id', $pengajuanDana->id)->delete();
+
             // Delete attachments
             foreach ($pengajuanDana->attachments as $attachment) {
-                Storage::disk('public')->delete($attachment->path);
+                \Storage::disk('public')->delete($attachment->path);
                 $attachment->delete();
             }
 
@@ -629,16 +650,31 @@ class PengajuanDanaController extends Controller
                 ->with('error', 'Pengajuan tidak dapat dibatalkan karena sudah dalam proses lebih lanjut.');
         }
 
+        DB::beginTransaction();
         try {
             $pengajuanDana->update([
                 'status' => 'cancelled',
             ]);
+
+            // Delete related approval notifications
+            \App\Models\Notification::where('type', 'approval')
+                ->where('notifiable_type', \App\Models\PengajuanDana::class)
+                ->where('notifiable_id', $pengajuanDana->id)
+                ->delete();
+
+            // Also delete pending approvals
+            \App\Models\Approval::where('pengajuan_dana_id', $pengajuanDana->id)
+                ->where('status', 'pending')
+                ->delete();
+
+            DB::commit();
 
             return redirect()
                 ->route('pengajuan-dana.show', $pengajuanDana)
                 ->with('success', 'Pengajuan dana berhasil dibatalkan.');
 
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Failed to cancel pengajuan dana: ' . $e->getMessage());
 
             return redirect()

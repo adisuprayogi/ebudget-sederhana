@@ -9,7 +9,21 @@
     </x-slot>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-3 gap-3 mb-4">
+    <div class="grid grid-cols-4 gap-3 mb-4">
+        <div class="bg-white rounded-xl border border-blue-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xl font-semibold text-gray-900">{{ $stats['menunggu_refund'] ?? 0 }}</p>
+                    <p class="text-xs text-gray-500">Menunggu Refund</p>
+                </div>
+            </div>
+        </div>
+
         <div class="bg-white rounded-xl border border-blue-100 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
@@ -33,7 +47,7 @@
                 </div>
                 <div>
                     <p class="text-xl font-semibold text-gray-900">{{ $stats['processed'] ?? 0 }}</p>
-                    <p class="text-xs text-gray-500">Disetujui/Selesai</p>
+                    <p class="text-xs text-gray-500">Selesai</p>
                 </div>
             </div>
         </div>
@@ -92,7 +106,17 @@
     <!-- Tabs -->
     <div class="bg-white rounded-xl border border-blue-100 overflow-hidden mb-4">
         <div class="flex flex-wrap border-b border-blue-100">
-            <button onclick="showTab('menunggu-approval')" id="tab-menunggu-approval" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-amber-500 text-amber-600 bg-amber-50 transition-colors">
+            <button onclick="showTab('menunggu-refund')" id="tab-menunggu-refund" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-blue-500 text-blue-600 bg-blue-50 transition-colors">
+                <div class="flex items-center justify-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="hidden md:inline">Menunggu Refund</span>
+                    <span class="md:hidden">Refund</span>
+                    <span class="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['menunggu_refund'] ?? 0 }}</span>
+                </div>
+            </button>
+            <button onclick="showTab('menunggu-approval')" id="tab-menunggu-approval" class="flex-1 min-w-[120px] px-3 py-3 text-sm font-semibold border-b-2 border-transparent text-gray-600 hover:bg-blue-50 transition-colors">
                 <div class="flex items-center justify-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -107,7 +131,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span class="hidden md:inline">Disetujui</span>
+                    <span class="hidden md:inline">Selesai</span>
                     <span class="md:hidden">Selesai</span>
                     <span class="bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $stats['processed'] ?? 0 }}</span>
                 </div>
@@ -125,8 +149,114 @@
         </div>
     </div>
 
+    <!-- Tab Content: Menunggu Refund -->
+    <div id="content-menunggu-refund" class="tab-content">
+        @if(isset($lpjsMenungguRefund) && $lpjsMenungguRefund->count() > 0)
+            <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-blue-50 border-b border-blue-100">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-blue-700 uppercase">Nomor LPJ</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-blue-700 uppercase">Judul LPJ</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-blue-700 uppercase">Divisi</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-blue-700 uppercase">Pengajuan</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold text-blue-700 uppercase">Sisa Dana</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-blue-700 uppercase">Tgl Approve LPJ</th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-blue-700 uppercase">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-blue-50">
+                            @foreach($lpjsMenungguRefund as $lpj)
+                            <tr class="hover:bg-blue-50/50 transition-colors">
+                                <td class="px-4 py-3">
+                                    <span class="font-mono font-semibold text-blue-600 text-sm">{{ $lpj->nomor_lpj }}</span>
+                                    <div class="text-xs text-gray-500 mt-0.5">
+                                        @if($lpj->pencairanDana && $lpj->pencairanDana->pengajuanDana && $lpj->pencairanDana->pengajuanDana->createdBy)
+                                            Pengaju: {{ $lpj->pencairanDana->pengajuanDana->createdBy->name }}
+                                        @elseif($lpj->createdBy)
+                                            Pengaju: {{ $lpj->createdBy->name }}
+                                        @else
+                                            Pengaju: -
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-900">{{ $lpj->judul_lpj ?? '-' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">
+                                    @if($lpj->pencairanDana && $lpj->pencairanDana->pengajuanDana && $lpj->pencairanDana->pengajuanDana->divisi)
+                                        {{ $lpj->pencairanDana->pengajuanDana->divisi->nama_divisi }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700">
+                                    @if($lpj->pencairanDana && $lpj->pencairanDana->pengajuanDana)
+                                        {{ $lpj->pencairanDana->pengajuanDana->judul_pengajuan ?? '-' }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 text-sm font-semibold text-green-600">{{ formatRupiah($lpj->sisa_dana) }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">{{ \Carbon\Carbon::parse($lpj->approved_at)->format('d/m/Y') }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <div class="flex items-center justify-center gap-1">
+                                        <a href="{{ route('lpj.show', $lpj) }}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs font-medium rounded-lg transition-colors" title="Lihat Detail LPJ">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                        <button onclick="sendRefundReminder({{ $lpj->id }}, '{{ $lpj->nomor_lpj }}', '{{ $lpj->pencairanDana->pengajuanDana->createdBy->name ?? 'Pengaju' }}')" class="inline-flex items-center gap-1.5 px-2 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-lg transition-colors" title="Ingatkan Pengaju">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100 flex items-center justify-between">
+                    <p class="text-sm text-gray-600">
+                        Menampilkan {{ $lpjsMenungguRefund->firstItem() }} sampai {{ $lpjsMenungguRefund->lastItem() }} dari {{ $lpjsMenungguRefund->total() }} LPJ
+                    </p>
+                    {{ $lpjsMenungguRefund->appends(request()->except('page'))->links() }}
+                </div>
+
+                <!-- Total Sisa Dana -->
+                <div class="bg-blue-50 border-t border-blue-100 px-4 py-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="text-sm font-semibold text-blue-900">Total Sisa Dana Belum Di-Refund:</span>
+                        </div>
+                        <span class="text-lg font-bold text-blue-600">{{ formatRupiah($totalSisaDana ?? 0) }}</span>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="bg-white rounded-xl border border-blue-100 p-16 text-center">
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-700 font-medium">Tidak Ada LPJ dengan Sisa Dana</p>
+                    <p class="text-gray-400 text-sm mt-1">LPJ yang sudah disetujui dengan sisa dana akan ditampilkan di sini.</p>
+                </div>
+            </div>
+        @endif
+    </div>
+
     <!-- Tab Content: Menunggu Approval -->
-    <div id="content-menunggu-approval" class="tab-content">
+    <div id="content-menunggu-approval" class="tab-content hidden">
         @if($refunds->count() > 0)
             <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
                 <div class="overflow-x-auto">
@@ -426,6 +556,39 @@
         </div>
     </div>
 
+    <!-- Quick Process Modal -->
+    <div id="quickProcessModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 overflow-hidden">
+            <div class="px-5 py-4 border-b border-blue-100 bg-violet-50">
+                <h3 class="text-base font-semibold text-violet-900">Proses Refund</h3>
+                <p class="text-xs text-violet-600 mt-0.5" id="processRefundNumber"></p>
+            </div>
+            <form id="quickProcessForm" method="POST" action="" enctype="multipart/form-data" class="p-5">
+                @csrf
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600">Konfirmasi bahwa refund ini telah selesai diproses dan dana telah dikembalikan.</p>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Transfer *</label>
+                    <input type="date" name="tanggal_transfer" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Bukti Transfer *</label>
+                    <input type="file" name="bukti_transfer" required accept=".pdf,.jpg,.jpeg,.png" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100">
+                    <p class="text-xs text-gray-500 mt-1">PDF, JPG, JPEG, PNG (max 5MB)</p>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeProcessModal()" class="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors text-sm">
+                        Ya, Proses
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function showTab(tabName) {
             // Hide all tab contents
@@ -435,7 +598,7 @@
 
             // Remove active state from all tabs
             document.querySelectorAll('[id^="tab-"]').forEach(function(el) {
-                el.classList.remove('border-amber-500', 'border-emerald-500', 'border-red-500', 'text-amber-600', 'text-emerald-600', 'text-red-600', 'bg-amber-50', 'bg-emerald-50', 'bg-red-50');
+                el.classList.remove('border-blue-500', 'border-amber-500', 'border-emerald-500', 'border-red-500', 'text-blue-600', 'text-amber-600', 'text-emerald-600', 'text-red-600', 'bg-blue-50', 'bg-amber-50', 'bg-emerald-50', 'bg-red-50');
                 el.classList.add('border-transparent', 'text-gray-600');
             });
 
@@ -446,7 +609,9 @@
             var activeTab = document.getElementById('tab-' + tabName);
             activeTab.classList.remove('border-transparent', 'text-gray-600');
 
-            if (tabName === 'menunggu-approval') {
+            if (tabName === 'menunggu-refund') {
+                activeTab.classList.add('border-blue-500', 'text-blue-600', 'bg-blue-50');
+            } else if (tabName === 'menunggu-approval') {
                 activeTab.classList.add('border-amber-500', 'text-amber-600', 'bg-amber-50');
             } else if (tabName === 'processed') {
                 activeTab.classList.add('border-emerald-500', 'text-emerald-600', 'bg-emerald-50');
@@ -483,6 +648,20 @@
             document.getElementById('quickRejectForm').reset();
         }
 
+        function quickProcess(refundId, nomorRefund) {
+            const form = document.getElementById('quickProcessForm');
+            form.action = '/refund-verification/' + refundId + '/process';
+            document.getElementById('processRefundNumber').textContent = nomorRefund;
+            document.getElementById('quickProcessModal').classList.remove('hidden');
+            document.getElementById('quickProcessModal').classList.add('flex');
+        }
+
+        function closeProcessModal() {
+            document.getElementById('quickProcessModal').classList.add('hidden');
+            document.getElementById('quickProcessModal').classList.remove('flex');
+            document.getElementById('quickProcessForm').reset();
+        }
+
         // Close modals on outside click
         document.getElementById('quickApproveModal').addEventListener('click', function(e) {
             if (e.target === this) {
@@ -495,5 +674,36 @@
                 closeRejectModal();
             }
         });
+
+        document.getElementById('quickProcessModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeProcessModal();
+            }
+        });
+
+        function sendRefundReminder(lpjId, nomorLpj, pengajuName) {
+            if (confirm('Kirim notifikasi ke ' + pengajuName + ' bahwa LPJ ' + nomorLpj + ' memiliki sisa dana yang bisa di-refund?')) {
+                fetch('/refund-reminder/' + lpjId, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Notifikasi berhasil dikirim ke ' + pengajuName);
+                        location.reload();
+                    } else {
+                        alert('Gagal mengirim notifikasi: ' + (data.message || 'Terjadi kesalahan'));
+                    }
+                })
+                .catch(error => {
+                    alert('Gagal mengirim notifikasi: ' + error.message);
+                });
+            }
+        }
     </script>
 </x-app-layout>

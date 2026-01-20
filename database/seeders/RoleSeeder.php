@@ -66,6 +66,7 @@ class RoleSeeder extends Seeder
                     'pengajuan_dana.create',
                     'pengajuan_dana.read',
                     'pengajuan_dana.update',
+                    'pengajuan_dana.approve',
                     'pengajuan_dana.approve_divisi',
                     'pencairan_dana.read',
                     'lpj.create',

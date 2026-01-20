@@ -1,315 +1,170 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="{{ route('perencanaan-penerimaan.index') }}" class="w-10 h-10 rounded-xl bg-blue-50 hover:bg-blue-100 flex items-center justify-center transition-colors">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
-                </div>
+                </a>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Buat Perencanaan Penerimaan Baru</h1>
-                    <p class="text-gray-500 text-sm mt-0.5">Tambahkan perencanaan penerimaan dana</p>
+                    <h1 class="text-xl font-semibold text-gray-900">Buat Perencanaan Penerimaan</h1>
+                    <p class="text-sm text-gray-500 mt-0.5">Tambahkan perencanaan dana baru</p>
                 </div>
             </div>
-            <a href="{{ route('perencanaan-penerimaan.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-xl shadow-sm transition-all duration-200 hover:shadow-md">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Kembali
-            </a>
         </div>
     </x-slot>
 
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-4xl">
         <form method="POST" action="{{ route('perencanaan-penerimaan.store') }}" id="createForm">
             @csrf
 
-            <!-- Informasi Perencanaan -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-blue-100">
-                    <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
-                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+            <!-- Main Form Card -->
+            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                <!-- Form Fields -->
+                <div class="p-8 space-y-6">
+                    <!-- Periode Anggaran -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Periode Anggaran <span class="text-red-500">*</span></label>
+                        <select name="periode_anggaran_id" id="periode_anggaran_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-sm">
+                            <option value="">Pilih Periode Anggaran</option>
+                            @foreach($periodeAnggarans ?? [] as $periode)
+                                <option value="{{ $periode->id }}" data-start="{{ $periode->tanggal_mulai_penggunaan_anggaran }}" data-end="{{ $periode->tanggal_selesai_penggunaan_anggaran }}">
+                                    {{ $periode->nama_periode }} ({{ $periode->tahun_anggaran }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('periode_anggaran_id')
+                            <p class="text-sm text-red-600 mt-1.5">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Divisi & Kode Rekening -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Divisi <span class="text-red-500">*</span></label>
+                            <select name="divisi_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-sm">
+                                <option value="">Pilih Divisi</option>
+                                @foreach($divisis ?? [] as $divisi)
+                                    <option value="{{ $divisi->id }}" {{ old('divisi_id') == $divisi->id || $defaultDivisi == $divisi->id ? 'selected' : '' }}>
+                                        {{ $divisi->nama_divisi }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('divisi_id')
+                                <p class="text-sm text-red-600 mt-1.5">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div>
-                            <p class="font-semibold text-blue-900">Informasi Perencanaan</p>
-                            <p class="text-sm text-blue-700 mt-0.5">Lengkapi data perencanaan penerimaan dana</p>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kode Rekening</label>
+                            <input type="text" name="kode_rekening" value="{{ old('kode_rekening') }}" placeholder="Contoh: 4.1.1.01" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono text-sm">
+                            @error('kode_rekening')
+                                <p class="text-sm text-red-600 mt-1.5">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
-                </div>
 
-                <div class="p-6">
+                    <!-- Uraian -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Uraian <span class="text-red-500">*</span></label>
+                        <textarea name="uraian" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none text-sm" placeholder="Jelaskan sumber penerimaan dana...">{{ old('uraian') }}</textarea>
+                        @error('uraian')
+                            <p class="text-sm text-red-600 mt-1.5">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Sumber Dana & Jumlah Estimasi -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Periode Anggaran -->
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Periode Anggaran <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <select name="periode_anggaran_id" id="periode_anggaran_id" class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none bg-white">
-                                    <option value="">Pilih Periode Anggaran</option>
-                                    @foreach($periodeAnggarans ?? [] as $periode)
-                                        <option value="{{ $periode->id }}" data-start="{{ $periode->tanggal_mulai_penggunaan_anggaran }}" data-end="{{ $periode->tanggal_selesai_penggunaan_anggaran }}">
-                                            {{ $periode->nama_periode }} ({{ $periode->tahun_anggaran }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </div>
-                            @error('periode_anggaran_id')
-                                <p class="text-sm text-red-600 mt-1.5 flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <!-- Divisi -->
                         <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Divisi <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
-                                </div>
-                                <select name="divisi_id" class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none bg-white">
-                                    <option value="">Pilih Divisi</option>
-                                    @foreach($divisis ?? [] as $divisi)
-                                        <option value="{{ $divisi->id }}" {{ old('divisi_id') == $divisi->id || $defaultDivisi == $divisi->id ? 'selected' : '' }}>
-                                            {{ $divisi->nama_divisi }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </div>
-                            @error('divisi_id')
-                                <p class="text-sm text-red-600 mt-1.5 flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <!-- Kode Rekening -->
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Kode Rekening</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                                    </svg>
-                                </div>
-                                <input type="text" name="kode_rekening" value="{{ old('kode_rekening') }}" placeholder="Contoh: 4.1.1.01" class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono">
-                            </div>
-                            @error('kode_rekening')
-                                <p class="text-sm text-red-600 mt-1.5 flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <!-- Uraian -->
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Uraian <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <div class="absolute top-3 left-3 pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                                <textarea name="uraian" rows="3" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none" placeholder="Jelaskan sumber penerimaan dana...">{{ old('uraian') }}</textarea>
-                            </div>
-                            @error('uraian')
-                                <p class="text-sm text-red-600 mt-1.5 flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <!-- Sumber Dana -->
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Sumber Dana <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <select name="sumber_dana_id" class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none bg-white">
-                                    <option value="">Pilih Sumber Dana</option>
-                                    @foreach($sumberDanas ?? [] as $sumberDana)
-                                        <option value="{{ $sumberDana->id }}" {{ old('sumber_dana_id') == $sumberDana->id ? 'selected' : '' }}>
-                                            {{ $sumberDana->nama_sumber }} ({{ $sumberDana->kode_sumber }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sumber Dana <span class="text-red-500">*</span></label>
+                            <select name="sumber_dana_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-sm">
+                                <option value="">Pilih Sumber Dana</option>
+                                @foreach($sumberDanas ?? [] as $sumberDana)
+                                    <option value="{{ $sumberDana->id }}" {{ old('sumber_dana_id') == $sumberDana->id ? 'selected' : '' }}>
+                                        {{ $sumberDana->nama_sumber }} ({{ $sumberDana->kode_sumber }})
+                                    </option>
+                                @endforeach
+                            </select>
                             @error('sumber_dana_id')
-                                <p class="text-sm text-red-600 mt-1.5 flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                    {{ $message }}
-                                </p>
+                                <p class="text-sm text-red-600 mt-1.5">{{ $message }}</p>
                             @enderror
                         </div>
-
-                        <!-- Jumlah Estimasi -->
                         <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Jumlah Estimasi <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Estimasi <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 font-bold text-sm">Rp</span>
-                                </div>
-                                <input type="text" id="jumlah_estimasi_display" class="currency-input w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-right font-mono" placeholder="0" data-target="jumlah_estimasi">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">Rp</span>
+                                <input type="text" id="jumlah_estimasi_display" class="currency-input w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-right font-mono text-sm" placeholder="0" data-target="jumlah_estimasi">
                                 <input type="hidden" name="jumlah_estimasi" id="jumlah_estimasi" value="{{ old('jumlah_estimasi') }}">
                             </div>
                             @error('jumlah_estimasi')
-                                <p class="text-sm text-red-600 mt-1.5 flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                    {{ $message }}
-                                </p>
+                                <p class="text-sm text-red-600 mt-1.5">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Perkiraan Per Bulan -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-                <div class="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4 border-b border-purple-100">
-                    <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
-                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                    <!-- Perkiraan Per Bulan -->
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold text-gray-700">Perkiraan Per Bulan</h3>
+                            <span id="total_bulanan" class="text-sm font-bold text-blue-600">Rp 0</span>
                         </div>
-                        <div>
-                            <p class="font-semibold text-purple-900">Perkiraan Per Bulan</p>
-                            <p class="text-sm text-purple-700 mt-0.5">Rincikan estimasi penerimaan per bulan sesuai periode anggaran</p>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="p-6">
-                    <!-- Month inputs will be dynamically loaded here -->
-                    <div id="months-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="col-span-full text-center py-12">
-                            <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div id="months-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                            <div class="col-span-full text-center py-12">
+                                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
+                                <p class="text-gray-500 text-sm">Pilih periode anggaran untuk melihat daftar bulan</p>
                             </div>
-                            <p class="text-gray-500">Pilih periode anggaran untuk melihat daftar bulan</p>
                         </div>
-                    </div>
 
-                    <!-- Summary -->
-                    <div class="mt-6 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-                        <div class="flex flex-wrap justify-between items-center gap-4">
-                            <div class="flex items-center gap-2">
-                                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                    </svg>
+                        <!-- Summary Card -->
+                        <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div class="flex items-center gap-6">
+                                    <div>
+                                        <p class="text-xs text-gray-500">Total Bulanan</p>
+                                        <p id="total_bulanan_card" class="text-lg font-bold text-gray-900">Rp 0</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500">Estimasi</p>
+                                        <p id="estimasi_display" class="text-lg font-bold text-gray-900">Rp 0</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span class="text-sm text-blue-700 block">Total Per Bulan:</span>
-                                    <span id="total_bulanan" class="text-lg font-bold text-blue-900">Rp 0</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span class="text-sm text-blue-700 block">Estimasi:</span>
-                                    <span id="estimasi_display" class="text-lg font-bold text-blue-900">Rp 0</span>
-                                </div>
-                            </div>
-                            <div id="selisih_container" class="hidden flex items-center gap-2">
-                                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span class="text-sm text-blue-700 block">Selisih:</span>
-                                    <span id="selisih" class="text-lg font-bold text-red-600">Rp 0</span>
+                                <div id="selisih_container" class="hidden">
+                                    <p class="text-xs text-gray-500">Selisih</p>
+                                    <p id="selisih" class="text-lg font-bold text-red-600">Rp 0</p>
                                 </div>
                             </div>
                         </div>
+
+                        <p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Total per bulan harus sama dengan jumlah estimasi
+                        </p>
                     </div>
 
-                    <div class="mt-4 flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-200">
-                        <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <!-- Catatan -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Catatan</label>
+                        <textarea name="catatan" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none text-sm" placeholder="Tambahkan catatan atau keterangan tambahan...">{{ old('catatan') }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="bg-gray-50 px-8 py-4 border-t border-gray-200 flex items-center justify-end gap-3">
+                    <a href="{{ route('perencanaan-penerimaan.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 font-medium rounded-lg transition-colors text-sm">
+                        Batal
+                    </a>
+                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        <p class="text-sm text-amber-800">Total per bulan harus sama dengan jumlah estimasi</p>
-                    </div>
+                        Simpan Perencanaan
+                    </button>
                 </div>
-            </div>
-
-            <!-- Catatan -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-                <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
-                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900">Catatan</h3>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div class="relative">
-                        <div class="absolute top-3 left-3 pointer-events-none">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <textarea name="catatan" rows="3" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none" placeholder="Tambahkan catatan atau keterangan tambahan...">{{ old('catatan') }}</textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex items-center justify-end gap-3">
-                <a href="{{ route('perencanaan-penerimaan.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 font-medium rounded-xl shadow-sm transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Batal
-                </a>
-                <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-xl shadow-lg shadow-blue-500/30 transition-all duration-200 hover:scale-[1.02]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Simpan Perencanaan
-                </button>
             </div>
         </form>
     </div>
@@ -317,7 +172,6 @@
     <script>
         let availableMonths = [];
 
-        // Currency Formatter
         function formatCurrency(value) {
             let cleanValue = value.replace(/[^0-9]/g, '');
             if (cleanValue === '') return '';
@@ -371,7 +225,6 @@
             });
         }
 
-        // Generate months based on selected periode anggaran
         function loadMonths() {
             const periodeId = document.getElementById('periode_anggaran_id').value;
             const container = document.getElementById('months-container');
@@ -379,12 +232,10 @@
             if (!periodeId) {
                 container.innerHTML = `
                     <div class="col-span-full text-center py-12">
-                        <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <p class="text-gray-500">Pilih periode anggaran untuk melihat daftar bulan</p>
+                        <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p class="text-gray-500 text-sm">Pilih periode anggaran untuk melihat daftar bulan</p>
                     </div>
                 `;
                 availableMonths = [];
@@ -420,7 +271,7 @@
 
             if (availableMonths.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-full text-center py-8 text-gray-500">
+                    <div class="col-span-full text-center py-8 text-gray-500 text-sm">
                         <p>Periode anggaran tidak valid</p>
                     </div>
                 `;
@@ -428,23 +279,15 @@
             }
 
             let html = '';
-            availableMonths.forEach((month, index) => {
-                const colors = [
-                    'from-emerald-50 to-green-100 border-emerald-200 text-emerald-700',
-                    'from-blue-50 to-indigo-100 border-blue-200 text-blue-700',
-                    'from-amber-50 to-orange-100 border-amber-200 text-amber-700',
-                    'from-purple-50 to-pink-100 border-purple-200 text-purple-700'
-                ];
-                const colorClass = colors[index % colors.length];
-
+            availableMonths.forEach((month) => {
                 html += `
-                    <div class="bg-gradient-to-br ${colorClass} border rounded-xl p-4">
-                        <label class="block text-sm font-bold mb-2">${month.label}</label>
+                    <div class="bg-white border border-gray-200 rounded-lg p-3">
+                        <label class="block text-xs font-medium text-gray-600 mb-2">${month.label}</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 text-sm font-semibold">Rp</span>
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">Rp</span>
                             <input type="text"
                                    name="perkiraan_bulanan_display[${month.key}]"
-                                   class="bulanan-input currency-input-month w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm text-right font-mono bg-white"
+                                   class="bulanan-input currency-input-month w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs text-right font-mono"
                                    placeholder="0"
                                    data-month-key="${month.key}"
                                    data-month="${month.label}">
@@ -455,9 +298,7 @@
             });
 
             container.innerHTML = html;
-
             initMonthlyCurrencyInputs();
-
             updateDisplay();
         }
 
@@ -498,7 +339,9 @@
 
             const estimasi = parseFloat(document.getElementById('jumlah_estimasi')?.value) || 0;
 
-            document.getElementById('total_bulanan').textContent = 'Rp ' + total.toLocaleString('id-ID');
+            const formattedTotal = 'Rp ' + total.toLocaleString('id-ID');
+            document.getElementById('total_bulanan').textContent = formattedTotal;
+            document.getElementById('total_bulanan_card').textContent = formattedTotal;
             document.getElementById('estimasi_display').textContent = 'Rp ' + estimasi.toLocaleString('id-ID');
 
             const selisih = Math.abs(total - estimasi);
@@ -520,7 +363,6 @@
             }
         }
 
-        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             initCurrencyInputs();
             document.getElementById('periode_anggaran_id').addEventListener('change', loadMonths);

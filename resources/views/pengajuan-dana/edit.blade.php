@@ -125,6 +125,38 @@
                             placeholder="Jelaskan detail pengajuan dana...">{{ old('deskripsi', $pengajuan->deskripsi) }}</textarea>
                         <x-input-error :messages="$errors->get('deskripsi')" class="mt-2" />
                     </div>
+
+                    <div>
+                        <x-input-label for="nama_bank" value="Nama Bank" />
+                        <select name="nama_bank" id="nama_bank" class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+                            <option value="">-- Pilih Bank --</option>
+                            @foreach(\App\Models\Bank::orderBy('nama_bank')->get() as $bank)
+                                <option value="{{ $bank->nama_bank }}" {{ old('nama_bank', $pengajuan->nama_bank) == $bank->nama_bank ? 'selected' : '' }}>{{ $bank->nama_bank }}</option>
+                            @endforeach
+                            <option value="BCA" {{ old('nama_bank', $pengajuan->nama_bank) == 'BCA' ? 'selected' : '' }}>BCA</option>
+                            <option value="Bank Mandiri" {{ old('nama_bank', $pengajuan->nama_bank) == 'Bank Mandiri' ? 'selected' : '' }}>Bank Mandiri</option>
+                            <option value="Bank BNI" {{ old('nama_bank', $pengajuan->nama_bank) == 'Bank BNI' ? 'selected' : '' }}>Bank BNI</option>
+                            <option value="Bank BRI" {{ old('nama_bank', $pengajuan->nama_bank) == 'Bank BRI' ? 'selected' : '' }}>Bank BRI</option>
+                            <option value="Bank CIMB Niaga" {{ old('nama_bank', $pengajuan->nama_bank) == 'Bank CIMB Niaga' ? 'selected' : '' }}>Bank CIMB Niaga</option>
+                            <option value="Bank Danamon" {{ old('nama_bank', $pengajuan->nama_bank) == 'Bank Danamon' ? 'selected' : '' }}>Bank Danamon</option>
+                            <option value="Bank Permata" {{ old('nama_bank', $pengajuan->nama_bank) == 'Bank Permata' ? 'selected' : '' }}>Bank Permata</option>
+                            <option value="Bank Jago" {{ old('nama_bank', $pengajuan->nama_bank) == 'Bank Jago' ? 'selected' : '' }}>Bank Jago</option>
+                            <option value="Jenius" {{ old('nama_bank', $pengajuan->nama_bank) == 'Jenius' ? 'selected' : '' }}>Jenius</option>
+                            <option value="Digibank" {{ old('nama_bank', $pengajuan->nama_bank) == 'Digibank' ? 'selected' : '' }}>Digibank</option>
+                            <option value="Bank Syariah Indonesia" {{ old('nama_bank', $pengajuan->nama_bank) == 'Bank Syariah Indonesia' ? 'selected' : '' }}>Bank Syariah Indonesia</option>
+                            <option value="Lainnya" {{ old('nama_bank', $pengajuan->nama_bank) == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('nama_bank')" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="rekening_tujuan" value="Nomor Rekening Tujuan" />
+                        <input type="text" name="rekening_tujuan" id="rekening_tujuan" value="{{ old('rekening_tujuan', $pengajuan->rekening_tujuan) }}"
+                            class="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                            placeholder="Contoh: 1234567890">
+                        <x-input-error :messages="$errors->get('rekening_tujuan')" class="mt-2" />
+                        <p class="mt-1 text-xs text-gray-500">Nomor rekening tujuan untuk transfer dana</p>
+                    </div>
                 </div>
             </div>
 

@@ -27,7 +27,8 @@ class LpjController extends Controller
                 'pencairanDana.pengajuanDana',
                 'pencairanDana.pengajuanDana.divisi',
                 'pencairanDana.pengajuanDana.programKerja',
-                'createdBy'
+                'createdBy',
+                'refunds'
             ])->where('status', $status);
 
             // Only show own LPJ unless can verify all
@@ -155,10 +156,16 @@ class LpjController extends Controller
             });
         }
 
-        // Filter by periode anggaran
+        // Filter by periode anggaran (through program_kerja/sub_program)
         if ($request->filled('periode_anggaran_id')) {
             $query->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
-                $q->where('periode_anggaran_id', $request->periode_anggaran_id);
+                $q->where(function ($subQ) use ($request) {
+                    $subQ->whereHas('programKerja', function ($ss) use ($request) {
+                        $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    })->orWhereHas('subProgram', function ($ss) use ($request) {
+                        $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    });
+                });
             });
         }
 
@@ -174,7 +181,7 @@ class LpjController extends Controller
         $lpjs = $query->orderBy('created_at', 'desc')->paginate(15);
 
         // Get pencairan that is selesai but doesn't have LPJ yet (belum buat LPJ)
-        // Exclude Honorarium and Pembayaran types (they don't have LPJ)
+        // Exclude Honorarium, Pembayaran, and Reimbursement types (they don't have LPJ)
         $pencairanQuery = \App\Models\PencairanDana::with([
             'pengajuanDana',
             'pengajuanDana.divisi',
@@ -184,8 +191,8 @@ class LpjController extends Controller
         ])->where('status', 'selesai')
           ->whereDoesntHave('laporanPertanggungJawaban')
           ->whereHas('pengajuanDana', function ($q) {
-              // Exclude Honorarium and Pembayaran - they don't have LPJ
-              $q->whereNotIn('jenis_pengajuan', ['honorarium', 'pembayaran']);
+              // Exclude Honorarium, Pembayaran, and Reimbursement - they don't have LPJ
+              $q->whereNotIn('jenis_pengajuan', ['honorarium', 'pembayaran', 'reimbursement']);
           });
 
         // Filter by divisi for pencairan
@@ -195,10 +202,16 @@ class LpjController extends Controller
             });
         }
 
-        // Filter by periode anggaran for pencairan
+        // Filter by periode anggaran for pencairan (through program_kerja/sub_program)
         if ($request->filled('periode_anggaran_id')) {
             $pencairanQuery->whereHas('pengajuanDana', function ($q) use ($request) {
-                $q->where('periode_anggaran_id', $request->periode_anggaran_id);
+                $q->where(function ($subQ) use ($request) {
+                    $subQ->whereHas('programKerja', function ($ss) use ($request) {
+                        $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    })->orWhereHas('subProgram', function ($ss) use ($request) {
+                        $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    });
+                });
             });
         }
 
@@ -214,6 +227,30 @@ class LpjController extends Controller
         }
 
         $pencairanBelumLpj = $pencairanQuery->orderBy('tanggal_pencairan', 'desc')->paginate(15);
+
+        // Calculate total jumlah pencairan for belum buat LPJ
+        $totalPencairanBelumLpj = \App\Models\PencairanDana::where('status', 'selesai')
+            ->whereDoesntHave('laporanPertanggungJawaban')
+            ->whereHas('pengajuanDana', function ($q) {
+                $q->whereNotIn('jenis_pengajuan', ['honorarium', 'pembayaran', 'reimbursement']);
+            });
+        if ($request->filled('divisi_id')) {
+            $totalPencairanBelumLpj->whereHas('pengajuanDana', function ($q) use ($request) {
+                $q->where('divisi_id', $request->divisi_id);
+            });
+        }
+        if ($request->filled('periode_anggaran_id')) {
+            $totalPencairanBelumLpj->whereHas('pengajuanDana', function ($q) use ($request) {
+                $q->where(function ($subQ) use ($request) {
+                    $subQ->whereHas('programKerja', function ($ss) use ($request) {
+                        $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    })->orWhereHas('subProgram', function ($ss) use ($request) {
+                        $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    });
+                });
+            });
+        }
+        $totalPencairanBelumLpj = $totalPencairanBelumLpj->sum('jumlah_pencairan');
 
         // Get LPJ menunggu revisi (status revisi)
         $lpjRevisiQuery = LaporanPertanggungJawaban::with([
@@ -231,10 +268,16 @@ class LpjController extends Controller
             });
         }
 
-        // Filter by periode anggaran for LPJ revisi
+        // Filter by periode anggaran for LPJ revisi (through program_kerja/sub_program)
         if ($request->filled('periode_anggaran_id')) {
             $lpjRevisiQuery->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
-                $q->where('periode_anggaran_id', $request->periode_anggaran_id);
+                $q->where(function ($subQ) use ($request) {
+                    $subQ->whereHas('programKerja', function ($ss) use ($request) {
+                        $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    })->orWhereHas('subProgram', function ($ss) use ($request) {
+                        $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    });
+                });
             });
         }
 
@@ -266,10 +309,16 @@ class LpjController extends Controller
             });
         }
 
-        // Filter by periode anggaran for LPJ selesai
+        // Filter by periode anggaran for LPJ selesai (through program_kerja/sub_program)
         if ($request->filled('periode_anggaran_id')) {
             $lpjSelesaiQuery->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
-                $q->where('periode_anggaran_id', $request->periode_anggaran_id);
+                $q->where(function ($subQ) use ($request) {
+                    $subQ->whereHas('programKerja', function ($ss) use ($request) {
+                        $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    })->orWhereHas('subProgram', function ($ss) use ($request) {
+                        $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    });
+                });
             });
         }
 
@@ -291,8 +340,8 @@ class LpjController extends Controller
             'belum_buat_lpj' => \App\Models\PencairanDana::where('status', 'selesai')
                 ->whereDoesntHave('laporanPertanggungJawaban')
                 ->whereHas('pengajuanDana', function ($q) {
-                    // Exclude Honorarium and Pembayaran - they don't have LPJ
-                    $q->whereNotIn('jenis_pengajuan', ['honorarium', 'pembayaran']);
+                    // Exclude Honorarium, Pembayaran, and Reimbursement - they don't have LPJ
+                    $q->whereNotIn('jenis_pengajuan', ['honorarium', 'pembayaran', 'reimbursement']);
                 })->count(),
             'lpj_selesai' => LaporanPertanggungJawaban::where('status', 'approved')->count(),
             'approved_today' => LaporanPertanggungJawaban::where('status', 'approved')
@@ -302,7 +351,7 @@ class LpjController extends Controller
                 ->whereMonth('approved_at', now()->month)->count(),
         ];
 
-        return view('lpj.verification-index', compact('lpjs', 'lpjRevisi', 'lpjSelesai', 'pencairanBelumLpj', 'stats'));
+        return view('lpj.verification-index', compact('lpjs', 'lpjRevisi', 'lpjSelesai', 'pencairanBelumLpj', 'stats', 'totalPencairanBelumLpj'));
     }
 
     /**
@@ -327,9 +376,15 @@ class LpjController extends Controller
             $query->where('divisi_id', $request->divisi_id);
         }
 
-        // Filter by periode anggaran
+        // Filter by periode anggaran (through program_kerja/sub_program)
         if ($request->filled('periode_anggaran_id')) {
-            $query->where('periode_anggaran_id', $request->periode_anggaran_id);
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('programKerja', function ($ss) use ($request) {
+                    $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                })->orWhereHas('subProgram', function ($ss) use ($request) {
+                    $ss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                });
+            });
         }
 
         // Filter by search keyword
@@ -701,22 +756,70 @@ class LpjController extends Controller
 
         $stats = [
             'total' => LaporanPertanggungJawaban::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
+                return $q->whereHas('pengajuanDana', function ($subQ) use ($periodeId) {
+                    $subQ->where(function ($ss) use ($periodeId) {
+                        $ss->whereHas('programKerja', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        })->orWhereHas('subProgram', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        });
+                    });
+                });
             })->count(),
             'draft' => LaporanPertanggungJawaban::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
+                return $q->whereHas('pengajuanDana', function ($subQ) use ($periodeId) {
+                    $subQ->where(function ($ss) use ($periodeId) {
+                        $ss->whereHas('programKerja', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        })->orWhereHas('subProgram', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        });
+                    });
+                });
             })->where('status', 'draft')->count(),
             'menunggu_verifikasi' => LaporanPertanggungJawaban::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
+                return $q->whereHas('pengajuanDana', function ($subQ) use ($periodeId) {
+                    $subQ->where(function ($ss) use ($periodeId) {
+                        $ss->whereHas('programKerja', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        })->orWhereHas('subProgram', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        });
+                    });
+                });
             })->where('status', 'menunggu_verifikasi')->count(),
             'menunggu_approval' => LaporanPertanggungJawaban::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
+                return $q->whereHas('pengajuanDana', function ($subQ) use ($periodeId) {
+                    $subQ->where(function ($ss) use ($periodeId) {
+                        $ss->whereHas('programKerja', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        })->orWhereHas('subProgram', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        });
+                    });
+                });
             })->where('status', 'menunggu_approval')->count(),
             'approved' => LaporanPertanggungJawaban::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
+                return $q->whereHas('pengajuanDana', function ($subQ) use ($periodeId) {
+                    $subQ->where(function ($ss) use ($periodeId) {
+                        $ss->whereHas('programKerja', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        })->orWhereHas('subProgram', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        });
+                    });
+                });
             })->where('status', 'approved')->count(),
             'rejected' => LaporanPertanggungJawaban::when($periodeId, function ($q) use ($periodeId) {
-                return $q->where('periode_anggaran_id', $periodeId);
+                return $q->whereHas('pengajuanDana', function ($subQ) use ($periodeId) {
+                    $subQ->where(function ($ss) use ($periodeId) {
+                        $ss->whereHas('programKerja', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        })->orWhereHas('subProgram', function ($sss) use ($periodeId) {
+                            $sss->where('periode_anggaran_id', $periodeId);
+                        });
+                    });
+                });
             })->where('status', 'rejected')->count(),
         ];
 

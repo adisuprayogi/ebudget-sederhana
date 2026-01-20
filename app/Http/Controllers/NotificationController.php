@@ -16,6 +16,22 @@ class NotificationController extends Controller
         $query = Notification::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc');
 
+        // Filter out notifications for cancelled/rejected pengajuan
+        $query->where(function ($q) {
+            $q->where('type', '!=', 'approval')
+                ->orWhere(function ($subQ) {
+                    // For approval notifications, check if pengajuan is still active
+                    $subQ->where('type', 'approval')
+                        ->where(function ($activeQ) {
+                            $activeQ->whereNull('notifiable_type')
+                                ->orWhereNull('notifiable_id')
+                                ->orWhereHasMorph('notifiable', [\App\Models\PengajuanDana::class], function ($pengajuanQ) {
+                                    $pengajuanQ->whereNotIn('status', ['cancelled', 'draft', 'ditolak', 'rejected']);
+                                });
+                        });
+                });
+        });
+
         // Filter by read status
         if ($request->filled('is_read')) {
             if ($request->is_read === 'true') {
@@ -34,8 +50,21 @@ class NotificationController extends Controller
             ->onEachSide(1)
             ->withQueryString();
 
-        // Get unread count
+        // Get unread count (also filter cancelled pengajuan)
         $unreadCount = Notification::where('user_id', Auth::id())
+            ->where(function ($q) {
+                $q->where('type', '!=', 'approval')
+                    ->orWhere(function ($subQ) {
+                        $subQ->where('type', 'approval')
+                            ->where(function ($activeQ) {
+                                $activeQ->whereNull('notifiable_type')
+                                    ->orWhereNull('notifiable_id')
+                                    ->orWhereHasMorph('notifiable', [\App\Models\PengajuanDana::class], function ($pengajuanQ) {
+                                        $pengajuanQ->whereNotIn('status', ['cancelled', 'draft', 'ditolak', 'rejected']);
+                                    });
+                            });
+                    });
+            })
             ->unread()
             ->count();
 
@@ -170,6 +199,19 @@ class NotificationController extends Controller
     public function unreadCount()
     {
         $count = Notification::where('user_id', Auth::id())
+            ->where(function ($q) {
+                $q->where('type', '!=', 'approval')
+                    ->orWhere(function ($subQ) {
+                        $subQ->where('type', 'approval')
+                            ->where(function ($activeQ) {
+                                $activeQ->whereNull('notifiable_type')
+                                    ->orWhereNull('notifiable_id')
+                                    ->orWhereHasMorph('notifiable', [\App\Models\PengajuanDana::class], function ($pengajuanQ) {
+                                        $pengajuanQ->whereNotIn('status', ['cancelled', 'draft', 'ditolak', 'rejected']);
+                                    });
+                            });
+                    });
+            })
             ->unread()
             ->count();
 
@@ -184,12 +226,38 @@ class NotificationController extends Controller
     public function recent(Request $request)
     {
         $notifications = Notification::where('user_id', Auth::id())
+            ->where(function ($q) {
+                $q->where('type', '!=', 'approval')
+                    ->orWhere(function ($subQ) {
+                        $subQ->where('type', 'approval')
+                            ->where(function ($activeQ) {
+                                $activeQ->whereNull('notifiable_type')
+                                    ->orWhereNull('notifiable_id')
+                                    ->orWhereHasMorph('notifiable', [\App\Models\PengajuanDana::class], function ($pengajuanQ) {
+                                        $pengajuanQ->whereNotIn('status', ['cancelled', 'draft', 'ditolak', 'rejected']);
+                                    });
+                            });
+                    });
+            })
             ->with(['notifiable'])
             ->orderBy('created_at', 'desc')
             ->limit($request->limit ?? 10)
             ->get();
 
         $unreadCount = Notification::where('user_id', Auth::id())
+            ->where(function ($q) {
+                $q->where('type', '!=', 'approval')
+                    ->orWhere(function ($subQ) {
+                        $subQ->where('type', 'approval')
+                            ->where(function ($activeQ) {
+                                $activeQ->whereNull('notifiable_type')
+                                    ->orWhereNull('notifiable_id')
+                                    ->orWhereHasMorph('notifiable', [\App\Models\PengajuanDana::class], function ($pengajuanQ) {
+                                        $pengajuanQ->whereNotIn('status', ['cancelled', 'draft', 'ditolak', 'rejected']);
+                                    });
+                            });
+                    });
+            })
             ->unread()
             ->count();
 

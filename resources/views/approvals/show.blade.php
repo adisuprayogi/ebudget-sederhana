@@ -15,14 +15,34 @@
 
     <div class="py-8">
         <!-- Alert -->
-        <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start">
-            <svg class="w-5 h-5 text-amber-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div class="text-amber-700 text-sm">
-                Anda sedang memproses approval <strong>Level {{ $approval->level }}</strong> untuk pengajuan dana ini.
+        @if($isCancelled ?? false)
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-red-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-red-700 text-sm">
+                    Pengajuan ini telah <strong>dibatalkan</strong> oleh pengaju. Detail pengajuan masih dapat dilihat untuk referensi.
+                </div>
             </div>
-        </div>
+        @elseif($isProcessed ?? false)
+            <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-blue-700 text-sm">
+                    Approval ini sudah diproses. Detail pengajuan masih dapat dilihat untuk referensi.
+                </div>
+            </div>
+        @else
+            <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start">
+                <svg class="w-5 h-5 text-amber-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-amber-700 text-sm">
+                    Anda sedang memproses approval <strong>Level {{ $approval->level }}</strong> untuk pengajuan dana ini.
+                </div>
+            </div>
+        @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Main Content -->
@@ -375,14 +395,25 @@
                         </div>
                         <div>
                             <p class="text-sm text-secondary-500">Status Approval</p>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
-                                Menunggu
-                            </span>
+                            @if($isCancelled ?? false)
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                    Dibatalkan
+                                </span>
+                            @elseif($isProcessed ?? false)
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                                    {{ $approval->status === 'disetujui' ? 'Disetujui' : 'Ditolak' }}
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                                    Menunggu
+                                </span>
+                            @endif
                         </div>
                     </div>
                 </div>
 
-                <!-- Action Form -->
+                <!-- Action Form - Only show if not cancelled and not processed -->
+                @if(!($isCancelled ?? false) && !($isProcessed ?? false))
                 <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
                     <div class="px-6 py-4 border-b border-secondary-200">
                         <h3 class="text-lg font-semibold text-secondary-900">Proses Approval</h3>
@@ -415,6 +446,7 @@
                         </div>
                     </form>
                 </div>
+                @endif
 
                 <!-- Documents -->
                 @if($approval->pengajuanDana->attachments && $approval->pengajuanDana->attachments->count() > 0)

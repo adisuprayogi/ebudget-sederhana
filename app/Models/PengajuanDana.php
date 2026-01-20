@@ -24,8 +24,11 @@ class PengajuanDana extends Model
         'penerima_manfaat_detail',
         'judul_pengajuan',
         'deskripsi',
+        'nama_bank',
+        'rekening_tujuan',
         'total_pengajuan',
         'status',
+        'catatan',
         'created_by',
     ];
 

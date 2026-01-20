@@ -30,7 +30,11 @@ class ApprovalController extends Controller
             'pengajuanDana.createdBy',
         ])
         ->where('approver_id', $user->id)
-        ->where('status', 'pending');
+        ->where('status', 'pending')
+        ->whereHas('pengajuanDana', function ($q) {
+            // Exclude cancelled, draft, and rejected pengajuan
+            $q->whereNotIn('status', ['cancelled', 'draft', 'ditolak', 'rejected']);
+        });
 
         // Apply filters
         if ($request->filled('search')) {
@@ -90,13 +94,6 @@ class ApprovalController extends Controller
             abort(403);
         }
 
-        // Check if approval is still pending
-        if ($approval->status !== 'pending') {
-            return redirect()
-                ->route('approvals.index')
-                ->with('error', 'Approval ini sudah diproses');
-        }
-
         $approval->load([
             'pengajuanDana.divisi',
             'pengajuanDana.programKerja',
@@ -111,9 +108,21 @@ class ApprovalController extends Controller
             },
         ]);
 
+        // Check if approval is already processed or pengajuan is cancelled
+        $isProcessed = $approval->status !== 'pending';
+        $isCancelled = in_array($approval->pengajuanDana->status ?? '', ['cancelled', 'draft', 'ditolak', 'rejected']);
+
+        if ($isProcessed && !$isCancelled) {
+            return redirect()
+                ->route('approvals.index')
+                ->with('error', 'Approval ini sudah diproses');
+        }
+
         return view('approvals.show', [
             'approval' => $approval,
             'pengajuan' => $approval->pengajuanDana,
+            'isProcessed' => $isProcessed,
+            'isCancelled' => $isCancelled,
         ]);
     }
 
@@ -233,6 +242,9 @@ class ApprovalController extends Controller
         $stats = [
             'pending' => Approval::where('approver_id', $user->id)
                 ->where('status', 'pending')
+                ->whereHas('pengajuanDana', function ($q) {
+                    $q->whereNotIn('status', ['cancelled', 'draft', 'ditolak', 'rejected']);
+                })
                 ->count(),
             'approved' => Approval::where('approver_id', $user->id)
                 ->where('status', 'disetujui')
@@ -282,6 +294,10 @@ class ApprovalController extends Controller
 
         $count = Approval::where('approver_id', $user->id)
             ->where('status', 'pending')
+            ->whereHas('pengajuanDana', function ($q) {
+                // Exclude cancelled, draft, and rejected pengajuan
+                $q->whereNotIn('status', ['cancelled', 'draft', 'ditolak', 'rejected']);
+            })
             ->count();
 
         return response()->json(['count' => $count]);

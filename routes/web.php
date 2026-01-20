@@ -310,7 +310,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ============================================================
     Route::prefix('refund-verification')->name('refund-verification.')->middleware('role:staff_keuangan,direktur_keuangan')->group(function () {
         Route::get('/', [RefundController::class, 'verificationIndex'])->name('index');
+        Route::post('/{refund}/process', [RefundController::class, 'process'])->name('process');
     });
+
+    // Refund reminder notification route
+    Route::post('/refund-reminder/{lpj}', [RefundController::class, 'sendReminder'])->name('refund-reminder.send')->middleware('role:staff_keuangan,direktur_keuangan');
 
     // ============================================================
     // APPROVAL ROUTES

@@ -109,12 +109,98 @@ class RefundController extends Controller
             ->paginate(15)
             ->appends($request->except('page'));
 
+        // Get LPJ with sisa_dana that haven't been refunded yet (Menunggu Refund)
+        // Only show LPJ where pengaju is the current user
+        $lpjsMenungguRefundQuery = \App\Models\LaporanPertanggungJawaban::with([
+            'pencairanDana',
+            'pencairanDana.pengajuanDana',
+            'pencairanDana.pengajuanDana.divisi',
+            'pencairanDana.pengajuanDana.createdBy',
+            'pencairanDana.pengajuanDana.programKerja',
+            'detailLpjs',
+            'createdBy',
+            'refunds'
+        ])->where('status', 'approved')
+          ->where('sisa_dana', '>', 0)
+          ->whereDoesntHave('refunds', function ($q) {
+              $q->where('status', '!=', 'rejected');
+          })
+          // Only show LPJ where pengaju is the current user
+          ->whereHas('pencairanDana.pengajuanDana', function ($q) use ($user) {
+              $q->where('created_by', $user->id);
+          });
+
+        // Apply filters for LPJ menunggu refund
+        if ($request->filled('divisi_id')) {
+            $lpjsMenungguRefundQuery->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
+                $q->where('divisi_id', $request->divisi_id);
+            });
+        }
+        if ($request->filled('periode_anggaran_id')) {
+            $lpjsMenungguRefundQuery->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
+                $q->where(function ($ss) use ($request) {
+                    $ss->whereHas('programKerja', function ($sss) use ($request) {
+                        $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    })->orWhereHas('subProgram', function ($sss) use ($request) {
+                        $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    });
+                });
+            });
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $lpjsMenungguRefundQuery->where(function ($q) use ($search) {
+                $q->where('nomor_lpj', 'like', "%{$search}%")
+                  ->orWhere('judul_lpj', 'like', "%{$search}%")
+                  ->orWhere('uraian_kegiatan', 'like', "%{$search}%");
+            });
+        }
+
+        $lpjsMenungguRefund = $lpjsMenungguRefundQuery->orderBy('approved_at', 'desc')->paginate(15);
+
+        // Calculate total sisa dana for user's LPJ menunggu refund
+        $totalSisaDanaRefund = \App\Models\LaporanPertanggungJawaban::where('status', 'approved')
+            ->where('sisa_dana', '>', 0)
+            ->whereDoesntHave('refunds', function ($q) {
+                $q->where('status', '!=', 'rejected');
+            })
+            ->whereHas('pencairanDana.pengajuanDana', function ($q) use ($user) {
+                $q->where('created_by', $user->id);
+            });
+        // Apply filters for total calculation
+        if ($request->filled('divisi_id')) {
+            $totalSisaDanaRefund->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
+                $q->where('divisi_id', $request->divisi_id);
+            });
+        }
+        if ($request->filled('periode_anggaran_id')) {
+            $totalSisaDanaRefund->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
+                $q->where(function ($ss) use ($request) {
+                    $ss->whereHas('programKerja', function ($sss) use ($request) {
+                        $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    })->orWhereHas('subProgram', function ($sss) use ($request) {
+                        $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    });
+                });
+            });
+        }
+        $totalSisaDanaRefund = $totalSisaDanaRefund->sum('sisa_dana');
+
         // Get statistics (only user's own refunds unless can process all)
         $statsQuery = Refund::query();
         if (!$canProcessAll) {
             $statsQuery->where('created_by', $user->id);
         }
         $stats = [
+            // Menunggu Refund - only count LPJ where pengaju is current user
+            'menunggu_refund' => \App\Models\LaporanPertanggungJawaban::where('status', 'approved')
+                ->where('sisa_dana', '>', 0)
+                ->whereDoesntHave('refunds', function ($q) {
+                    $q->where('status', '!=', 'rejected');
+                })
+                ->whereHas('pencairanDana.pengajuanDana', function ($q) use ($user) {
+                    $q->where('created_by', $user->id);
+                })->count(),
             'draft' => (clone $statsQuery)->where('status', 'draft')->count(),
             'menunggu_approval' => (clone $statsQuery)->where('status', 'menunggu_approval')->count(),
             'approved' => (clone $statsQuery)->where('status', 'approved')->count(),
@@ -142,6 +228,8 @@ class RefundController extends Controller
             'refundsApproved',
             'refundsProcessed',
             'refundsRejected',
+            'lpjsMenungguRefund',
+            'totalSisaDanaRefund',
             'stats',
             'statistics'
         ));
@@ -164,6 +252,71 @@ class RefundController extends Controller
                 'approvedBy'
             ])->where('status', $status);
         };
+
+        // Menunggu Refund - LPJ dengan sisa dana yang belum ada refund aktif
+        $menungguRefundQuery = \App\Models\LaporanPertanggungJawaban::with([
+            'pencairanDana',
+            'pencairanDana.pengajuanDana',
+            'pencairanDana.pengajuanDana.divisi',
+            'pencairanDana.pengajuanDana.createdBy',
+            'pencairanDana.pengajuanDana.programKerja',
+            'detailLpjs',
+            'createdBy',
+            'refunds'
+        ])->where('status', 'approved')
+          ->where('sisa_dana', '>', 0)
+          ->whereDoesntHave('refunds', function ($q) {
+              $q->where('status', '!=', 'rejected');
+          });
+        if ($request->filled('divisi_id')) {
+            $menungguRefundQuery->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
+                $q->where('divisi_id', $request->divisi_id);
+            });
+        }
+        if ($request->filled('periode_anggaran_id')) {
+            $menungguRefundQuery->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
+                $q->where(function ($ss) use ($request) {
+                    $ss->whereHas('programKerja', function ($sss) use ($request) {
+                        $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    })->orWhereHas('subProgram', function ($sss) use ($request) {
+                        $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    });
+                });
+            });
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $menungguRefundQuery->where(function ($q) use ($search) {
+                $q->where('nomor_lpj', 'like', "%{$search}%")
+                  ->orWhere('judul_lpj', 'like', "%{$search}%")
+                  ->orWhere('uraian_kegiatan', 'like', "%{$search}%");
+            });
+        }
+        $lpjsMenungguRefund = $menungguRefundQuery->orderBy('approved_at', 'desc')->paginate(15);
+
+        // Calculate total sisa dana for LPJ menunggu refund
+        $totalSisaDana = \App\Models\LaporanPertanggungJawaban::where('status', 'approved')
+            ->where('sisa_dana', '>', 0)
+            ->whereDoesntHave('refunds', function ($q) {
+                $q->where('status', '!=', 'rejected');
+            });
+        if ($request->filled('divisi_id')) {
+            $totalSisaDana->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
+                $q->where('divisi_id', $request->divisi_id);
+            });
+        }
+        if ($request->filled('periode_anggaran_id')) {
+            $totalSisaDana->whereHas('pencairanDana.pengajuanDana', function ($q) use ($request) {
+                $q->where(function ($ss) use ($request) {
+                    $ss->whereHas('programKerja', function ($sss) use ($request) {
+                        $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    })->orWhereHas('subProgram', function ($sss) use ($request) {
+                        $sss->where('periode_anggaran_id', $request->periode_anggaran_id);
+                    });
+                });
+            });
+        }
+        $totalSisaDana = $totalSisaDana->sum('sisa_dana');
 
         // Menunggu Approval
         $menungguQuery = $baseQuery('menunggu_approval');
@@ -247,7 +400,7 @@ class RefundController extends Controller
                   ->orWhere('alasan_refund', 'like', "%{$search}%");
             });
         }
-        $refundsProcessed = $processedQuery->orderBy('approved_at', 'desc')->paginate(15);
+        $refundsProcessed = $processedQuery->orderBy('processed_at', 'desc')->paginate(15);
 
         // Ditolak (rejected)
         $rejectedQuery = $baseQuery('rejected');
@@ -293,12 +446,24 @@ class RefundController extends Controller
 
         // Get statistics
         $stats = [
+            'menunggu_refund' => \App\Models\LaporanPertanggungJawaban::where('status', 'approved')
+                ->where('sisa_dana', '>', 0)
+                ->whereDoesntHave('refunds', function ($q) {
+                    $q->where('status', '!=', 'rejected');
+                })->count(),
             'menunggu_approval' => Refund::where('status', 'menunggu_approval')->count(),
             'processed' => Refund::where('status', 'processed')->count(),
             'rejected' => Refund::where('status', 'rejected')->count(),
         ];
 
-        return view('refund.verification-index', compact('refunds', 'refundsProcessed', 'refundsRejected', 'stats'));
+        return view('refund.verification-index', compact(
+            'lpjsMenungguRefund',
+            'refunds',
+            'refundsProcessed',
+            'refundsRejected',
+            'stats',
+            'totalSisaDana'
+        ));
     }
 
     /**
@@ -591,6 +756,64 @@ class RefundController extends Controller
                 ->with('success', 'Refund berhasil diproses.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memproses refund: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send refund reminder notification to LPJ creator.
+     */
+    public function sendReminder(Request $request, $lpjId)
+    {
+        $lpj = \App\Models\LaporanPertanggungJawaban::with([
+            'pencairanDana.pengajuanDana.createdBy',
+            'createdBy'
+        ])->findOrFail($lpjId);
+
+        // Check if LPJ has remaining funds
+        if ($lpj->sisa_dana <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'LPJ tidak memiliki sisa dana.'
+            ], 400);
+        }
+
+        // Get the pengaju (creator of the original pengajuan)
+        $pengaju = null;
+        if ($lpj->pencairanDana && $lpj->pencairanDana->pengajuanDana && $lpj->pencairanDana->pengajuanDana->createdBy) {
+            $pengaju = $lpj->pencairanDana->pengajuanDana->createdBy;
+        } elseif ($lpj->createdBy) {
+            $pengaju = $lpj->createdBy;
+        }
+
+        if (!$pengaju) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pengaju tidak ditemukan.'
+            ], 404);
+        }
+
+        try {
+            // Create notification
+            \App\Models\Notification::create([
+                'user_id' => $pengaju->id,
+                'type' => 'info',
+                'title' => 'Sisa Dana LPJ Bisa Di-Refund',
+                'message' => "LPJ {$lpj->nomor_lpj} Anda memiliki sisa dana sebesar " . formatRupiah($lpj->sisa_dana) . " yang bisa di-refund. Silakan buat pengajuan refund melalui menu Refund.",
+                'link' => route('refund.create') . '?lpj_id=' . $lpj->id,
+                'notifiable_type' => \App\Models\LaporanPertanggungJawaban::class,
+                'notifiable_id' => $lpj->id,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notifikasi berhasil dikirim ke ' . $pengaju->name
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send refund reminder: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengirim notifikasi: ' . $e->getMessage()
+            ], 500);
         }
     }
 

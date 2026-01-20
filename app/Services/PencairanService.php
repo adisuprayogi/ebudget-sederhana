@@ -211,9 +211,10 @@ class PencairanService
                 throw new \Exception('Only pengaju can verify pencairan');
             }
 
-            // All types go directly to selesai after pengaju verification
+            // Honorarium, Pembayaran, and Reimbursement go directly to selesai (no LPJ needed)
+            // Other types (Pengadaan, Kegiatan, Sewa, Konsumi, Lainnya) require LPJ
             if ($confirmed) {
-                // Pengaju confirms receiving funds - mark as selesai
+                // Pengaju confirms receiving funds
                 $pencairan->update([
                     'status' => 'selesai',
                     'verified_at' => now(),
@@ -222,10 +223,20 @@ class PencairanService
                     'updated_at' => now(),
                 ]);
 
-                $pengajuan->update([
-                    'status' => 'selesai',
-                    'updated_at' => now(),
-                ]);
+                // Determine next status based on jenis_pengajuan
+                if (in_array($pengajuan->jenis_pengajuan, ['honorarium', 'pembayaran', 'reimbursement'])) {
+                    // Honorarium, Pembayaran, and Reimbursement are complete after confirmation (no LPJ)
+                    $pengajuan->update([
+                        'status' => 'selesai',
+                        'updated_at' => now(),
+                    ]);
+                } else {
+                    // Pengadaan, Kegiatan, Sewa, Konsumi, Lainnya require LPJ before completion
+                    $pengajuan->update([
+                        'status' => 'menunggu_lpj',
+                        'updated_at' => now(),
+                    ]);
+                }
             } else {
                 // Pengaju rejects - needs to be re-disbursed
                 $pencairan->update([

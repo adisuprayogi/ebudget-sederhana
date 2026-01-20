@@ -36,6 +36,11 @@
                         @else
                             <span class="text-sm text-secondary-700">-</span>
                         @endif
+                        @if($lpj->status === 'approved' && $lpj->sisa_dana > 0)
+                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                                Sisa: {{ formatRupiah($lpj->sisa_dana) }}
+                            </span>
+                        @endif
                     </td>
                     <td class="px-6 py-4">
                         @if($lpj->status === 'draft')
@@ -75,6 +80,13 @@
                                 <a href="{{ route('lpj.edit', $lpj) }}" class="p-2 text-secondary-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </a>
+                            @endif
+                            @if($lpj->status === 'approved' && $lpj->sisa_dana > 0 && !$lpj->refunds()->where('status', '!=', 'rejected')->exists())
+                                <a href="{{ route('refund.create') }}?lpj_id={{ $lpj->id }}" class="p-2 text-secondary-600 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors" title="Buat Refund">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6 6" />
                                     </svg>
                                 </a>
                             @endif
