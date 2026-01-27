@@ -53,7 +53,7 @@
     @endif
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <div class="bg-white rounded-xl border border-blue-100 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -149,7 +149,115 @@
 
     <!-- Table -->
     <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
-        <table class="w-full">
+        <!-- Mobile Card View -->
+        <div class="md:hidden p-4 space-y-3">
+            @forelse($periodes as $periode)
+                <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+                    <div class="flex items-start justify-between gap-2 mb-3">
+                        <div class="flex-1 min-w-0">
+                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-mono font-semibold rounded bg-blue-100 text-blue-700">
+                                {{ $periode->kode_periode }}
+                            </span>
+                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-mono font-semibold rounded bg-gray-100 text-gray-700 ml-2">
+                                {{ $periode->tahun_anggaran }}
+                            </span>
+                        </div>
+                        @if($periode->status === 'active')
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Aktif
+                            </span>
+                        @elseif($periode->status === 'draft')
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                Draft
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                                Tutup
+                            </span>
+                        @endif
+                    </div>
+
+                    <p class="font-bold text-slate-900 text-sm mb-1">{{ $periode->nama_periode }}</p>
+                    @if($periode->deskripsi)
+                        <p class="text-xs text-slate-500 mb-2 line-clamp-2">{{ $periode->deskripsi }}</p>
+                    @endif
+
+                    <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+                        @if($periode->fase === 'perencanaan')
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                                Perencanaan
+                            </span>
+                        @elseif($periode->fase === 'penggunaan')
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-emerald-100 text-emerald-700">
+                                Penggunaan
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                                Ditutup
+                            </span>
+                        @endif
+                        <span class="text-slate-500">
+                            {{ \Carbon\Carbon::parse($periode->tanggal_mulai_perencanaan_anggaran)->format('M y') }} - {{ \Carbon\Carbon::parse($periode->tanggal_selesai_penggunaan_anggaran)->format('M y') }}
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <span class="text-slate-600">Progress</span>
+                            <span class="font-semibold text-slate-700">{{ number_format($periode->progress_percentage, 0) }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full transition-all" style="width: {{ $periode->progress_percentage }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+                        <a href="{{ route('periode-anggaran.show', $periode) }}" class="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </a>
+                        @if(auth()->user()->hasAnyRole(['direktur_keuangan', 'staff_keuangan']))
+                            @if(in_array($periode->status, ['draft', 'active']))
+                                <a href="{{ route('periode-anggaran.edit', $periode) }}" class="p-2 text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </a>
+                            @endif
+                            @if($periode->status === 'draft')
+                                <form method="POST" action="{{ route('periode-anggaran.destroy', $periode) }}" class="inline" onsubmit="return confirm('Hapus periode ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-xl border border-slate-100 p-8 text-center">
+                    <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                    </div>
+                    <p class="text-slate-500">Belum ada periode</p>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="w-full">
             <thead class="bg-blue-50 border-b border-blue-100">
                 <tr>
                     <th class="px-5 py-3 text-left text-xs font-semibold text-blue-700 uppercase">Kode</th>
@@ -274,7 +382,7 @@
 
         <!-- Pagination -->
         @if($periodes->hasPages())
-            <div class="bg-gray-50 px-5 py-3 border-t border-blue-100">
+            <div class="bg-gray-50 px-4 md:px-5 py-3 border-t border-blue-100">
                 {{ $periodes->appends(request()->query())->links() }}
             </div>
         @endif

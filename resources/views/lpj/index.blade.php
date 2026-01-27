@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-xl font-semibold text-gray-900">Laporan Pertanggung Jawaban</h1>
                 <p class="text-sm text-gray-500 mt-0.5">Kelola LPJ untuk pencairan dana yang telah dilakukan</p>
             </div>
             @if(auth()->user()->hasAnyRole(['kepala_divisi', 'staff_divisi']))
-                <a href="{{ route('lpj.select-pengajuan') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                <a href="{{ route('lpj.select-pengajuan') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -17,7 +17,7 @@
     </x-slot>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <div class="bg-white rounded-xl border border-blue-100 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -78,7 +78,7 @@
     <!-- Filter -->
     <div class="bg-white rounded-xl border border-blue-100 p-3 mb-4">
         <form method="GET" action="{{ route('lpj.index') }}" class="flex flex-wrap items-center gap-3">
-            <div class="min-w-[140px]">
+            <div class="w-full sm:min-w-[140px] sm:w-auto">
                 <select name="periode_anggaran_id" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white">
                     <option value="">Semua Periode</option>
                     @foreach($periodeAnggarans ?? [] as $periode)
@@ -88,20 +88,22 @@
                     @endforeach
                 </select>
             </div>
-            <div class="min-w-[200px] flex-1">
+            <div class="w-full sm:flex-1 sm:min-w-[200px]">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor LPJ..." class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
             </div>
-            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                Filter
-            </button>
-            @if(request()->anyFilled(['periode_anggaran_id', 'search']))
-                <a href="{{ route('lpj.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
-                    Reset
-                </a>
-            @endif
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button type="submit" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Filter
+                </button>
+                @if(request()->anyFilled(['periode_anggaran_id', 'search']))
+                    <a href="{{ route('lpj.index') }}" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
+                        Reset
+                    </a>
+                @endif
+            </div>
         </form>
     </div>
 

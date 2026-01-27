@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-xl font-semibold text-gray-900">Manajemen Role</h1>
                 <p class="text-sm text-gray-500 mt-0.5">{{ $roles->total() }} role • {{ \App\Models\User::count() }} total user</p>
             </div>
-            <a href="{{ route('admin.roles.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+            <a href="{{ route('admin.roles.create') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -15,7 +15,7 @@
     </x-slot>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <div class="bg-white rounded-xl border border-blue-100 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -73,8 +73,106 @@
         </div>
     </div>
 
-    <!-- Table -->
-    <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
+    <!-- Mobile Card View -->
+    <div class="md:hidden space-y-3">
+        @forelse($roles as $role)
+            @php
+                $userCount = \App\Models\User::where('role_id', $role->id)->count();
+            @endphp
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                <!-- Header -->
+                <div class="px-3 py-3 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-100">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 flex-1 min-w-0">
+                            <div class="w-9 h-9 {{ $role->name == 'superadmin' ? 'bg-violet-500' : 'bg-blue-500' }} rounded-lg flex items-center justify-center flex-shrink-0">
+                                @if($role->name == 'superadmin')
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                @else
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                @endif
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-gray-900 text-sm truncate" title="{{ $role->display_name ?? $role->name }}">{{ $role->display_name ?? $role->name }}</p>
+                                <p class="text-xs text-gray-400 font-mono truncate">{{ $role->name }}</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg {{ $userCount > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400' }} text-sm font-bold flex-shrink-0">
+                            {{ $userCount }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="p-3 space-y-3">
+                    @if($role->description)
+                        <p class="text-xs text-slate-600 line-clamp-2">{{ $role->description }}</p>
+                    @endif
+
+                    @if($role->name === 'superadmin')
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-violet-100 text-violet-700">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            Full Access
+                        </span>
+                    @elseif(!empty($role->permissions))
+                        <div class="flex flex-wrap gap-1">
+                            @foreach(array_slice($role->permissions, 0, 5) as $permission)
+                                <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                                    {{ $permission }}
+                                </span>
+                            @endforeach
+                            @if(count($role->permissions) > 5)
+                                <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded bg-blue-200 text-blue-800">
+                                    +{{ count($role->permissions) - 5 }}
+                                </span>
+                            @endif
+                        </div>
+                    @endif
+
+                    <div class="flex items-center justify-end pt-2 border-t border-slate-100 gap-1.5">
+                        <a href="{{ route('admin.roles.edit', $role) }}" class="inline-flex items-center gap-1.5 px-3 py-2 text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors text-xs font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <span class="hidden sm:inline">Edit</span>
+                        </a>
+                        @if($role->name !== 'superadmin')
+                            <form method="POST" action="{{ route('admin.roles.destroy', $role) }}" class="inline" onsubmit="return confirm('Hapus role ini?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors text-xs font-medium">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span class="hidden sm:inline">Hapus</span>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="bg-white rounded-xl border border-slate-100 p-8 text-center">
+                <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <p class="text-slate-500">Belum ada role</p>
+                <a href="{{ route('admin.roles.create') }}" class="mt-3 inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                    Tambah Role
+                </a>
+            </div>
+        @endforelse
+    </div>
+
+    <!-- Desktop Table View -->
+    <div class="hidden md:block bg-white rounded-xl border border-blue-100 overflow-hidden">
         <table class="w-full">
             <thead class="bg-blue-50 border-b border-blue-100">
                 <tr>
@@ -186,9 +284,10 @@
     </div>
 
     @if($roles->hasPages())
-        <div class="mt-4 flex items-center justify-between text-sm">
-            <span class="text-gray-500">
-                Menampilkan {{ $roles->firstItem() ?? 0 }}–{{ $roles->lastItem() ?? 0 }} dari {{ $roles->total() }}
+        <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs md:text-sm">
+            <span class="text-gray-500 text-center md:text-left">
+                <span class="hidden md:inline">Menampilkan {{ $roles->firstItem() ?? 0 }}–{{ $roles->lastItem() ?? 0 }} dari {{ $roles->total() }}</span>
+                <span class="md:hidden">{{ $roles->total() }} role</span>
             </span>
             {{ $roles->links() }}
         </div>

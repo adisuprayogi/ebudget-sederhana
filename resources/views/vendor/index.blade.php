@@ -16,13 +16,13 @@
 
     <div class="py-8">
         <!-- Filters -->
-        <div class="bg-white rounded-2xl shadow-soft p-6 mb-8">
-            <form method="GET" action="{{ route('vendors.index') }}" class="flex flex-wrap gap-4">
-                <div class="flex-1 min-w-[200px]">
+        <div class="bg-white rounded-2xl shadow-soft p-4 md:p-6 mb-8">
+            <form method="GET" action="{{ route('vendors.index') }}" class="flex flex-wrap gap-3 md:gap-4">
+                <div class="flex-1 min-w-[200px] w-full md:w-auto">
                     <label class="block text-sm font-medium text-secondary-700 mb-2">Cari</label>
                     <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Kode, nama, NPWP..." class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                 </div>
-                <div class="flex-1 min-w-[150px]">
+                <div class="flex-1 min-w-[140px] w-full md:w-auto">
                     <label class="block text-sm font-medium text-secondary-700 mb-2">Status</label>
                     <select name="status" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <option value="">Semua Status</option>
@@ -31,7 +31,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="flex-1 min-w-[150px]">
+                <div class="flex-1 min-w-[140px] w-full md:w-auto">
                     <label class="block text-sm font-medium text-secondary-700 mb-2">Jenis Vendor</label>
                     <select name="jenis_vendor" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <option value="">Semua Jenis</option>
@@ -41,7 +41,7 @@
                         <option value="lainnya" {{ ($filters['jenis_vendor'] ?? '') === 'lainnya' ? 'selected' : '' }}>Lainnya</option>
                     </select>
                 </div>
-                <div class="flex-1 min-w-[150px]">
+                <div class="flex-1 min-w-[140px] w-full md:w-auto">
                     <label class="block text-sm font-medium text-secondary-700 mb-2">Kota</label>
                     <select name="kota" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <option value="">Semua Kota</option>
@@ -51,15 +51,95 @@
                     </select>
                 </div>
                 <div class="flex items-end">
-                    <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
+                    <button type="submit" class="w-full md:w-auto px-6 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
                         Filter
                     </button>
                 </div>
             </form>
         </div>
 
-        <!-- Vendors List -->
-        <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+        <!-- Mobile Card View -->
+        <div class="md:hidden space-y-3 mb-8">
+            @forelse($vendors ?? [] as $vendor)
+                <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                <span class="font-mono text-xs font-semibold text-primary-600">{{ $vendor->kode_vendor }}</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-700">
+                                    {{ ucfirst($vendor->jenis_vendor) }}
+                                </span>
+                            </div>
+                            <h3 class="font-semibold text-secondary-900 text-sm truncate">{{ $vendor->nama_vendor }}</h3>
+                            @if($vendor->npwp)
+                                <p class="text-xs text-secondary-500">NPWP: {{ $vendor->npwp }}</p>
+                            @endif
+                        </div>
+                        <div class="flex items-center ml-2">
+                            @for($i = 1; $i <= 5; $i++)
+                                <svg class="w-3.5 h-3.5 {{ $i <= $vendor->rating ? 'text-amber-400' : 'text-secondary-200' }}" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                            @endfor
+                        </div>
+                    </div>
+                    <div class="space-y-1 text-sm mb-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Lokasi</span>
+                            <span class="text-gray-900 text-right">{{ $vendor->kota ?? '-' }}{{ $vendor->propinsi ? ', ' . $vendor->propinsi : '' }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Kontak</span>
+                            <span class="text-gray-900 text-right">{{ $vendor->telepon ?? '-' }}</span>
+                        </div>
+                        @if($vendor->kontak_person)
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">PIC</span>
+                                <span class="text-gray-900 text-right text-sm">{{ $vendor->kontak_person }}</span>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-200">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold
+                            @if($vendor->status === 'active') bg-blue-100 text-blue-700
+                            @elseif($vendor->status === 'inactive') bg-gray-100 text-gray-700
+                            @elseif($vendor->status === 'blacklisted') bg-red-100 text-red-700
+                            @endif">
+                            @if($vendor->status === 'active') Aktif
+                            @elseif($vendor->status === 'inactive') Non-Aktif
+                            @elseif($vendor->status === 'blacklisted') Blacklist
+                            @endif
+                        </span>
+                        <div class="flex items-center gap-1">
+                            <a href="{{ route('vendors.show', $vendor) }}" class="p-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Lihat">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </a>
+                            <a href="{{ route('vendors.edit', $vendor) }}" class="p-2 text-secondary-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
+                    <svg class="w-16 h-16 text-secondary-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <p class="text-secondary-500">Belum ada vendor</p>
+                    <a href="{{ route('vendors.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
+                        Tambah Vendor Baru
+                    </a>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden md:block bg-white rounded-2xl shadow-soft overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-secondary-50 border-b border-secondary-200">
@@ -139,16 +219,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center">
-                                        <svg class="w-16 h-16 text-secondary-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
-                                        <p class="text-secondary-500">Belum ada vendor</p>
-                                        <a href="{{ route('vendors.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
-                                            Tambah Vendor Baru
-                                        </a>
-                                    </div>
+                                <td colspan="8" class="px-6 py-8 text-center text-secondary-500 text-sm">
+                                    Belum ada vendor
                                 </td>
                             </tr>
                         @endforelse

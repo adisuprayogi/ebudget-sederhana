@@ -17,7 +17,7 @@
     </x-slot>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <div class="bg-white rounded-xl border border-blue-100 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -78,7 +78,7 @@
     <!-- Filter -->
     <div class="bg-white rounded-xl border border-blue-100 p-3 mb-4">
         <form method="GET" action="{{ route('pencairan-dana.index') }}" class="flex flex-wrap items-center gap-3">
-            <div class="min-w-[140px]">
+            <div class="w-full md:min-w-[140px] md:w-auto">
                 <select name="metode_pencairan" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white">
                     <option value="">Semua Metode</option>
                     <option value="transfer" {{ request('metode_pencairan') == 'transfer' ? 'selected' : '' }}>Transfer</option>
@@ -86,26 +86,28 @@
                     <option value="reimburse" {{ request('metode_pencairan') == 'reimburse' ? 'selected' : '' }}>Reimburse</option>
                 </select>
             </div>
-            <div class="min-w-[140px]">
+            <div class="w-full md:min-w-[140px] md:w-auto">
                 <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}" placeholder="Tanggal Mulai" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
             </div>
-            <div class="min-w-[140px]">
+            <div class="w-full md:min-w-[140px] md:w-auto">
                 <input type="date" name="tanggal_selesai" value="{{ request('tanggal_selesai') }}" placeholder="Tanggal Selesai" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
             </div>
-            <div class="min-w-[200px] flex-1">
+            <div class="w-full md:min-w-[200px] md:flex-1">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor pencairan..." class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
             </div>
-            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                Filter
-            </button>
-            @if(request()->anyFilled(['metode_pencairan', 'tanggal_mulai', 'tanggal_selesai', 'search']))
-                <a href="{{ route('pencairan-dana.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
-                    Reset
-                </a>
-            @endif
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <button type="submit" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Filter
+                </button>
+                @if(request()->anyFilled(['metode_pencairan', 'tanggal_mulai', 'tanggal_selesai', 'search']))
+                    <a href="{{ route('pencairan-dana.index') }}" class="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
+                        Reset
+                    </a>
+                @endif
+            </div>
         </form>
     </div>
 
@@ -172,7 +174,40 @@
     <!-- Tab Content: Menunggu Verifikasi -->
     <div id="content-menunggu" class="tab-content">
         @if($pencairansMenunggu->count() > 0)
-            <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
+            <!-- Mobile Card View -->
+            <div class="md:hidden space-y-3 mb-4">
+                @foreach($pencairansMenunggu as $pencairan)
+                    <a href="{{ route('pencairan-dana.show', $pencairan) }}" class="block bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1 min-w-0">
+                                <span class="font-mono text-xs font-semibold text-blue-600">{{ $pencairan->nomor_pencairan }}</span>
+                                <h3 class="font-semibold text-gray-900 text-sm mt-1 truncate">{{ $pencairan->pengajuanDana->judul_pengajuan ?? '-' }}</h3>
+                                <p class="text-xs text-gray-400 font-mono">{{ $pencairan->pengajuanDana->nomor_pengajuan ?? '-' }}</p>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 ml-2">
+                                {{ ucfirst($pencairan->metode_pencairan) }}
+                            </span>
+                        </div>
+                        <div class="space-y-1 text-sm mb-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Divisi</span>
+                                <span class="text-gray-900 text-right">{{ $pencairan->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Tanggal</span>
+                                <span class="text-gray-900 text-right">{{ \Carbon\Carbon::parse($pencairan->tanggal_pencairan)->format('d/m/Y') }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Jumlah</span>
+                                <span class="font-semibold text-gray-900 text-right">{{ formatRupiah($pencairan->jumlah_pencairan) }}</span>
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="hidden md:block bg-white rounded-xl border border-blue-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
@@ -244,7 +279,55 @@
     <!-- Tab Content: Menunggu Proses -->
     <div id="content-pending" class="tab-content hidden">
         @if($pencairansPending->count() > 0)
-            <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
+            <!-- Mobile Card View -->
+            <div class="md:hidden space-y-3 mb-4">
+                @foreach($pencairansPending as $pencairan)
+                    <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1 min-w-0">
+                                <span class="font-mono text-xs font-semibold text-blue-600">{{ $pencairan->nomor_pencairan }}</span>
+                                <h3 class="font-semibold text-gray-900 text-sm mt-1 truncate">{{ $pencairan->pengajuanDana->judul_pengajuan ?? '-' }}</h3>
+                                <p class="text-xs text-gray-400 font-mono">{{ $pencairan->pengajuanDana->nomor_pengajuan ?? '-' }}</p>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 ml-2">
+                                {{ ucfirst($pencairan->metode_pencairan) }}
+                            </span>
+                        </div>
+                        <div class="space-y-1 text-sm mb-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Divisi</span>
+                                <span class="text-gray-900 text-right">{{ $pencairan->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Tanggal</span>
+                                <span class="text-gray-900 text-right">{{ \Carbon\Carbon::parse($pencairan->tanggal_pencairan)->format('d/m/Y') }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Jumlah</span>
+                                <span class="font-semibold text-gray-900 text-right">{{ formatRupiah($pencairan->jumlah_pencairan) }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-1 pt-3 border-t border-slate-200">
+                            <a href="{{ route('pencairan-dana.show', $pencairan) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Lihat">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </a>
+                            @if(auth()->user()->hasRole('staff_keuangan'))
+                                <a href="{{ route('pencairan-dana.edit', $pencairan) }}" class="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="hidden md:block bg-white rounded-xl border border-blue-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
@@ -325,7 +408,40 @@
     <!-- Tab Content: Diproses -->
     <div id="content-processed" class="tab-content hidden">
         @if($pencairansProcessed->count() > 0)
-            <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
+            <!-- Mobile Card View -->
+            <div class="md:hidden space-y-3 mb-4">
+                @foreach($pencairansProcessed as $pencairan)
+                    <a href="{{ route('pencairan-dana.show', $pencairan) }}" class="block bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1 min-w-0">
+                                <span class="font-mono text-xs font-semibold text-blue-600">{{ $pencairan->nomor_pencairan }}</span>
+                                <h3 class="font-semibold text-gray-900 text-sm mt-1 truncate">{{ $pencairan->pengajuanDana->judul_pengajuan ?? '-' }}</h3>
+                                <p class="text-xs text-gray-400 font-mono">{{ $pencairan->pengajuanDana->nomor_pengajuan ?? '-' }}</p>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 ml-2">
+                                {{ ucfirst($pencairan->metode_pencairan) }}
+                            </span>
+                        </div>
+                        <div class="space-y-1 text-sm mb-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Divisi</span>
+                                <span class="text-gray-900 text-right">{{ $pencairan->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Tanggal</span>
+                                <span class="text-gray-900 text-right">{{ \Carbon\Carbon::parse($pencairan->tanggal_pencairan)->format('d/m/Y') }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Jumlah</span>
+                                <span class="font-semibold text-gray-900 text-right">{{ formatRupiah($pencairan->jumlah_pencairan) }}</span>
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="hidden md:block bg-white rounded-xl border border-blue-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
@@ -397,7 +513,40 @@
     <!-- Tab Content: Selesai -->
     <div id="content-selesai" class="tab-content hidden">
         @if($pencairansSelesai->count() > 0)
-            <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
+            <!-- Mobile Card View -->
+            <div class="md:hidden space-y-3 mb-4">
+                @foreach($pencairansSelesai as $pencairan)
+                    <a href="{{ route('pencairan-dana.show', $pencairan) }}" class="block bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1 min-w-0">
+                                <span class="font-mono text-xs font-semibold text-blue-600">{{ $pencairan->nomor_pencairan }}</span>
+                                <h3 class="font-semibold text-gray-900 text-sm mt-1 truncate">{{ $pencairan->pengajuanDana->judul_pengajuan ?? '-' }}</h3>
+                                <p class="text-xs text-gray-400 font-mono">{{ $pencairan->pengajuanDana->nomor_pengajuan ?? '-' }}</p>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 ml-2">
+                                {{ ucfirst($pencairan->metode_pencairan) }}
+                            </span>
+                        </div>
+                        <div class="space-y-1 text-sm mb-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Divisi</span>
+                                <span class="text-gray-900 text-right">{{ $pencairan->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Tanggal</span>
+                                <span class="text-gray-900 text-right">{{ \Carbon\Carbon::parse($pencairan->tanggal_pencairan)->format('d/m/Y') }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Jumlah</span>
+                                <span class="font-semibold text-gray-900 text-right">{{ formatRupiah($pencairan->jumlah_pencairan) }}</span>
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="hidden md:block bg-white rounded-xl border border-blue-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
@@ -469,7 +618,55 @@
     <!-- Tab Content: Revisi -->
     <div id="content-revisi" class="tab-content hidden">
         @if($pencairansRevisi->count() > 0)
-            <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
+            <!-- Mobile Card View -->
+            <div class="md:hidden space-y-3 mb-4">
+                @foreach($pencairansRevisi as $pencairan)
+                    <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1 min-w-0">
+                                <span class="font-mono text-xs font-semibold text-blue-600">{{ $pencairan->nomor_pencairan }}</span>
+                                <h3 class="font-semibold text-gray-900 text-sm mt-1 truncate">{{ $pencairan->pengajuanDana->judul_pengajuan ?? '-' }}</h3>
+                                <p class="text-xs text-gray-400 font-mono">{{ $pencairan->pengajuanDana->nomor_pengajuan ?? '-' }}</p>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 ml-2">
+                                {{ ucfirst($pencairan->metode_pencairan) }}
+                            </span>
+                        </div>
+                        <div class="space-y-1 text-sm mb-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Divisi</span>
+                                <span class="text-gray-900 text-right">{{ $pencairan->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Tanggal</span>
+                                <span class="text-gray-900 text-right">{{ \Carbon\Carbon::parse($pencairan->tanggal_pencairan)->format('d/m/Y') }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Jumlah</span>
+                                <span class="font-semibold text-gray-900 text-right">{{ formatRupiah($pencairan->jumlah_pencairan) }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-1 pt-3 border-t border-slate-200">
+                            <a href="{{ route('pencairan-dana.show', $pencairan) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Lihat">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </a>
+                            @if(auth()->user()->hasRole('staff_keuangan'))
+                                <a href="{{ route('pencairan-dana.retry', $pencairan) }}" class="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Buat Ulang">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="hidden md:block bg-white rounded-xl border border-blue-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
@@ -550,7 +747,40 @@
     <!-- Tab Content: Dibatalkan -->
     <div id="content-cancelled" class="tab-content hidden">
         @if($pencairansCancelled->count() > 0)
-            <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
+            <!-- Mobile Card View -->
+            <div class="md:hidden space-y-3 mb-4">
+                @foreach($pencairansCancelled as $pencairan)
+                    <a href="{{ route('pencairan-dana.show', $pencairan) }}" class="block bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200 opacity-75">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1 min-w-0">
+                                <span class="font-mono text-xs font-semibold text-gray-400">{{ $pencairan->nomor_pencairan }}</span>
+                                <h3 class="font-medium text-gray-600 text-sm mt-1 truncate">{{ $pencairan->pengajuanDana->judul_pengajuan ?? '-' }}</h3>
+                                <p class="text-xs text-gray-400 font-mono">{{ $pencairan->pengajuanDana->nomor_pengajuan ?? '-' }}</p>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 ml-2">
+                                {{ ucfirst($pencairan->metode_pencairan) }}
+                            </span>
+                        </div>
+                        <div class="space-y-1 text-sm mb-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Divisi</span>
+                                <span class="text-gray-500 text-right">{{ $pencairan->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Tanggal</span>
+                                <span class="text-gray-500 text-right">{{ \Carbon\Carbon::parse($pencairan->tanggal_pencairan)->format('d/m/Y') }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Jumlah</span>
+                                <span class="font-medium text-gray-500 text-right">{{ formatRupiah($pencairan->jumlah_pencairan) }}</span>
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="hidden md:block bg-white rounded-xl border border-blue-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">

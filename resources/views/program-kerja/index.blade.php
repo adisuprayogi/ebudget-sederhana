@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-xl font-semibold text-gray-900">Program Kerja</h1>
                 <p class="text-sm text-gray-500 mt-0.5">Kelola program kerja per divisi untuk periode anggaran aktif</p>
@@ -18,7 +18,7 @@
         </div>
     @else
         <!-- Quick Stats -->
-        <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
             <div class="bg-white rounded-xl border border-blue-100 p-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -63,56 +63,54 @@
         </div>
 
         <!-- Periode Anggaran Info -->
-        <div class="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl p-4 mb-4">
-            <div class="flex items-center justify-between">
-                <div>
+        <div class="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl p-3 md:p-4 mb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="w-full sm:w-auto flex-1">
                     <p class="text-xs text-blue-100 mb-0.5">Periode Anggaran Aktif</p>
-                    <p class="text-lg font-bold text-white">{{ $activePeriode->nama_periode }}</p>
-                    <p class="text-xs text-blue-100 mt-0.5">
+                    <p class="text-base md:text-lg font-bold text-white break-words">{{ $activePeriode->nama_periode }}</p>
+                    <p class="text-xs text-blue-100 mt-0.5 break-words">
                         {{ $activePeriode->tanggal_mulai_perencanaan_anggaran->translatedFormat('d F Y') }} - {{ $activePeriode->tanggal_selesai_perencanaan_anggaran->translatedFormat('d F Y') }}
                     </p>
                 </div>
-                <div class="text-right">
+                <div class="w-full sm:w-auto sm:text-right sm:ml-4">
                     <p class="text-xs text-cyan-100 mb-0.5">Total Pagu Periode</p>
-                    <p class="text-lg font-bold text-white">{{ formatRupiah($penetapanPagus->sum('jumlah_pagu')) }}</p>
+                    <p class="text-base md:text-lg font-bold text-white break-words">{{ formatRupiah($penetapanPagus->sum('jumlah_pagu')) }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Divisi List -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             @forelse($penetapanPagus as $penetapanPagu)
                 @if($penetapanPagu->divisi)
                     <a href="{{ route('program-kerja.divisi-show', $penetapanPagu->divisi) }}" class="block bg-white rounded-xl border border-blue-100 hover:border-blue-200 transition-all overflow-hidden group">
-                        <div class="p-4">
-                            <div class="flex items-start justify-between mb-3">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
-                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-semibold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">{{ $penetapanPagu->divisi->nama_divisi }}</h3>
-                                        <p class="text-xs text-gray-500">{{ $penetapanPagu->divisi->singkatan ?? '' }}</p>
-                                    </div>
+                        <div class="p-3 md:p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="w-9 h-9 md:w-10 md:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="font-semibold text-gray-900 text-sm md:text-base group-hover:text-blue-600 transition-colors truncate">{{ $penetapanPagu->divisi->nama_divisi }}</h3>
+                                    <p class="text-xs text-gray-500 truncate">{{ $penetapanPagu->divisi->singkatan ?? '' }}</p>
                                 </div>
                             </div>
 
                             <div class="space-y-2">
                                 <div class="flex justify-between items-center">
                                     <span class="text-xs text-gray-500">Pagu Ditetaapkan</span>
-                                    <span class="font-semibold text-gray-900 text-sm">{{ formatRupiah($penetapanPagu->jumlah_pagu) }}</span>
+                                    <span class="font-semibold text-gray-900 text-xs md:text-sm truncate ml-2">{{ formatRupiah($penetapanPagu->jumlah_pagu) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-xs text-gray-500">Program Kerja</span>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 flex-shrink-0">
                                         {{ $penetapanPagu->divisi->program_kerjas_count ?? 0 }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-xs text-gray-500">Sub Program</span>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 flex-shrink-0">
                                         {{ $penetapanPagu->divisi->sub_programs_count ?? 0 }}
                                     </span>
                                 </div>
@@ -134,14 +132,14 @@
                                             <div class="h-1.5 rounded-full @if($percentage > 90) bg-red-500 @elseif($percentage > 70) bg-amber-500 @else bg-emerald-500 @endif" style="width: {{ min($percentage, 100) }}%"></div>
                                         </div>
                                         <div class="flex justify-between items-center mt-1.5">
-                                            <span class="text-xs text-gray-400">{{ formatRupiah($usedPagu) }}</span>
-                                            <span class="text-xs text-gray-400">{{ formatRupiah($penetapanPagu->jumlah_pagu - $usedPagu) }} tersisa</span>
+                                            <span class="text-xs text-gray-400 truncate mr-2">{{ formatRupiah($usedPagu) }}</span>
+                                            <span class="text-xs text-gray-400 truncate">{{ formatRupiah($penetapanPagu->jumlah_pagu - $usedPagu) }} tersisa</span>
                                         </div>
                                     </div>
                                 @endif
                             </div>
                         </div>
-                        <div class="px-4 py-2 bg-blue-50 border-t border-blue-100 flex items-center justify-between">
+                        <div class="px-3 md:px-4 py-2 bg-blue-50 border-t border-blue-100 flex items-center justify-between">
                             <span class="text-xs text-gray-600">Kelola Program</span>
                             <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

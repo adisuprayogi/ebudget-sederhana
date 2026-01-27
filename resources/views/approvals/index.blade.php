@@ -15,7 +15,7 @@
     </x-slot>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <div class="bg-white rounded-xl border border-blue-100 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
@@ -76,7 +76,7 @@
     <!-- Filter -->
     <div class="bg-white rounded-xl border border-blue-100 p-3 mb-4">
         <form method="GET" action="{{ route('approvals.index') }}" class="flex flex-wrap items-center gap-3">
-            <div class="flex-1 min-w-[200px]">
+            <div class="w-full md:flex-1 md:min-w-[200px]">
                 <div class="relative">
                     <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -85,7 +85,7 @@
                         class="w-full pl-9 pr-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
                 </div>
             </div>
-            <div class="min-w-[140px]">
+            <div class="w-full md:min-w-[140px] md:w-auto">
                 <select name="level" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white">
                     <option value="">Semua Level</option>
                     @foreach($filterOptions['levels'] ?? [] as $level)
@@ -93,7 +93,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="min-w-[140px]">
+            <div class="w-full md:min-w-[140px] md:w-auto">
                 <select name="divisi_id" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white">
                     <option value="">Semua Divisi</option>
                     @foreach($filterOptions['divisis'] ?? [] as $divisi)
@@ -101,22 +101,120 @@
                     @endforeach
                 </select>
             </div>
-            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                Filter
-            </button>
-            @if(request()->hasAny(['search', 'level', 'divisi_id']))
-                <a href="{{ route('approvals.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
-                    Reset
-                </a>
-            @endif
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <button type="submit" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Filter
+                </button>
+                @if(request()->hasAny(['search', 'level', 'divisi_id']))
+                    <a href="{{ route('approvals.index') }}" class="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
+                        Reset
+                    </a>
+                @endif
+            </div>
         </form>
     </div>
 
-    <!-- Table -->
-    <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
+    <!-- Mobile Card View -->
+    <div class="md:hidden space-y-3">
+        @forelse($approvals ?? [] as $approval)
+            @php
+                $jenisLabels = [
+                    'kegiatan' => 'Kegiatan',
+                    'pengadaan' => 'Pengadaan',
+                    'pembayaran' => 'Pembayaran',
+                    'honorarium' => 'Honorarium',
+                    'sewa' => 'Sewa',
+                    'konsumsi' => 'Konsumsi',
+                    'konsumi' => 'Konsumsi',
+                    'reimbursement' => 'Reimbursement',
+                    'lainnya' => 'Lainnya',
+                ];
+                $jenisColors = [
+                    'kegiatan' => 'bg-blue-100 text-blue-700',
+                    'pengadaan' => 'bg-emerald-100 text-emerald-700',
+                    'pembayaran' => 'bg-amber-100 text-amber-700',
+                    'honorarium' => 'bg-violet-100 text-violet-700',
+                    'sewa' => 'bg-orange-100 text-orange-700',
+                    'konsumsi' => 'bg-pink-100 text-pink-700',
+                    'konsumi' => 'bg-pink-100 text-pink-700',
+                    'reimbursement' => 'bg-cyan-100 text-cyan-700',
+                    'lainnya' => 'bg-gray-100 text-gray-700',
+                ];
+                $jenis = $approval->pengajuanDana->jenis_pengajuan;
+                $label = $jenisLabels[$jenis] ?? ucfirst($jenis);
+                $colorClass = $jenisColors[$jenis] ?? 'bg-gray-100 text-gray-700';
+            @endphp
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                <!-- Header -->
+                <div class="px-3 py-3 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-100">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1 min-w-0">
+                            <span class="font-mono text-xs font-bold text-blue-600 block truncate">{{ $approval->pengajuanDana->nomor_pengajuan }}</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $colorClass }} mt-1">
+                                {{ $label }}
+                            </span>
+                        </div>
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-sm font-bold text-blue-700 flex-shrink-0">
+                            {{ $approval->level }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="p-3 space-y-3">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-900 line-clamp-2">{{ $approval->pengajuanDana->judul_pengajuan }}</p>
+                        @if($approval->pengajuanDana->program_kerja)
+                            <p class="text-xs text-slate-500 mt-0.5 truncate">{{ $approval->pengajuanDana->programKerja->nama_program }}</p>
+                        @endif
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <span class="text-slate-500 block">Pengaju:</span>
+                            <div class="flex items-center gap-1 mt-0.5">
+                                <div class="w-5 h-5 bg-blue-500 rounded flex items-center justify-center flex-shrink-0">
+                                    <span class="text-[10px] font-bold text-white">{{ strtoupper(substr($approval->pengajuanDana->createdBy->name ?? '-', 0, 1)) }}</span>
+                                </div>
+                                <span class="font-medium text-slate-700 truncate">{{ $approval->pengajuanDana->createdBy->name ?? '-' }}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 block">Total:</span>
+                            <div class="font-mono font-semibold text-slate-900 mt-0.5 truncate" title="Rp {{ number_format($approval->pengajuanDana->total_pengajuan, 0, ',', '.') }}">Rp {{ number_format($approval->pengajuanDana->total_pengajuan, 0, ',', '.') }}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                        <span class="text-xs text-slate-500">{{ \Carbon\Carbon::parse($approval->created_at)->format('d/m/Y') }}</span>
+                        <a href="{{ route('approvals.show', $approval) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            Review
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="bg-white rounded-xl border border-slate-100 p-8 text-center">
+                <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <p class="text-slate-500">Tidak ada approval</p>
+                <p class="text-slate-400 text-xs mt-1">Tidak ada pengajuan yang menunggu approval</p>
+            </div>
+        @endforelse
+    </div>
+
+    <!-- Desktop Table View -->
+    <div class="hidden md:block bg-white rounded-xl border border-blue-100 overflow-hidden">
         <table class="w-full">
             <thead class="bg-blue-50 border-b border-blue-100">
                 <tr>
@@ -261,9 +359,10 @@
 
     <!-- Pagination -->
     @if(isset($approvals) && $approvals->hasPages())
-        <div class="mt-4 flex items-center justify-between text-sm">
-            <span class="text-gray-500">
-                Menampilkan {{ $approvals->firstItem() ?? 0 }}–{{ $approvals->lastItem() ?? 0 }} dari {{ $approvals->total() }}
+        <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs md:text-sm">
+            <span class="text-gray-500 text-center md:text-left">
+                <span class="hidden md:inline">Menampilkan {{ $approvals->firstItem() ?? 0 }}–{{ $approvals->lastItem() ?? 0 }} dari {{ $approvals->total() }}</span>
+                <span class="md:hidden">{{ $approvals->total() }} pengajuan</span>
             </span>
             {{ $approvals->appends(request()->query())->links() }}
         </div>

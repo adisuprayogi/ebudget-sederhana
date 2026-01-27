@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-xl font-semibold text-gray-900">Verifikasi Refund</h1>
                 <p class="text-sm text-gray-500 mt-0.5">Verifikasi pengajuan refund dan lihat history</p>
@@ -9,7 +9,7 @@
     </x-slot>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <div class="bg-white rounded-xl border border-blue-100 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -69,8 +69,8 @@
 
     <!-- Filter -->
     <div class="bg-white rounded-xl border border-blue-100 p-3 mb-4">
-        <form method="GET" action="{{ route('refund-verification.index') }}" class="flex flex-wrap items-center gap-3">
-            <div class="min-w-[140px]">
+        <form method="GET" action="{{ route('refund-verification.index') }}" class="flex flex-col sm:flex-row flex-wrap items-center gap-3">
+            <div class="w-full sm:min-w-[140px] sm:w-auto">
                 <select name="divisi_id" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white">
                     <option value="">Semua Divisi</option>
                     @foreach(\App\Models\Divisi::orderBy('nama_divisi')->get() as $divisi)
@@ -78,7 +78,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="min-w-[140px]">
+            <div class="w-full sm:min-w-[140px] sm:w-auto">
                 <select name="periode_anggaran_id" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white">
                     <option value="">Semua Periode</option>
                     @foreach(\App\Models\PeriodeAnggaran::orderBy('tahun_anggaran', 'desc')->get() as $periode)
@@ -86,20 +86,22 @@
                     @endforeach
                 </select>
             </div>
-            <div class="min-w-[200px] flex-1">
+            <div class="w-full sm:min-w-[200px] sm:flex-1">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor atau alasan refund..." class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
             </div>
-            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                Filter
-            </button>
-            @if(request()->anyFilled(['divisi_id', 'periode_anggaran_id', 'search']))
-                <a href="{{ route('refund-verification.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
-                    Reset
-                </a>
-            @endif
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button type="submit" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Filter
+                </button>
+                @if(request()->anyFilled(['divisi_id', 'periode_anggaran_id', 'search']))
+                    <a href="{{ route('refund-verification.index') }}" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
+                        Reset
+                    </a>
+                @endif
+            </div>
         </form>
     </div>
 
@@ -153,7 +155,86 @@
     <div id="content-menunggu-refund" class="tab-content">
         @if(isset($lpjsMenungguRefund) && $lpjsMenungguRefund->count() > 0)
             <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
-                <div class="overflow-x-auto">
+                <!-- Mobile Card View -->
+                <div class="md:hidden space-y-3">
+                    @foreach($lpjsMenungguRefund as $lpj)
+                        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-3 py-3 bg-gradient-to-r from-blue-50 to-blue-50/50 border-b border-blue-100">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <span class="font-mono text-xs font-bold text-blue-600 block truncate">{{ $lpj->nomor_lpj }}</span>
+                                        <p class="text-xs text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($lpj->approved_at)->format('d/m/Y') }}</p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 flex-shrink-0">
+                                        {{ formatRupiah($lpj->sisa_dana) }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-3 space-y-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900 line-clamp-2">{{ $lpj->judul_lpj ?? '-' }}</p>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Divisi:</span>
+                                    <span class="ml-1 font-medium text-slate-700 truncate block">
+                                        @if($lpj->pencairanDana && $lpj->pencairanDana->pengajuanDana && $lpj->pencairanDana->pengajuanDana->divisi)
+                                            {{ $lpj->pencairanDana->pengajuanDana->divisi->nama_divisi }}
+                                        @else
+                                            -
+                                        @endif
+                                    </span>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Pengajuan:</span>
+                                    <span class="ml-1 font-medium text-slate-700 truncate block">
+                                        @if($lpj->pencairanDana && $lpj->pencairanDana->pengajuanDana)
+                                            {{ $lpj->pencairanDana->pengajuanDana->judul_pengajuan ?? '-' }}
+                                        @else
+                                            -
+                                        @endif
+                                    </span>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Pengaju:</span>
+                                    <span class="ml-1 font-medium text-slate-700">
+                                        @if($lpj->pencairanDana && $lpj->pencairanDana->pengajuanDana && $lpj->pencairanDana->pengajuanDana->createdBy)
+                                            {{ $lpj->pencairanDana->pengajuanDana->createdBy->name }}
+                                        @elseif($lpj->createdBy)
+                                            {{ $lpj->createdBy->name }}
+                                        @else
+                                            -
+                                        @endif
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center justify-end pt-2 border-t border-slate-100 gap-1.5">
+                                    <a href="{{ route('lpj.show', $lpj) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Lihat LPJ</span>
+                                    </a>
+                                    <button onclick="sendRefundReminder({{ $lpj->id }}, '{{ $lpj->nomor_lpj }}', '{{ $lpj->pencairanDana->pengajuanDana->createdBy->name ?? 'Pengaju' }}')" class="inline-flex items-center gap-1.5 px-3 py-2 text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Ingatkan</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
                             <tr>
@@ -220,23 +301,26 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100 flex items-center justify-between">
-                    <p class="text-sm text-gray-600">
-                        Menampilkan {{ $lpjsMenungguRefund->firstItem() }} sampai {{ $lpjsMenungguRefund->lastItem() }} dari {{ $lpjsMenungguRefund->total() }} LPJ
-                    </p>
-                    {{ $lpjsMenungguRefund->appends(request()->except('page'))->links() }}
+                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <p class="text-xs md:text-sm text-gray-600 text-center md:text-left">
+                            <span class="hidden md:inline">Menampilkan {{ $lpjsMenungguRefund->firstItem() }} sampai {{ $lpjsMenungguRefund->lastItem() }} dari {{ $lpjsMenungguRefund->total() }} LPJ</span>
+                            <span class="md:hidden">{{ $lpjsMenungguRefund->total() }} LPJ</span>
+                        </p>
+                        {{ $lpjsMenungguRefund->appends(request()->except('page'))->links() }}
+                    </div>
                 </div>
 
                 <!-- Total Sisa Dana -->
-                <div class="bg-blue-50 border-t border-blue-100 px-4 py-3">
-                    <div class="flex items-center justify-between">
+                <div class="bg-blue-50 border-t border-blue-100 px-3 md:px-4 py-2 md:py-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span class="text-sm font-semibold text-blue-900">Total Sisa Dana Belum Di-Refund:</span>
                         </div>
-                        <span class="text-lg font-bold text-blue-600">{{ formatRupiah($totalSisaDana ?? 0) }}</span>
+                        <span class="text-base md:text-lg font-bold text-blue-600 truncate">{{ formatRupiah($totalSisaDana ?? 0) }}</span>
                     </div>
                 </div>
             </div>
@@ -259,7 +343,78 @@
     <div id="content-menunggu-approval" class="tab-content hidden">
         @if($refunds->count() > 0)
             <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
-                <div class="overflow-x-auto">
+                <!-- Mobile Card View -->
+                <div class="md:hidden space-y-3">
+                    @foreach($refunds as $refund)
+                        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-3 py-3 bg-gradient-to-r from-amber-50 to-amber-50/50 border-b border-amber-100">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <span class="font-mono text-xs font-bold text-amber-600 block truncate">{{ $refund->nomor_refund }}</span>
+                                        <p class="text-xs text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($refund->created_at)->format('d/m/Y') }}</p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 flex-shrink-0">
+                                        Approval
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-3 space-y-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-lg">
+                                        {{ ucfirst(str_replace('_', ' ', $refund->jenis_refund)) }}
+                                    </span>
+                                    <span class="text-sm font-semibold text-slate-900">{{ formatRupiah($refund->jumlah_refund) }}</span>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Divisi:</span>
+                                    <span class="ml-1 font-medium text-slate-700 truncate block">
+                                        @if($refund->pencairanDana && $refund->pencairanDana->pengajuanDana)
+                                            {{ $refund->pencairanDana->pengajuanDana->divisi->nama_divisi ?? '-' }}
+                                        @elseif($refund->pengajuanDana)
+                                            {{ $refund->pengajuanDana->divisi->nama_divisi ?? '-' }}
+                                        @else
+                                            -
+                                        @endif
+                                    </span>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Oleh:</span>
+                                    <span class="ml-1 font-medium text-slate-700">{{ $refund->createdBy->name ?? '-' }}</span>
+                                </div>
+
+                                <div class="flex items-center justify-end pt-2 border-t border-slate-100 gap-1.5">
+                                    <a href="{{ route('refund.show', $refund) }}" class="inline-flex items-center gap-1.5 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Lihat</span>
+                                    </a>
+                                    <button onclick="quickApprove({{ $refund->id }}, '{{ $refund->nomor_refund }}')" class="inline-flex items-center gap-1.5 px-3 py-2 text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Setujui</span>
+                                    </button>
+                                    <button onclick="quickReject({{ $refund->id }}, '{{ $refund->nomor_refund }}')" class="inline-flex items-center gap-1.5 px-3 py-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Tolak</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
                             <tr>
@@ -322,11 +477,14 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100 flex items-center justify-between">
-                    <p class="text-sm text-gray-600">
-                        Menampilkan {{ $refunds->firstItem() }} sampai {{ $refunds->lastItem() }} dari {{ $refunds->total() }} refund
-                    </p>
-                    {{ $refunds->appends(request()->except('page'))->links() }}
+                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <p class="text-xs md:text-sm text-gray-600 text-center md:text-left">
+                            <span class="hidden md:inline">Menampilkan {{ $refunds->firstItem() }} sampai {{ $refunds->lastItem() }} dari {{ $refunds->total() }} refund</span>
+                            <span class="md:hidden">{{ $refunds->total() }} refund</span>
+                        </p>
+                        {{ $refunds->appends(request()->except('page'))->links() }}
+                    </div>
                 </div>
             </div>
         @else
@@ -348,7 +506,66 @@
     <div id="content-processed" class="tab-content hidden">
         @if($refundsProcessed->count() > 0)
             <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
-                <div class="overflow-x-auto">
+                <!-- Mobile Card View -->
+                <div class="md:hidden space-y-3">
+                    @foreach($refundsProcessed as $refund)
+                        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-3 py-3 bg-gradient-to-r from-emerald-50 to-emerald-50/50 border-b border-emerald-100">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <span class="font-mono text-xs font-bold text-emerald-600 block truncate">{{ $refund->nomor_refund }}</span>
+                                        <p class="text-xs text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($refund->approved_at)->format('d/m/Y H:i') }}</p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 flex-shrink-0">
+                                        Selesai
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-3 space-y-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-lg">
+                                        {{ ucfirst(str_replace('_', ' ', $refund->jenis_refund)) }}
+                                    </span>
+                                    <span class="text-sm font-semibold text-slate-900">{{ formatRupiah($refund->jumlah_refund) }}</span>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Divisi:</span>
+                                    <span class="ml-1 font-medium text-slate-700 truncate block">
+                                        @if($refund->pencairanDana && $refund->pencairanDana->pengajuanDana)
+                                            {{ $refund->pencairanDana->pengajuanDana->divisi->nama_divisi ?? '-' }}
+                                        @elseif($refund->pengajuanDana)
+                                            {{ $refund->pengajuanDana->divisi->nama_divisi ?? '-' }}
+                                        @else
+                                            -
+                                        @endif
+                                    </span>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Disetujui oleh:</span>
+                                    <span class="ml-1 font-medium text-slate-700">{{ $refund->approvedBy->name ?? '-' }}</span>
+                                </div>
+
+                                <div class="flex items-center justify-end pt-2 border-t border-slate-100 gap-1.5">
+                                    <a href="{{ route('refund.show', $refund) }}" class="inline-flex items-center gap-1.5 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Lihat</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
                             <tr>
@@ -399,11 +616,14 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100 flex items-center justify-between">
-                    <p class="text-sm text-gray-600">
-                        Menampilkan {{ $refundsProcessed->firstItem() }} sampai {{ $refundsProcessed->lastItem() }} dari {{ $refundsProcessed->total() }} refund
-                    </p>
-                    {{ $refundsProcessed->appends(request()->except('page'))->links() }}
+                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <p class="text-xs md:text-sm text-gray-600 text-center md:text-left">
+                            <span class="hidden md:inline">Menampilkan {{ $refundsProcessed->firstItem() }} sampai {{ $refundsProcessed->lastItem() }} dari {{ $refundsProcessed->total() }} refund</span>
+                            <span class="md:hidden">{{ $refundsProcessed->total() }} refund</span>
+                        </p>
+                        {{ $refundsProcessed->appends(request()->except('page'))->links() }}
+                    </div>
                 </div>
             </div>
         @else
@@ -425,7 +645,66 @@
     <div id="content-rejected" class="tab-content hidden">
         @if($refundsRejected->count() > 0)
             <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
-                <div class="overflow-x-auto">
+                <!-- Mobile Card View -->
+                <div class="md:hidden space-y-3">
+                    @foreach($refundsRejected as $refund)
+                        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-3 py-3 bg-gradient-to-r from-red-50 to-red-50/50 border-b border-red-100">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <span class="font-mono text-xs font-bold text-red-600 block truncate">{{ $refund->nomor_refund }}</span>
+                                        <p class="text-xs text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($refund->approved_at)->format('d/m/Y H:i') }}</p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 flex-shrink-0">
+                                        Ditolak
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-3 space-y-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-lg">
+                                        {{ ucfirst(str_replace('_', ' ', $refund->jenis_refund)) }}
+                                    </span>
+                                    <span class="text-sm font-semibold text-slate-900">{{ formatRupiah($refund->jumlah_refund) }}</span>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Divisi:</span>
+                                    <span class="ml-1 font-medium text-slate-700 truncate block">
+                                        @if($refund->pencairanDana && $refund->pencairanDana->pengajuanDana)
+                                            {{ $refund->pencairanDana->pengajuanDana->divisi->nama_divisi ?? '-' }}
+                                        @elseif($refund->pengajuanDana)
+                                            {{ $refund->pengajuanDana->divisi->nama_divisi ?? '-' }}
+                                        @else
+                                            -
+                                        @endif
+                                    </span>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Ditolak oleh:</span>
+                                    <span class="ml-1 font-medium text-slate-700">{{ $refund->approvedBy->name ?? '-' }}</span>
+                                </div>
+
+                                <div class="flex items-center justify-end pt-2 border-t border-slate-100 gap-1.5">
+                                    <a href="{{ route('refund.show', $refund) }}" class="inline-flex items-center gap-1.5 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Lihat</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
                             <tr>
@@ -476,11 +755,14 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100 flex items-center justify-between">
-                    <p class="text-sm text-gray-600">
-                        Menampilkan {{ $refundsRejected->firstItem() }} sampai {{ $refundsRejected->lastItem() }} dari {{ $refundsRejected->total() }} refund
-                    </p>
-                    {{ $refundsRejected->appends(request()->except('page'))->links() }}
+                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <p class="text-xs md:text-sm text-gray-600 text-center md:text-left">
+                            <span class="hidden md:inline">Menampilkan {{ $refundsRejected->firstItem() }} sampai {{ $refundsRejected->lastItem() }} dari {{ $refundsRejected->total() }} refund</span>
+                            <span class="md:hidden">{{ $refundsRejected->total() }} refund</span>
+                        </p>
+                        {{ $refundsRejected->appends(request()->except('page'))->links() }}
+                    </div>
                 </div>
             </div>
         @else
@@ -499,13 +781,13 @@
     </div>
 
     <!-- Quick Approve Modal -->
-    <div id="quickApproveModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 overflow-hidden">
-            <div class="px-5 py-4 border-b border-blue-100 bg-emerald-50">
+    <div id="quickApproveModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-lg max-w-md w-full overflow-hidden">
+            <div class="px-4 md:px-5 py-3 md:py-4 border-b border-blue-100 bg-emerald-50">
                 <h3 class="text-base font-semibold text-emerald-900">Setujui Refund</h3>
                 <p class="text-xs text-emerald-600 mt-0.5" id="approveRefundNumber"></p>
             </div>
-            <form id="quickApproveForm" method="POST" action="" class="p-5">
+            <form id="quickApproveForm" method="POST" action="" class="p-4 md:p-5">
                 @csrf
                 <input type="hidden" name="status" value="approved">
                 <div class="mb-4">
@@ -515,7 +797,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (opsional)</label>
                     <textarea name="catatan_approval" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Catatan approval..."></textarea>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row gap-2">
                     <button type="button" onclick="closeApproveModal()" class="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">
                         Batal
                     </button>
@@ -528,13 +810,13 @@
     </div>
 
     <!-- Quick Reject Modal -->
-    <div id="quickRejectModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 overflow-hidden">
-            <div class="px-5 py-4 border-b border-blue-100 bg-red-50">
+    <div id="quickRejectModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-lg max-w-md w-full overflow-hidden">
+            <div class="px-4 md:px-5 py-3 md:py-4 border-b border-blue-100 bg-red-50">
                 <h3 class="text-base font-semibold text-red-900">Tolak Refund</h3>
                 <p class="text-xs text-red-600 mt-0.5" id="rejectRefundNumber"></p>
             </div>
-            <form id="quickRejectForm" method="POST" action="" class="p-5">
+            <form id="quickRejectForm" method="POST" action="" class="p-4 md:p-5">
                 @csrf
                 <input type="hidden" name="status" value="rejected">
                 <div class="mb-4">
@@ -544,7 +826,7 @@
                     <label class="block text-sm font-medium text-red-700 mb-1">Alasan Penolakan *</label>
                     <textarea name="catatan_approval" rows="3" required class="w-full px-3 py-2 border border-red-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500/20 focus:border-red-500" placeholder="Jelaskan alasan penolakan..."></textarea>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row gap-2">
                     <button type="button" onclick="closeRejectModal()" class="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">
                         Batal
                     </button>
@@ -557,13 +839,13 @@
     </div>
 
     <!-- Quick Process Modal -->
-    <div id="quickProcessModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 overflow-hidden">
-            <div class="px-5 py-4 border-b border-blue-100 bg-violet-50">
+    <div id="quickProcessModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-lg max-w-md w-full overflow-hidden">
+            <div class="px-4 md:px-5 py-3 md:py-4 border-b border-blue-100 bg-violet-50">
                 <h3 class="text-base font-semibold text-violet-900">Proses Refund</h3>
                 <p class="text-xs text-violet-600 mt-0.5" id="processRefundNumber"></p>
             </div>
-            <form id="quickProcessForm" method="POST" action="" enctype="multipart/form-data" class="p-5">
+            <form id="quickProcessForm" method="POST" action="" enctype="multipart/form-data" class="p-4 md:p-5">
                 @csrf
                 <div class="mb-4">
                     <p class="text-sm text-gray-600">Konfirmasi bahwa refund ini telah selesai diproses dan dana telah dikembalikan.</p>
@@ -577,7 +859,7 @@
                     <input type="file" name="bukti_transfer" required accept=".pdf,.jpg,.jpeg,.png" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100">
                     <p class="text-xs text-gray-500 mt-1">PDF, JPG, JPEG, PNG (max 5MB)</p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row gap-2">
                     <button type="button" onclick="closeProcessModal()" class="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">
                         Batal
                     </button>

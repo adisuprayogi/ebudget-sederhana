@@ -20,13 +20,13 @@
 
     <div class="py-8">
         <!-- Filters -->
-        <div class="bg-white rounded-2xl shadow-soft p-6 mb-8">
-            <form method="GET" action="{{ route('users.index') }}" class="flex flex-wrap gap-4">
-                <div class="flex-1 min-w-[200px]">
+        <div class="bg-white rounded-2xl shadow-soft p-4 md:p-6 mb-8">
+            <form method="GET" action="{{ route('users.index') }}" class="flex flex-wrap gap-3 md:gap-4">
+                <div class="flex-1 min-w-[200px] w-full md:w-auto">
                     <label class="block text-sm font-medium text-secondary-700 mb-2">Cari</label>
                     <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Nama, email, username..." class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                 </div>
-                <div class="flex-1 min-w-[180px]">
+                <div class="flex-1 min-w-[140px] w-full md:w-auto">
                     <label class="block text-sm font-medium text-secondary-700 mb-2">Role</label>
                     <select name="role_id" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <option value="">Semua Role</option>
@@ -35,7 +35,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="flex-1 min-w-[180px]">
+                <div class="flex-1 min-w-[140px] w-full md:w-auto">
                     <label class="block text-sm font-medium text-secondary-700 mb-2">Divisi</label>
                     <select name="divisi_id" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <option value="">Semua Divisi</option>
@@ -44,7 +44,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="flex-1 min-w-[150px]">
+                <div class="flex-1 min-w-[140px] w-full md:w-auto">
                     <label class="block text-sm font-medium text-secondary-700 mb-2">Status</label>
                     <select name="is_active" class="w-full px-4 py-2 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                         <option value="">Semua</option>
@@ -53,15 +53,94 @@
                     </select>
                 </div>
                 <div class="flex items-end">
-                    <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
+                    <button type="submit" class="w-full md:w-auto px-6 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
                         Filter
                     </button>
                 </div>
             </form>
         </div>
 
-        <!-- Users List -->
-        <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+        <!-- Mobile Card View -->
+        <div class="md:hidden space-y-3 mb-8">
+            @forelse($users ?? [] as $user)
+                <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
+                    <div class="flex items-start gap-3 mb-3">
+                        <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            @if($user->avatar)
+                                <img src="{{ asset('storage/' . $user->avatar) }}" class="w-12 h-12 rounded-full object-cover" alt="{{ $user->full_name }}">
+                            @else
+                                <span class="text-primary-600 font-semibold">{{ substr($user->full_name, 0, 2) }}</span>
+                            @endif
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-semibold text-secondary-900 text-sm">{{ $user->full_name }}</h3>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold {{ $user->is_active ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700' }}">
+                                    {{ $user->is_active ? 'Aktif' : 'Non-Aktif' }}
+                                </span>
+                            </div>
+                            <p class="text-xs text-secondary-500">@{{ $user->username ?? '-' }}</p>
+                            <p class="text-sm text-secondary-700 text-xs">{{ $user->email }}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-1 text-sm mb-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Role</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                                {{ $user->role->name ?? '-' }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Divisi</span>
+                            <span class="text-gray-900 text-right">{{ $user->divisi->nama_divisi ?? '-' }}</span>
+                        </div>
+                        @if($user->phone)
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Telepon</span>
+                                <span class="text-gray-900 text-right">{{ $user->phone }}</span>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="flex items-center justify-end gap-1 pt-3 border-t border-slate-200">
+                        <a href="{{ route('users.show', $user) }}" class="p-2 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Lihat">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </a>
+                        @if($permissions['edit'] ?? false)
+                            <a href="{{ route('users.edit', $user) }}" class="p-2 text-secondary-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </a>
+                        @endif
+                        @if($permissions['reset_password'] ?? false && $user->id !== auth()->id())
+                            <button type="button" x-data="{ open: false }" @click="open = true" class="p-2 text-secondary-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Reset Password">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                </svg>
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-2xl shadow-soft p-12 text-center">
+                    <svg class="w-16 h-16 text-secondary-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <p class="text-secondary-500">Belum ada pengguna</p>
+                    @if($permissions['create'] ?? false)
+                        <a href="{{ route('users.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
+                            Tambah Pengguna Baru
+                        </a>
+                    @endif
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden md:block bg-white rounded-2xl shadow-soft overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-secondary-50 border-b border-secondary-200">
@@ -140,18 +219,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center">
-                                        <svg class="w-16 h-16 text-secondary-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                        </svg>
-                                        <p class="text-secondary-500">Belum ada pengguna</p>
-                                        @if($permissions['create'] ?? false)
-                                            <a href="{{ route('users.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-200">
-                                                Tambah Pengguna Baru
-                                            </a>
-                                        @endif
-                                    </div>
+                                <td colspan="6" class="px-6 py-8 text-center text-secondary-500 text-sm">
+                                    Belum ada pengguna
                                 </td>
                             </tr>
                         @endforelse
@@ -207,8 +276,28 @@
 
         document.querySelectorAll('[title="Reset Password"]').forEach(btn => {
             btn.addEventListener('click', function() {
-                const userId = this.closest('tr').querySelector('a[href^="{{ route('users.show', ['']) }}"]').href.split('/').pop();
-                openResetModal(userId);
+                let userId;
+                // Try to find from desktop table row
+                const tr = this.closest('tr');
+                if (tr) {
+                    const showLink = tr.querySelector('a[href^="{{ route('users.show', '') }}"]');
+                    if (showLink) {
+                        userId = showLink.href.split('/').pop();
+                    }
+                }
+                // Try to find from mobile card
+                if (!userId) {
+                    const card = this.closest('[class*="bg-gradient-to-br"]');
+                    if (card) {
+                        const showLink = card.querySelector('a[href^="{{ route('users.show', '') }}"]');
+                        if (showLink) {
+                            userId = showLink.href.split('/').pop();
+                        }
+                    }
+                }
+                if (userId) {
+                    openResetModal(userId);
+                }
             });
         });
     </script>

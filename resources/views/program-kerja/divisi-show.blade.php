@@ -1,19 +1,19 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <nav class="flex text-xs text-gray-500 mb-2">
                     <a href="{{ route('program-kerja.index') }}" class="hover:text-blue-600">Program Kerja</a>
                     <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span class="text-gray-900">{{ $divisi->nama_divisi }}</span>
+                    <span class="text-gray-900 truncate">{{ $divisi->nama_divisi }}</span>
                 </nav>
-                <h1 class="text-xl font-semibold text-gray-900">Program Kerja - {{ $divisi->nama_divisi }}</h1>
+                <h1 class="text-xl font-semibold text-gray-900 truncate">Program Kerja - {{ $divisi->nama_divisi }}</h1>
                 <p class="text-xs text-gray-500 mt-0.5">Periode: {{ $activePeriode->nama_periode }}</p>
             </div>
             @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
-                <a href="{{ route('program-kerja.create', $divisi) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <a href="{{ route('program-kerja.create', $divisi) }}" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -25,7 +25,7 @@
 
     <div class="space-y-4">
         <!-- Quick Stats -->
-        <div class="grid grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div class="bg-white rounded-xl border border-blue-100 p-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -84,9 +84,9 @@
         </div>
 
         <!-- Filters -->
-        <div class="bg-white rounded-xl border border-blue-100 p-4">
+        <div class="bg-white rounded-xl border border-blue-100 p-3 md:p-4">
             <form method="GET" action="{{ route('program-kerja.divisi-show', $divisi) }}" class="flex flex-wrap gap-3">
-                <div class="flex-1 min-w-[160px]">
+                <div class="w-full sm:flex-1 sm:min-w-[160px]">
                     <select name="status" class="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                         <option value="">Semua Status</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
@@ -94,10 +94,10 @@
                         <option value="suspended" {{ request('status') == 'suspended' ? 'selected' : '' }}>Ditangguhkan</option>
                     </select>
                 </div>
-                <div class="flex-1 min-w-[200px]">
+                <div class="w-full sm:flex-1 sm:min-w-[200px]">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode atau nama program..." class="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                 </div>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
                     <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 3.293A1 1 0 013 2.586V4z" />
                     </svg>
@@ -106,8 +106,100 @@
             </form>
         </div>
 
-        <!-- Program Kerja List -->
-        <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
+        <!-- Mobile Card View -->
+        <div class="md:hidden space-y-3">
+            @forelse($programKerjas as $program)
+                <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                    <!-- Header -->
+                    <div class="px-3 py-3 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-100">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <span class="font-mono text-xs font-bold text-blue-600 block">{{ $program->kode_program }}</span>
+                                <h3 class="font-semibold text-gray-900 text-sm mt-0.5 truncate">{{ $program->nama_program }}</h3>
+                                @if($program->target_output)
+                                    <p class="text-xs text-gray-500 truncate">Target: {{ $program->target_output }}</p>
+                                @endif
+                            </div>
+                            @if($program->status === 'active')
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 flex-shrink-0">
+                                    Aktif
+                                </span>
+                            @elseif($program->status === 'inactive')
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 flex-shrink-0">
+                                    Non-Aktif
+                                </span>
+                            @elseif($program->status === 'suspended')
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 flex-shrink-0">
+                                    Ditangguhkan
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 flex-shrink-0">
+                                    {{ $program->status }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-3 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">Pagu Anggaran</span>
+                            <span class="font-semibold text-gray-900 text-sm">{{ formatRupiah($program->calculated_pagu ?? 0) }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">Sub Program</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700">
+                                {{ $program->subPrograms->count() ?? 0 }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-1.5 pt-2 border-t border-slate-100">
+                            <a href="{{ route('program-kerja.show', [$divisi, $program]) }}" class="inline-flex items-center gap-1.5 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <span class="hidden sm:inline">Lihat</span>
+                            </a>
+                            @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
+                                @php
+                                    $canEdit = true;
+                                    $periode = $program->periodeAnggaran;
+                                    if($periode && $periode->fase !== 'perencanan') {
+                                        $canEdit = false;
+                                    }
+                                @endphp
+                                @if($canEdit)
+                                    <a href="{{ route('program-kerja.edit', [$divisi, $program]) }}" class="inline-flex items-center gap-1.5 px-3 py-2 text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Edit</span>
+                                    </a>
+                                @endif
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-xl border border-slate-100 p-6 md:p-8 text-center">
+                    <div class="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 text-sm">Belum ada program kerja untuk divisi ini</p>
+                    @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama']))
+                        <a href="{{ route('program-kerja.create', $divisi) }}" class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                            Tambah Program Baru
+                        </a>
+                    @endif
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden md:block bg-white rounded-xl border border-blue-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-blue-50 border-b border-blue-100">
@@ -210,7 +302,13 @@
             <!-- Pagination -->
             @if($programKerjas->hasPages())
                 <div class="bg-gray-50 px-4 py-3 border-t border-blue-100">
-                    {{ $programKerjas->appends(request()->query())->links() }}
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs md:text-sm">
+                        <span class="text-gray-500 text-center md:text-left">
+                            <span class="hidden md:inline">Menampilkan {{ $programKerjas->firstItem() ?? 0 }}–{{ $programKerjas->lastItem() ?? 0 }} dari {{ $programKerjas->total() }}</span>
+                            <span class="md:hidden">{{ $programKerjas->total() }} program</span>
+                        </span>
+                        {{ $programKerjas->appends(request()->query())->links() }}
+                    </div>
                 </div>
             @endif
         </div>

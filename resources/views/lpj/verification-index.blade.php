@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-xl font-semibold text-gray-900">Verifikasi LPJ</h1>
                 <p class="text-sm text-gray-500 mt-0.5">Verifikasi Laporan Pertanggung Jawaban</p>
@@ -9,7 +9,7 @@
     </x-slot>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <div class="bg-white rounded-xl border border-blue-100 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
@@ -69,8 +69,8 @@
 
     <!-- Filter -->
     <div class="bg-white rounded-xl border border-blue-100 p-3 mb-4">
-        <form method="GET" action="{{ route('lpj-verification.index') }}" class="flex flex-wrap items-center gap-3">
-            <div class="min-w-[140px]">
+        <form method="GET" action="{{ route('lpj-verification.index') }}" class="flex flex-col sm:flex-row flex-wrap items-center gap-3">
+            <div class="w-full sm:min-w-[140px] sm:w-auto">
                 <select name="divisi_id" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white">
                     <option value="">Semua Divisi</option>
                     @foreach(\App\Models\Divisi::orderBy('nama_divisi')->get() as $divisi)
@@ -78,7 +78,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="min-w-[140px]">
+            <div class="w-full sm:min-w-[140px] sm:w-auto">
                 <select name="periode_anggaran_id" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white">
                     <option value="">Semua Periode</option>
                     @foreach(\App\Models\PeriodeAnggaran::orderBy('tahun_anggaran', 'desc')->get() as $periode)
@@ -86,20 +86,22 @@
                     @endforeach
                 </select>
             </div>
-            <div class="min-w-[200px] flex-1">
+            <div class="w-full sm:min-w-[200px] sm:flex-1">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor LPJ/Pencairan atau uraian..." class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
             </div>
-            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                Filter
-            </button>
-            @if(request()->anyFilled(['divisi_id', 'periode_anggaran_id', 'search']))
-                <a href="{{ route('lpj-verification.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
-                    Reset
-                </a>
-            @endif
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button type="submit" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Filter
+                </button>
+                @if(request()->anyFilled(['divisi_id', 'periode_anggaran_id', 'search']))
+                    <a href="{{ route('lpj-verification.index') }}" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
+                        Reset
+                    </a>
+                @endif
+            </div>
         </form>
     </div>
 
@@ -153,7 +155,84 @@
     <div id="content-menunggu-verifikasi" class="tab-content">
         @if($lpjs->count() > 0)
             <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
-                <div class="overflow-x-auto">
+                <!-- Mobile Card View -->
+                <div class="md:hidden space-y-3">
+                    @foreach($lpjs as $lpj)
+                        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-3 py-3 bg-gradient-to-r from-amber-50 to-amber-50/50 border-b border-amber-100">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <span class="font-mono text-xs font-bold text-amber-600 block truncate">{{ $lpj->nomor_lpj }}</span>
+                                        <p class="text-xs text-slate-400 mt-0.5">{{ $lpj->submitted_at ? \Carbon\Carbon::parse($lpj->submitted_at)->format('d/m/Y H:i') : '-' }}</p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 flex-shrink-0">
+                                        Verifikasi
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-3 space-y-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900 line-clamp-2">{{ $lpj->uraian_kegiatan }}</p>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <span class="text-slate-500">Divisi:</span>
+                                        <span class="ml-1 font-medium text-slate-700 truncate block">{{ $lpj->pencairanDana->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Pencairan:</span>
+                                        <span class="ml-1 font-mono font-medium text-slate-700 truncate block">{{ $lpj->pencairanDana->nomor_pencairan ?? '-' }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <span class="text-slate-500">Digunakan:</span>
+                                        <span class="ml-1 font-medium text-slate-900">{{ formatRupiah($lpj->total_digunakan) }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Sisa:</span>
+                                        <span class="ml-1 font-medium @if($lpj->sisa_dana > 0) text-orange-600 @else text-emerald-600 @endif">{{ formatRupiah($lpj->sisa_dana) }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Oleh:</span>
+                                    <span class="ml-1 font-medium text-slate-700">{{ $lpj->createdBy->name ?? '-' }}</span>
+                                </div>
+
+                                <div class="flex items-center justify-end pt-2 border-t border-slate-100 gap-1.5">
+                                    <a href="{{ route('lpj.show', $lpj) }}" class="inline-flex items-center gap-1.5 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Lihat</span>
+                                    </a>
+                                    <button onclick="quickApprove({{ $lpj->id }}, '{{ $lpj->nomor_lpj }}')" class="inline-flex items-center gap-1.5 px-3 py-2 text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Setujui</span>
+                                    </button>
+                                    <button onclick="quickReject({{ $lpj->id }}, '{{ $lpj->nomor_lpj }}')" class="inline-flex items-center gap-1.5 px-3 py-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Tolak</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
                             <tr>
@@ -215,11 +294,14 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100 flex items-center justify-between">
-                    <p class="text-sm text-gray-600">
-                        Menampilkan {{ $lpjs->firstItem() }} sampai {{ $lpjs->lastItem() }} dari {{ $lpjs->total() }} LPJ
-                    </p>
-                    {{ $lpjs->appends(request()->except('page'))->links() }}
+                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <p class="text-xs md:text-sm text-gray-600 text-center md:text-left">
+                            <span class="hidden md:inline">Menampilkan {{ $lpjs->firstItem() }} sampai {{ $lpjs->lastItem() }} dari {{ $lpjs->total() }} LPJ</span>
+                            <span class="md:hidden">{{ $lpjs->total() }} LPJ</span>
+                        </p>
+                        {{ $lpjs->appends(request()->except('page'))->links() }}
+                    </div>
                 </div>
             </div>
         @else
@@ -241,7 +323,66 @@
     <div id="content-menunggu-revisi" class="tab-content hidden">
         @if($lpjRevisi && $lpjRevisi->count() > 0)
             <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
-                <div class="overflow-x-auto">
+                <!-- Mobile Card View -->
+                <div class="md:hidden space-y-3">
+                    @foreach($lpjRevisi as $lpj)
+                        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-3 py-3 bg-gradient-to-r from-violet-50 to-violet-50/50 border-b border-violet-100">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <span class="font-mono text-xs font-bold text-violet-600 block truncate">{{ $lpj->nomor_lpj }}</span>
+                                        <p class="text-xs text-slate-400 mt-0.5">{{ $lpj->updated_at ? \Carbon\Carbon::parse($lpj->updated_at)->format('d/m/Y H:i') : '-' }}</p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-violet-100 text-violet-700 flex-shrink-0">
+                                        Revisi
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-3 space-y-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900 line-clamp-2">{{ $lpj->uraian_kegiatan }}</p>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <span class="text-slate-500">Divisi:</span>
+                                        <span class="ml-1 font-medium text-slate-700 truncate block">{{ $lpj->pencairanDana->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Digunakan:</span>
+                                        <span class="ml-1 font-medium text-slate-900">{{ formatRupiah($lpj->total_digunakan) }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Oleh:</span>
+                                    <span class="ml-1 font-medium text-slate-700">{{ $lpj->createdBy->name ?? '-' }}</span>
+                                </div>
+
+                                <div class="bg-red-50 rounded-lg p-2">
+                                    <p class="text-xs text-red-600 font-medium mb-0.5">Alasan Penolakan:</p>
+                                    <p class="text-xs text-red-700 line-clamp-2">{{ $lpj->rejection_reason }}</p>
+                                </div>
+
+                                <div class="flex items-center justify-end pt-2 border-t border-slate-100 gap-1.5">
+                                    <a href="{{ route('lpj.show', $lpj) }}" class="inline-flex items-center gap-1.5 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Lihat</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
                             <tr>
@@ -287,11 +428,14 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100 flex items-center justify-between">
-                    <p class="text-sm text-gray-600">
-                        Menampilkan {{ $lpjRevisi->firstItem() }} sampai {{ $lpjRevisi->lastItem() }} dari {{ $lpjRevisi->total() }} LPJ
-                    </p>
-                    {{ $lpjRevisi->appends(request()->except('page'))->links() }}
+                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <p class="text-xs md:text-sm text-gray-600 text-center md:text-left">
+                            <span class="hidden md:inline">Menampilkan {{ $lpjRevisi->firstItem() }} sampai {{ $lpjRevisi->lastItem() }} dari {{ $lpjRevisi->total() }} LPJ</span>
+                            <span class="md:hidden">{{ $lpjRevisi->total() }} LPJ</span>
+                        </p>
+                        {{ $lpjRevisi->appends(request()->except('page'))->links() }}
+                    </div>
                 </div>
             </div>
         @else
@@ -313,7 +457,76 @@
     <div id="content-lpj-selesai" class="tab-content hidden">
         @if($lpjSelesai && $lpjSelesai->count() > 0)
             <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
-                <div class="overflow-x-auto">
+                <!-- Mobile Card View -->
+                <div class="md:hidden space-y-3">
+                    @foreach($lpjSelesai as $lpj)
+                        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-3 py-3 bg-gradient-to-r from-emerald-50 to-emerald-50/50 border-b border-emerald-100">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <span class="font-mono text-xs font-bold text-emerald-600 block truncate">{{ $lpj->nomor_lpj }}</span>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 flex-shrink-0">
+                                        Selesai
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-3 space-y-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900 line-clamp-2">{{ $lpj->uraian_kegiatan }}</p>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Divisi:</span>
+                                    <span class="ml-1 font-medium text-slate-700 truncate block">{{ $lpj->pencairanDana->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <span class="text-slate-500">Digunakan:</span>
+                                        <span class="ml-1 font-medium text-slate-900">{{ formatRupiah($lpj->total_digunakan) }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Sisa:</span>
+                                        <span class="ml-1 font-medium @if($lpj->sisa_dana > 0) text-orange-600 @else text-emerald-600 @endif">{{ formatRupiah($lpj->sisa_dana) }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <span class="text-slate-500">Dibuat:</span>
+                                        <span class="ml-1 font-medium text-slate-700 truncate block">{{ $lpj->createdBy->name ?? '-' }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Disetujui:</span>
+                                        <span class="ml-1 font-medium text-slate-700 truncate block">{{ $lpj->approvedBy->name ?? '-' }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Tgl Disetujui:</span>
+                                    <span class="ml-1 font-medium text-slate-700">{{ $lpj->approved_at ? \Carbon\Carbon::parse($lpj->approved_at)->format('d/m/Y') : '-' }}</span>
+                                </div>
+
+                                <div class="flex items-center justify-end pt-2 border-t border-slate-100 gap-1.5">
+                                    <a href="{{ route('lpj.show', $lpj) }}" class="inline-flex items-center gap-1.5 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Lihat</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
                             <tr>
@@ -360,11 +573,14 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100 flex items-center justify-between">
-                    <p class="text-sm text-gray-600">
-                        Menampilkan {{ $lpjSelesai->firstItem() }} sampai {{ $lpjSelesai->lastItem() }} dari {{ $lpjSelesai->total() }} LPJ
-                    </p>
-                    {{ $lpjSelesai->appends(request()->except('page'))->links() }}
+                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <p class="text-xs md:text-sm text-gray-600 text-center md:text-left">
+                            <span class="hidden md:inline">Menampilkan {{ $lpjSelesai->firstItem() }} sampai {{ $lpjSelesai->lastItem() }} dari {{ $lpjSelesai->total() }} LPJ</span>
+                            <span class="md:hidden">{{ $lpjSelesai->total() }} LPJ</span>
+                        </p>
+                        {{ $lpjSelesai->appends(request()->except('page'))->links() }}
+                    </div>
                 </div>
             </div>
         @else
@@ -386,7 +602,51 @@
     <div id="content-belum-lpj" class="tab-content hidden">
         @if($pencairanBelumLpj->count() > 0)
             <div class="bg-white rounded-xl border border-blue-100 overflow-hidden">
-                <div class="overflow-x-auto">
+                <!-- Mobile Card View -->
+                <div class="md:hidden space-y-3">
+                    @foreach($pencairanBelumLpj as $pencairan)
+                        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-3 py-3 bg-gradient-to-r from-orange-50 to-orange-50/50 border-b border-orange-100">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <span class="font-mono text-xs font-bold text-orange-600 block truncate">{{ $pencairan->nomor_pencairan }}</span>
+                                        <p class="text-xs text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($pencairan->tanggal_pencairan)->format('d/m/Y') }}</p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 flex-shrink-0">
+                                        Belum LPJ
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-3 space-y-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900 line-clamp-2">{{ $pencairan->pengajuanDana->judul_pengajuan }}</p>
+                                </div>
+
+                                <div class="text-xs">
+                                    <span class="text-slate-500">Divisi:</span>
+                                    <span class="ml-1 font-medium text-slate-700 truncate block">{{ $pencairan->pengajuanDana->divisi->nama_divisi ?? '-' }}</span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <span class="text-slate-500">Pencairan:</span>
+                                        <span class="ml-1 font-medium text-slate-900">{{ formatRupiah($pencairan->jumlah_pencairan) }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Oleh:</span>
+                                        <span class="ml-1 font-medium text-slate-700 truncate block">{{ $pencairan->pengajuanDana->createdBy->name ?? '-' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-blue-50 border-b border-blue-100">
                             <tr>
@@ -423,23 +683,26 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100 flex items-center justify-between">
-                    <p class="text-sm text-gray-600">
-                        Menampilkan {{ $pencairanBelumLpj->firstItem() }} sampai {{ $pencairanBelumLpj->lastItem() }} dari {{ $pencairanBelumLpj->total() }} pencairan
-                    </p>
-                    {{ $pencairanBelumLpj->appends(request()->except('page'))->links() }}
+                <div class="bg-gray-50 px-4 py-3 border-t border-blue-100">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <p class="text-xs md:text-sm text-gray-600 text-center md:text-left">
+                            <span class="hidden md:inline">Menampilkan {{ $pencairanBelumLpj->firstItem() }} sampai {{ $pencairanBelumLpj->lastItem() }} dari {{ $pencairanBelumLpj->total() }} pencairan</span>
+                            <span class="md:hidden">{{ $pencairanBelumLpj->total() }} pencairan</span>
+                        </p>
+                        {{ $pencairanBelumLpj->appends(request()->except('page'))->links() }}
+                    </div>
                 </div>
 
                 <!-- Total Pencairan Belum LPJ -->
-                <div class="bg-orange-50 border-t border-orange-100 px-4 py-3">
-                    <div class="flex items-center justify-between">
+                <div class="bg-orange-50 border-t border-orange-100 px-3 md:px-4 py-2 md:py-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-orange-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span class="text-sm font-semibold text-orange-900">Total Dana Belum Buat LPJ:</span>
                         </div>
-                        <span class="text-lg font-bold text-orange-600">{{ formatRupiah($totalPencairanBelumLpj ?? 0) }}</span>
+                        <span class="text-base md:text-lg font-bold text-orange-600 truncate">{{ formatRupiah($totalPencairanBelumLpj ?? 0) }}</span>
                     </div>
                 </div>
             </div>
@@ -459,13 +722,13 @@
     </div>
 
     <!-- Quick Approve Modal -->
-    <div id="quickApproveModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 overflow-hidden">
-            <div class="px-5 py-4 border-b border-blue-100 bg-emerald-50">
+    <div id="quickApproveModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-lg max-w-md w-full overflow-hidden">
+            <div class="px-4 md:px-5 py-3 md:py-4 border-b border-blue-100 bg-emerald-50">
                 <h3 class="text-base font-semibold text-emerald-900">Setujui LPJ</h3>
                 <p class="text-xs text-emerald-600 mt-0.5" id="approveLpjNumber"></p>
             </div>
-            <form id="quickApproveForm" method="POST" action="" class="p-5">
+            <form id="quickApproveForm" method="POST" action="" class="p-4 md:p-5">
                 @csrf
                 <input type="hidden" name="status" value="approved">
                 <div class="mb-4">
@@ -475,7 +738,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (opsional)</label>
                     <textarea name="catatan_verifikasi" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Catatan verifikasi..."></textarea>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row gap-2">
                     <button type="button" onclick="closeApproveModal()" class="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">
                         Batal
                     </button>
@@ -488,13 +751,13 @@
     </div>
 
     <!-- Quick Reject Modal -->
-    <div id="quickRejectModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 overflow-hidden">
-            <div class="px-5 py-4 border-b border-blue-100 bg-red-50">
+    <div id="quickRejectModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-lg max-w-md w-full overflow-hidden">
+            <div class="px-4 md:px-5 py-3 md:py-4 border-b border-blue-100 bg-red-50">
                 <h3 class="text-base font-semibold text-red-900">Tolak LPJ / Minta Revisi</h3>
                 <p class="text-xs text-red-600 mt-0.5" id="rejectLpjNumber"></p>
             </div>
-            <form id="quickRejectForm" method="POST" action="" class="p-5">
+            <form id="quickRejectForm" method="POST" action="" class="p-4 md:p-5">
                 @csrf
                 <input type="hidden" name="status" value="rejected">
                 <div class="mb-4">
@@ -504,7 +767,7 @@
                     <label class="block text-sm font-medium text-red-700 mb-1">Alasan Penolakan *</label>
                     <textarea name="catatan_verifikasi" rows="3" required class="w-full px-3 py-2 border border-red-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500/20 focus:border-red-500" placeholder="Jelaskan alasan penolakan agar pengaju dapat merevisi..."></textarea>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row gap-2">
                     <button type="button" onclick="closeRejectModal()" class="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">
                         Batal
                     </button>

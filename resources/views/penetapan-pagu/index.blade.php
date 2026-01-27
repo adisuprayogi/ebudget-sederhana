@@ -17,7 +17,7 @@
     </x-slot>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <div class="bg-white rounded-xl border border-blue-100 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -78,7 +78,7 @@
     <!-- Filter -->
     <div class="bg-white rounded-xl border border-blue-100 p-3 mb-4">
         <form method="GET" action="{{ route('penetapan-pagu.index') }}" class="flex flex-wrap items-center gap-3">
-            <div class="min-w-[160px]">
+            <div class="w-full md:min-w-[140px] md:w-auto">
                 <select name="periode_anggaran_id" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white">
                     <option value="">Semua Periode</option>
                     @foreach($filterOptions['periodeAnggarans'] ?? [] as $periode)
@@ -88,7 +88,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="min-w-[140px]">
+            <div class="w-full md:min-w-[140px] md:w-auto">
                 <select name="divisi_id" class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white">
                     <option value="">Semua Divisi</option>
                     @foreach($filterOptions['divisis'] ?? [] as $divisi)
@@ -98,74 +98,80 @@
                     @endforeach
                 </select>
             </div>
-            <div class="min-w-[200px] flex-1">
+            <div class="w-full md:min-w-[200px] md:flex-1">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama divisi..." class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
             </div>
-            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                Filter
-            </button>
-            @if(request()->hasAny(['divisi_id', 'periode_anggaran_id', 'search']))
-                <a href="{{ route('penetapan-pagu.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
-                    Reset
-                </a>
-            @endif
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <button type="submit" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Filter
+                </button>
+                @if(request()->hasAny(['divisi_id', 'periode_anggaran_id', 'search']))
+                    <a href="{{ route('penetapan-pagu.index') }}" class="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors">
+                        Reset
+                    </a>
+                @endif
+            </div>
         </form>
     </div>
 
     <!-- Penetapan Pagu Cards -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         @forelse($penetapanPagus ?? [] as $pagu)
             @php
                 $usagePercent = $pagu->usage_percentage;
                 $usageColor = $usagePercent >= 90 ? 'red' : ($usagePercent >= 70 ? 'amber' : 'emerald');
             @endphp
 
-            <div class="bg-white rounded-xl border border-blue-100 p-4 hover:border-blue-200 transition-colors">
+            <div class="bg-white rounded-xl border border-blue-100 p-3 md:p-4 hover:border-blue-200 transition-colors">
                 <!-- Header -->
-                <div class="flex items-start justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 font-bold text-sm">
-                            {{ substr($pagu->divisi->nama_divisi ?? 'D', 0, 1) }}
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900 text-sm">{{ $pagu->divisi->nama_divisi ?? '-' }}</h3>
-                            <p class="text-xs text-gray-400">{{ $pagu->divisi->kode_divisi ?? '' }} • {{ $pagu->periodeAnggaran->tahun_anggaran ?? '-' }}</p>
+                <div class="flex items-start gap-3 mb-3 md:mb-4">
+                    <div class="w-9 h-9 md:w-10 md:h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 font-bold text-xs md:text-sm flex-shrink-0">
+                        {{ substr($pagu->divisi->nama_divisi ?? 'D', 0, 1) }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <h3 class="font-semibold text-gray-900 text-sm md:text-base truncate">{{ $pagu->divisi->nama_divisi ?? '-' }}</h3>
+                                <p class="text-xs text-gray-400 truncate">{{ $pagu->divisi->kode_divisi ?? '' }} • {{ $pagu->periodeAnggaran->tahun_anggaran ?? '-' }}</p>
+                            </div>
+                            @if($pagu->status === 'approved')
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 flex-shrink-0">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span class="hidden sm:inline">Disetujui</span>
+                                    <span class="sm:hidden">✓</span>
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 flex-shrink-0">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    <span class="hidden sm:inline">Pending</span>
+                                    <span class="sm:hidden">⏳</span>
+                                </span>
+                            @endif
                         </div>
                     </div>
-                    @if($pagu->status === 'approved')
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            Disetujui
-                        </span>
-                    @else
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                            Pending
-                        </span>
-                    @endif
                 </div>
 
                 <!-- Numbers -->
-                <div class="grid grid-cols-3 gap-3 mb-4">
-                    <div class="text-center p-2 bg-blue-50 rounded-lg">
-                        <p class="text-xs text-gray-500 mb-1">Total Pagu</p>
-                        <p class="text-sm font-bold text-gray-900">{{ formatRupiah($pagu->jumlah_pagu) }}</p>
+                <div class="grid grid-cols-3 gap-2 md:gap-3 mb-3 md:mb-4">
+                    <div class="text-center p-2 md:p-2 bg-blue-50 rounded-lg">
+                        <p class="text-xs text-gray-500 mb-1">Pagu</p>
+                        <p class="text-xs md:text-sm font-bold text-gray-900 truncate" title="{{ formatRupiah($pagu->jumlah_pagu) }}">{{ formatRupiah($pagu->jumlah_pagu) }}</p>
                     </div>
-                    <div class="text-center p-2 bg-amber-50 rounded-lg">
+                    <div class="text-center p-2 md:p-2 bg-amber-50 rounded-lg">
                         <p class="text-xs text-gray-500 mb-1">Terpakai</p>
-                        <p class="text-sm font-bold text-amber-600">{{ formatRupiah($pagu->used_amount) }}</p>
+                        <p class="text-xs md:text-sm font-bold text-amber-600 truncate" title="{{ formatRupiah($pagu->used_amount) }}">{{ formatRupiah($pagu->used_amount) }}</p>
                     </div>
-                    <div class="text-center p-2 bg-emerald-50 rounded-lg">
+                    <div class="text-center p-2 md:p-2 bg-emerald-50 rounded-lg">
                         <p class="text-xs text-gray-500 mb-1">Sisa</p>
-                        <p class="text-sm font-bold text-emerald-600">{{ formatRupiah($pagu->remaining_amount) }}</p>
+                        <p class="text-xs md:text-sm font-bold text-emerald-600 truncate" title="{{ formatRupiah($pagu->remaining_amount) }}">{{ formatRupiah($pagu->remaining_amount) }}</p>
                     </div>
                 </div>
 
                 <!-- Progress Bar -->
-                <div class="mb-4">
+                <div class="mb-3 md:mb-4">
                     <div class="flex items-center justify-between text-xs mb-2">
                         <span class="text-gray-600">Penggunaan</span>
                         <span class="font-bold text-{{ $usageColor }}-600">{{ number_format($usagePercent, 1) }}%</span>
@@ -176,28 +182,29 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="flex items-center justify-between pt-3 border-t border-blue-50">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-blue-50">
                     <div class="text-xs text-gray-400">
                         @if($pagu->createdBy)
-                            Oleh <span class="font-medium text-gray-600">{{ $pagu->createdBy->name }}</span>
+                            <span class="truncate block">Oleh <span class="font-medium text-gray-600">{{ $pagu->createdBy->name }}</span></span>
                         @endif
                         @if($pagu->catatan)
-                            <span class="mx-1">•</span>
-                            <span class="italic">"{{ \Illuminate\Support\Str::limit($pagu->catatan, 25) }}"</span>
+                            <span class="italic truncate block mt-1" title="{{ $pagu->catatan }}">"{{ \Illuminate\Support\Str::limit($pagu->catatan, 40) }}"</span>
                         @endif
                     </div>
-                    <div class="flex items-center gap-1">
-                        <a href="{{ route('penetapan-pagu.show', $pagu) }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Lihat">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <a href="{{ route('penetapan-pagu.show', $pagu) }}" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 text-blue-700 bg-blue-50 hover:bg-blue-100 font-medium rounded-lg transition-colors text-xs">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
+                            Lihat
                         </a>
                         @if(auth()->user()->hasAnyRole(['direktur_keuangan', 'direktur_utama']))
-                            <a href="{{ route('penetapan-pagu.edit', $pagu) }}" class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
+                            <a href="{{ route('penetapan-pagu.edit', $pagu) }}" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 text-amber-700 bg-amber-50 hover:bg-amber-100 font-medium rounded-lg transition-colors text-xs">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
+                                Edit
                             </a>
                         @endif
                     </div>
@@ -220,7 +227,7 @@
 
     <!-- Pagination -->
     @if(isset($penetapanPagus) && $penetapanPagus->hasPages())
-        <div class="bg-white rounded-xl border border-blue-100 px-5 py-3 mt-4">
+        <div class="bg-white rounded-xl border border-blue-100 px-4 py-3 mt-4">
             {{ $penetapanPagus->appends(request()->query())->links() }}
         </div>
     @endif

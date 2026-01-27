@@ -1,20 +1,20 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <nav class="flex text-xs text-gray-500 mb-2">
-                    <a href="{{ route('program-kerja.index') }}" class="hover:text-blue-600">Program Kerja</a>
-                    <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="min-w-0">
+                <nav class="flex text-xs text-gray-500 mb-2 overflow-x-auto">
+                    <a href="{{ route('program-kerja.index') }}" class="hover:text-blue-600 whitespace-nowrap">Program Kerja</a>
+                    <svg class="w-4 h-4 mx-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <a href="{{ route('program-kerja.divisi-show', $divisi) }}" class="hover:text-blue-600">{{ $divisi->nama_divisi }}</a>
-                    <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('program-kerja.divisi-show', $divisi) }}" class="hover:text-blue-600 whitespace-nowrap">{{ $divisi->nama_divisi }}</a>
+                    <svg class="w-4 h-4 mx-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span class="text-gray-900">{{ $programKerja->nama_program }}</span>
+                    <span class="text-gray-900 truncate">{{ $programKerja->nama_program }}</span>
                 </nav>
-                <h1 class="text-xl font-semibold text-gray-900">{{ $programKerja->nama_program }}</h1>
-                <p class="text-xs text-gray-500 mt-0.5">{{ $programKerja->kode_program }} | {{ $divisi->nama_divisi }}</p>
+                <h1 class="text-xl font-semibold text-gray-900 truncate">{{ $programKerja->nama_program }}</h1>
+                <p class="text-xs text-gray-500 mt-0.5 truncate">{{ $programKerja->kode_program }} | {{ $divisi->nama_divisi }}</p>
             </div>
             @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
                 @php
@@ -25,7 +25,7 @@
                     }
                 @endphp
                 @if($canEdit)
-                    <a href="{{ route('program-kerja.edit', [$divisi, $programKerja]) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                    <a href="{{ route('program-kerja.edit', [$divisi, $programKerja]) }}" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
@@ -38,7 +38,7 @@
 
     <div class="space-y-4">
         <!-- Quick Stats -->
-        <div class="grid grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div class="bg-white rounded-xl border border-blue-100 p-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -114,16 +114,16 @@
         </div>
 
         <!-- Program Info -->
-        <div class="bg-white rounded-xl border border-blue-100 p-4">
+        <div class="bg-white rounded-xl border border-blue-100 p-3 md:p-4">
             <h3 class="text-sm font-semibold text-gray-900 mb-3">Informasi Program</h3>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                 <div>
                     <p class="text-xs text-gray-500 mb-0.5">Kode Program</p>
-                    <p class="text-sm font-medium text-gray-900">{{ $programKerja->kode_program }}</p>
+                    <p class="text-sm font-medium text-gray-900 break-all">{{ $programKerja->kode_program }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 mb-0.5">Nama Program</p>
-                    <p class="text-sm font-medium text-gray-900">{{ $programKerja->nama_program }}</p>
+                    <p class="text-sm font-medium text-gray-900 break-words">{{ $programKerja->nama_program }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 mb-0.5">Divisi</p>
@@ -131,11 +131,11 @@
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 mb-0.5">Periode Anggaran</p>
-                    <p class="text-sm font-medium text-gray-900">{{ $programKerja->periodeAnggaran->nama_periode }}</p>
+                    <p class="text-sm font-medium text-gray-900 break-words">{{ $programKerja->periodeAnggaran->nama_periode }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 mb-0.5">Target Output</p>
-                    <p class="text-sm font-medium text-gray-900">{{ $programKerja->target_output ?? '-' }}</p>
+                    <p class="text-sm font-medium text-gray-900 break-words">{{ $programKerja->target_output ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 mb-0.5">Status</p>
@@ -151,19 +151,19 @@
                         @endif
                     </div>
                 </div>
-                <div class="col-span-3">
+                <div class="sm:col-span-2 lg:col-span-3">
                     <p class="text-xs text-gray-500 mb-0.5">Deskripsi</p>
-                    <p class="text-sm font-medium text-gray-900">{{ $programKerja->deskripsi ?? '-' }}</p>
+                    <p class="text-sm font-medium text-gray-900 break-words">{{ $programKerja->deskripsi ?? '-' }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Sub Program Section -->
-        <div class="bg-white rounded-xl border border-blue-100 p-4">
-            <div class="flex items-center justify-between mb-4">
+        <div class="bg-white rounded-xl border border-blue-100 p-3 md:p-4">
+            <div class="flex items-center justify-between mb-4 gap-2">
                 <h3 class="text-sm font-semibold text-gray-900">Sub Program</h3>
                 @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
-                    <button onclick="toggleAddSubProgramForm()" class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                    <button onclick="toggleAddSubProgramForm()" class="w-full sm:w-auto inline-flex items-center justify-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
@@ -174,9 +174,9 @@
 
             @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
                 <!-- Add Sub Program Form -->
-                <form id="addSubProgramForm" method="POST" action="{{ route('program-kerja.sub-programs.store', [$divisi, $programKerja]) }}" class="hidden mb-4 bg-blue-50 rounded-lg p-4">
+                <form id="addSubProgramForm" method="POST" action="{{ route('program-kerja.sub-programs.store', [$divisi, $programKerja]) }}" class="hidden mb-4 bg-blue-50 rounded-lg p-3 md:p-4">
                     @csrf
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">Kode Sub Program</label>
                             <input type="text" name="kode_sub_program" required class="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="Contoh: 1.1">
@@ -192,9 +192,9 @@
                                 <input type="text" name="pagu_anggaran" required class="nominal-input w-full pl-10 pr-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="0">
                             </div>
                         </div>
-                        <div class="col-span-3 flex justify-end gap-2">
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">Simpan</button>
-                            <button type="button" onclick="toggleAddSubProgramForm()" class="px-4 py-2 border border-blue-200 text-gray-700 rounded-lg hover:bg-blue-50 transition-colors text-sm">Batal</button>
+                        <div class="sm:col-span-3 flex flex-col sm:flex-row justify-end gap-2">
+                            <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">Simpan</button>
+                            <button type="button" onclick="toggleAddSubProgramForm()" class="w-full sm:w-auto px-4 py-2 border border-blue-200 text-gray-700 rounded-lg hover:bg-blue-50 transition-colors text-sm">Batal</button>
                         </div>
                     </div>
                 </form>
@@ -205,35 +205,37 @@
                 @forelse($programKerja->subPrograms as $subProgram)
                     <div class="border border-blue-100 rounded-lg overflow-hidden">
                         <!-- Sub Program Header -->
-                        <div class="bg-blue-50 px-4 py-3 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="font-mono text-xs font-semibold text-blue-600">{{ $subProgram->kode_sub_program }}</span>
-                                <span class="text-sm font-medium text-gray-900">{{ $subProgram->nama_sub_program }}</span>
-                                <span class="text-xs text-gray-500">{{ formatRupiah($subProgram->pagu_anggaran) }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
-                                    <button onclick="openSubProgramModal({{ $subProgram->id }}, '{{ $subProgram->nama_sub_program }}', {{ $subProgram->pagu_anggaran }})" class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
-                                    <form method="POST" action="{{ route('program-kerja.sub-programs.destroy', [$divisi, $programKerja, $subProgram]) }}" onsubmit="return confirm('Yakin ingin menghapus sub program ini?')" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                        <div class="bg-blue-50 px-3 md:px-4 py-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                <div class="flex flex-wrap items-center gap-2 min-w-0">
+                                    <span class="font-mono text-xs font-semibold text-blue-600 flex-shrink-0">{{ $subProgram->kode_sub_program }}</span>
+                                    <span class="text-sm font-medium text-gray-900 truncate">{{ $subProgram->nama_sub_program }}</span>
+                                    <span class="text-xs text-gray-500 flex-shrink-0">{{ formatRupiah($subProgram->pagu_anggaran) }}</span>
+                                </div>
+                                <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                    @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
+                                        <button onclick="openSubProgramModal({{ $subProgram->id }}, '{{ $subProgram->nama_sub_program }}', {{ $subProgram->pagu_anggaran }})" class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </button>
-                                    </form>
-                                @endif
-                                <button onclick="openDetailAnggaranModal({{ $subProgram->id }}, '{{ $subProgram->nama_sub_program }}')" class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs">
-                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    Detail
-                                </button>
+                                        <form method="POST" action="{{ route('program-kerja.sub-programs.destroy', [$divisi, $programKerja, $subProgram]) }}" onsubmit="return confirm('Yakin ingin menghapus sub program ini?')" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    <button onclick="openDetailAnggaranModal({{ $subProgram->id }}, '{{ $subProgram->nama_sub_program }}')" class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs">
+                                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Detail
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -242,71 +244,73 @@
                             @if($subProgram->detailAnggarans && $subProgram->detailAnggarans->count() > 0)
                                 <div class="divide-y divide-blue-50">
                                     @foreach($subProgram->detailAnggarans as $detail)
-                                        <div class="p-4 hover:bg-blue-50/50 transition-colors">
-                                            <div class="flex items-start justify-between">
-                                                <div class="flex-1">
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="font-medium text-gray-900 text-sm">{{ $detail->nama_detail }}</span>
-                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
-                                                            {{ $detail->frekuensi }}
-                                                        </span>
-                                                        <span class="text-xs text-gray-500">{{ $detail->jumlah_periode }} periode</span>
-                                                    </div>
-                                                    @if($detail->deskripsi)
-                                                        <p class="text-xs text-gray-500 mt-1">{{ $detail->deskripsi }}</p>
-                                                    @endif
-                                                    <div class="text-xs text-gray-600 mt-2">
-                                                        <span class="text-gray-500">{{ $detail->jumlah_periode }} x {{ formatRupiah($detail->nominal_per_periode) }}</span>
-                                                        <span class="mx-2">•</span>
-                                                        <span class="font-semibold text-blue-600">{{ formatRupiah($detail->total_nominal) }}</span>
-                                                    </div>
-                                                    <!-- Estimasi Pengeluaran -->
-                                                    @if($detail->estimasiPengeluarans && $detail->estimasiPengeluarans->count() > 0)
-                                                        <div class="mt-3 space-y-1">
-                                                            @foreach($detail->estimasiPengeluarans as $estimasi)
-                                                                <div class="flex items-center justify-between px-2 py-1 text-xs rounded
-                                                                    @if($estimasi->status === 'selesai') bg-blue-50
-                                                                    @elseif($estimasi->status === 'pending') bg-amber-50
-                                                                    @else bg-gray-50 @endif">
-                                                                    <div class="flex items-center gap-2">
-                                                                        <span class="text-gray-600">{{ $estimasi->tanggal_rencana_realisasi->format('M Y') }}</span>
-                                                                        <span class="font-medium text-gray-800">{{ formatRupiah($estimasi->nominal_rencana) }}</span>
-                                                                        @if($estimasi->nominal_realisasi)
-                                                                            <span class="text-blue-600">→ {{ formatRupiah($estimasi->nominal_realisasi) }}</span>
+                                        <div class="p-3 md:p-4 hover:bg-blue-50/50 transition-colors">
+                                            <div class="flex flex-col gap-2">
+                                                <div class="flex items-start justify-between gap-2">
+                                                    <div class="flex-1 min-w-0">
+                                                        <div class="flex flex-wrap items-center gap-1.5">
+                                                            <span class="font-medium text-gray-900 text-sm">{{ $detail->nama_detail }}</span>
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 flex-shrink-0">
+                                                                {{ $detail->frekuensi }}
+                                                            </span>
+                                                            <span class="text-xs text-gray-500">{{ $detail->jumlah_periode }} periode</span>
+                                                        </div>
+                                                        @if($detail->deskripsi)
+                                                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ $detail->deskripsi }}</p>
+                                                        @endif
+                                                        <div class="text-xs text-gray-600 mt-2">
+                                                            <span class="text-gray-500">{{ $detail->jumlah_periode }} x {{ formatRupiah($detail->nominal_per_periode) }}</span>
+                                                            <span class="mx-2">•</span>
+                                                            <span class="font-semibold text-blue-600">{{ formatRupiah($detail->total_nominal) }}</span>
+                                                        </div>
+                                                        <!-- Estimasi Pengeluaran -->
+                                                        @if($detail->estimasiPengeluarans && $detail->estimasiPengeluarans->count() > 0)
+                                                            <div class="mt-3 space-y-1">
+                                                                @foreach($detail->estimasiPengeluarans as $estimasi)
+                                                                    <div class="flex flex-wrap items-center justify-between gap-1 px-2 py-1.5 text-xs rounded
+                                                                        @if($estimasi->status === 'selesai') bg-blue-50
+                                                                        @elseif($estimasi->status === 'pending') bg-amber-50
+                                                                        @else bg-gray-50 @endif">
+                                                                        <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+                                                                            <span class="text-gray-600">{{ $estimasi->tanggal_rencana_realisasi->format('M Y') }}</span>
+                                                                            <span class="font-medium text-gray-800">{{ formatRupiah($estimasi->nominal_rencana) }}</span>
+                                                                            @if($estimasi->nominal_realisasi)
+                                                                                <span class="text-blue-600">→ {{ formatRupiah($estimasi->nominal_realisasi) }}</span>
+                                                                            @endif
+                                                                            <span class="px-1.5 py-0.5 rounded-full text-xs flex-shrink-0
+                                                                                @if($estimasi->status === 'selesai') bg-blue-200 text-blue-800
+                                                                                @elseif($estimasi->status === 'pending') bg-amber-200 text-amber-800
+                                                                                @else bg-gray-200 text-gray-800 @endif">
+                                                                                {{ $estimasi->status }}
+                                                                            </span>
+                                                                        </div>
+                                                                        @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
+                                                                            <button onclick="openEstimasiModal({{ $estimasi->id }}, '{{ $estimasi->tanggal_rencana_realisasi->format('Y-m-d') }}', {{ $estimasi->nominal_rencana }}, '{{ addslashes($estimasi->catatan ?? '') }}', {{ $detail->id }}, {{ $subProgram->id }})" class="text-blue-600 hover:text-blue-800 text-xs font-medium flex-shrink-0">Edit</button>
                                                                         @endif
-                                                                        <span class="px-1.5 py-0.5 rounded-full text-xs
-                                                                            @if($estimasi->status === 'selesai') bg-blue-200 text-blue-800
-                                                                            @elseif($estimasi->status === 'pending') bg-amber-200 text-amber-800
-                                                                            @else bg-gray-200 text-gray-800 @endif">
-                                                                            {{ $estimasi->status }}
-                                                                        </span>
                                                                     </div>
-                                                                    @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
-                                                                        <button onclick="openEstimasiModal({{ $estimasi->id }}, '{{ $estimasi->tanggal_rencana_realisasi->format('Y-m-d') }}', {{ $estimasi->nominal_rencana }}, '{{ addslashes($estimasi->catatan ?? '') }}', {{ $detail->id }}, {{ $subProgram->id }})" class="text-blue-600 hover:text-blue-800 text-xs font-medium">Edit</button>
-                                                                    @endif
-                                                                </div>
-                                                            @endforeach
+                                                                @endforeach
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
+                                                        <div class="flex items-center gap-1">
+                                                            <button onclick="openDetailAnggaranEditModal({{ $detail->id }}, '{{ $detail->nama_detail }}', '{{ $detail->frekuensi }}', {{ $detail->jumlah_periode }}, {{ $detail->nominal_per_periode }}, {{ $subProgram->id }})" class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                </svg>
+                                                            </button>
+                                                            <form method="POST" action="{{ route('program-kerja.sub-programs.detail-anggaran.destroy', [$divisi, $programKerja, $subProgram, $detail]) }}" onsubmit="return confirm('Yakin ingin menghapus detail ini?')" class="inline">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                    </svg>
+                                                                </button>
+                                                            </form>
                                                         </div>
                                                     @endif
                                                 </div>
-                                                @if(auth()->user()->hasAnyRole(['superadmin', 'direktur_utama', 'kepala_divisi']))
-                                                    <div class="flex items-center gap-1 ml-3">
-                                                        <button onclick="openDetailAnggaranEditModal({{ $detail->id }}, '{{ $detail->nama_detail }}', '{{ $detail->frekuensi }}', {{ $detail->jumlah_periode }}, {{ $detail->nominal_per_periode }}, {{ $subProgram->id }})" class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                            </svg>
-                                                        </button>
-                                                        <form method="POST" action="{{ route('program-kerja.sub-programs.detail-anggaran.destroy', [$divisi, $programKerja, $subProgram, $detail]) }}" onsubmit="return confirm('Yakin ingin menghapus detail ini?')" class="inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                </svg>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                @endif
                                             </div>
                                         </div>
                                     @endforeach
@@ -333,7 +337,7 @@
         </div>
 
         <!-- Audit Info -->
-        <div class="flex items-center justify-between text-xs text-gray-500 px-2">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500 px-2 gap-1">
             <span>Dibuat: {{ $programKerja->createdBy->name ?? '-' }}</span>
             <span>{{ \Carbon\Carbon::parse($programKerja->created_at)->format('d F Y, H:i') }}</span>
         </div>
