@@ -4,9 +4,13 @@
     <div class="flex items-center justify-between h-16 px-6">
         <!-- Sidebar Toggle -->
         <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <span class="text-lg font-bold text-indigo-600">EBUDGET</span>
+                <span class="text-sm font-medium text-gray-500">TAZKIA</span>
+            </div>
         </button>
 
         <!-- Page Title -->

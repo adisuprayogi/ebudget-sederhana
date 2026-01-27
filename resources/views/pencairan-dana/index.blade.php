@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-xl font-semibold text-gray-900">Pencairan Dana</h1>
                 <p class="text-sm text-gray-500 mt-0.5">Kelola pencairan dana untuk pengajuan yang disetujui</p>
             </div>
             @if(auth()->user()->hasRole('staff_keuangan'))
-                <a href="{{ route('pencairan-dana.select-pengajuan') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                <a href="{{ route('pencairan-dana.select-pengajuan') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
