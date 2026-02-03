@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             DivisiSeeder::class,
             UserSeeder::class,
+            SimulationSeeder::class,
         ]);
     }
 
