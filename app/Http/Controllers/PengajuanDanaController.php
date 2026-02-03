@@ -213,6 +213,38 @@ class PengajuanDanaController extends Controller
             abort(403);
         }
 
+        // CHECK: Apakah user punya LPJ dari bulan-bulan lalu yang belum di-refund?
+        $lpjsBelumRefund = \App\Models\LaporanPertanggungJawaban::with([
+            'pencairanDana.pengajuanDana',
+            'pencairanDana.pengajuanDana.divisi'
+        ])
+            ->where('status', 'approved')
+            ->where('sisa_dana', '>', 0)
+            ->whereHas('pencairanDana.pengajuanDana', function ($q) use ($user) {
+                $q->where('created_by', $user->id);
+            })
+            ->whereDoesntHave('refundDetails', function ($q) {
+                $q->whereHas('refund', function ($sq) {
+                    $sq->whereNotIn('status', ['rejected']);
+                });
+            })
+            ->whereHas('pencairanDana.pengajuanDana', function ($q) {
+                // Filter hanya LPJ dari bulan-bulan SEBELUMNYA
+                $q->where('tanggal_pengajuan', '<', now()->startOfMonth());
+            })
+            ->get();
+
+        $totalSisaBelumRefund = $lpjsBelumRefund->sum('sisa_dana');
+
+        if ($lpjsBelumRefund->count() > 0) {
+            return redirect()->route('pengajuan-dana.index')
+                ->with('error', sprintf(
+                    'Anda tidak dapat membuat pengajuan dana baru. Anda memiliki %d LPJ dari bulan-bulan lalu dengan total sisa dana Rp %s yang wajib di-refund terlebih dahulu.',
+                    $lpjsBelumRefund->count(),
+                    number_format($totalSisaBelumRefund, 0, ',', '.')
+                ));
+        }
+
         // Get jenis pengajuan from query parameter
         $jenisPengajuan = $request->query('jenis');
 
@@ -259,9 +291,20 @@ class PengajuanDanaController extends Controller
             // Generate nomor pengajuan
             $nomorPengajuan = NumberingService::generateNomorPengajuan();
 
+            // Get periode_anggaran_id from program_kerja or sub_program
+            $periodeAnggaranId = null;
+            if ($request->program_kerja_id) {
+                $programKerja = \App\Models\ProgramKerja::find($request->program_kerja_id);
+                $periodeAnggaranId = $programKerja?->periode_anggaran_id;
+            } elseif ($request->sub_program_id) {
+                $subProgram = \App\Models\SubProgram::find($request->sub_program_id);
+                $periodeAnggaranId = $subProgram?->periode_anggaran_id;
+            }
+
             // Prepare common data
             $pengajuanData = [
                 'nomor_pengajuan' => $nomorPengajuan,
+                'periode_anggaran_id' => $periodeAnggaranId,
                 'judul_pengajuan' => $request->judul_pengajuan,
                 'jenis_pengajuan' => $request->jenis_pengajuan,
                 'program_kerja_id' => $request->program_kerja_id,

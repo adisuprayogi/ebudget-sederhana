@@ -16,6 +16,7 @@ class Refund extends Model
         'jumlah_refund',
         'alasan_refund',
         'jenis_refund',
+        'metode_refund',
         'rekening_perusahaan_id',
         'rekening_pengirim',
         'nama_pengirim',
@@ -91,6 +92,29 @@ class Refund extends Model
     public function approvedBy()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Get the refund details for this refund.
+     */
+    public function refundDetails()
+    {
+        return $this->hasMany(RefundDetail::class);
+    }
+
+    /**
+     * Get all LPJs through refund details.
+     */
+    public function lpjs()
+    {
+        return $this->hasManyThrough(
+            LaporanPertanggungJawaban::class,
+            RefundDetail::class,
+            'refund_id',
+            'id',
+            'id',
+            'lpj_id'
+        );
     }
 
     /**

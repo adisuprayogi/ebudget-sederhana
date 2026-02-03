@@ -11,6 +11,7 @@ class LaporanPertanggungJawaban extends Model
 
     protected $fillable = [
         'nomor_lpj',
+        'periode_anggaran_id',
         'pengajuan_dana_id',
         'pencairan_dana_id',
         'tanggal_lpj',
@@ -40,6 +41,14 @@ class LaporanPertanggungJawaban extends Model
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
     ];
+
+    /**
+     * Get the periode anggaran for this LPJ.
+     */
+    public function periodeAnggaran()
+    {
+        return $this->belongsTo(PeriodeAnggaran::class);
+    }
 
     /**
      * Get the pengajuan dana for this LPJ.
@@ -103,6 +112,46 @@ class LaporanPertanggungJawaban extends Model
     public function refunds()
     {
         return $this->hasMany(Refund::class, 'lpj_id');
+    }
+
+    /**
+     * Get the refund details for this LPJ.
+     */
+    public function refundDetails()
+    {
+        return $this->hasMany(RefundDetail::class, 'lpj_id');
+    }
+
+    /**
+     * Check if this LPJ has pending refund details (active refunds).
+     */
+    public function hasActiveRefundDetails(): bool
+    {
+        return $this->refundDetails()
+            ->whereHas('refund', function ($query) {
+                $query->whereNotIn('status', ['rejected']);
+            })
+            ->exists();
+    }
+
+    /**
+     * Get total refunded amount through refund details.
+     */
+    public function getTotalRefundedAttribute(): float
+    {
+        return $this->refundDetails()
+            ->whereHas('refund', function ($query) {
+                $query->whereNotIn('status', ['rejected']);
+            })
+            ->sum('jumlah_refund');
+    }
+
+    /**
+     * Get remaining sisa after refund details.
+     */
+    public function getSisaSetelahRefundAttribute(): float
+    {
+        return max(0, $this->sisa_dana - $this->total_refunded);
     }
 
     /**

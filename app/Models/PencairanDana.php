@@ -11,6 +11,7 @@ class PencairanDana extends Model
 
     protected $fillable = [
         'nomor_pencairan',
+        'periode_anggaran_id',
         'pengajuan_dana_id',
         'rekening_perusahaan_id',
         'tanggal_pencairan',
@@ -32,6 +33,14 @@ class PencairanDana extends Model
         'tanggal_pencairan' => 'date',
         'jumlah_pencairan' => 'decimal:2',
     ];
+
+    /**
+     * Get the periode anggaran for this pencairan.
+     */
+    public function periodeAnggaran()
+    {
+        return $this->belongsTo(PeriodeAnggaran::class);
+    }
 
     /**
      * Get the pengajuan dana that owns the pencairan.

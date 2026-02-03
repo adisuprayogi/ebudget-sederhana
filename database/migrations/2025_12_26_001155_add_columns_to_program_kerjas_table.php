@@ -14,25 +14,25 @@ return new class extends Migration
         Schema::table('program_kerjas', function (Blueprint $table) {
             // Check and add columns that don't exist
             if (!Schema::hasColumn('program_kerjas', 'deskripsi')) {
-                $table->text('deskripsi')->nullable()->after('nama_program');
+                $table->text('deskripsi')->nullable();
             }
             if (!Schema::hasColumn('program_kerjas', 'pagu_anggaran')) {
-                $table->decimal('pagu_anggaran', 15, 2)->default(0)->after('divisi_id');
+                $table->decimal('pagu_anggaran', 15, 2)->default(0);
             }
             if (!Schema::hasColumn('program_kerjas', 'target_output')) {
-                $table->string('target_output')->nullable()->after('pagu_anggaran');
+                $table->string('target_output')->nullable();
             }
             if (!Schema::hasColumn('program_kerjas', 'status')) {
-                $table->enum('status', ['active', 'inactive', 'suspended'])->default('active')->after('target_output');
+                $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
             }
             if (!Schema::hasColumn('program_kerjas', 'tanggal_mulai')) {
-                $table->date('tanggal_mulai')->nullable()->after('status');
+                $table->date('tanggal_mulai')->nullable();
             }
             if (!Schema::hasColumn('program_kerjas', 'tanggal_selesai')) {
-                $table->date('tanggal_selesai')->nullable()->after('tanggal_mulai');
+                $table->date('tanggal_selesai')->nullable();
             }
             if (!Schema::hasColumn('program_kerjas', 'created_by')) {
-                $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete()->after('tanggal_selesai');
+                $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             }
         });
     }

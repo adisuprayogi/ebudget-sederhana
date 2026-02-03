@@ -294,6 +294,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('refund')->name('refund.')->group(function () {
         Route::get('/', [RefundController::class, 'index'])->name('index');
         Route::get('/select-lpj', [RefundController::class, 'selectLpj'])->name('select-lpj');
+        Route::post('/validate-lpj', [RefundController::class, 'validateLpjSelection'])->name('validate-lpj');
+        Route::get('/create-from-selection', [RefundController::class, 'createFromSelection'])->name('create-from-selection');
+        Route::post('/store-from-selection', [RefundController::class, 'storeFromSelection'])->name('store-from-selection');
         Route::get('/create', [RefundController::class, 'create'])->name('create');
         Route::post('/', [RefundController::class, 'store'])->name('store');
         Route::get('/{refund}', [RefundController::class, 'show'])->name('show');

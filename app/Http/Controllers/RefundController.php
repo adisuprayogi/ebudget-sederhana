@@ -563,6 +563,7 @@ class RefundController extends Controller
             'pengajuan_dana_id' => 'nullable|exists:pengajuan_danas,id',
             'tanggal_refund' => 'required|date',
             'jumlah_refund' => 'required|numeric|min:0',
+            'metode_refund' => 'required|in:transfer,cash,potong_gaji,lainnya',
             'alasan_refund' => 'required|string|max:1000',
             'jenis_refund' => 'required|in:kelebihan,dana_kembali,batal,pengembalian lainnya',
             'rekening_perusahaan_id' => 'required|exists:rekening_perusahaans,id',
@@ -609,6 +610,178 @@ class RefundController extends Controller
                 ->route('refund.show', $refund)
                 ->with('success', 'Refund berhasil dibuat.');
         } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal membuat refund: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Validate LPJ selection for refund (API endpoint).
+     */
+    public function validateLpjSelection(Request $request)
+    {
+        $validated = $request->validate([
+            'lpj_ids' => 'required|array|min:1',
+            'lpj_ids.*' => 'exists:laporan_pertanggung_jawabans,id',
+        ]);
+
+        $lpjIds = $validated['lpj_ids'];
+
+        // Get all selected LPJs with their periode anggaran
+        $lpjs = \App\Models\LaporanPertanggungJawaban::with([
+            'pencairanDana.pengajuanDana.programKerja',
+            'pencairanDana.pengajuanDana.subProgram'
+        ])->whereIn('id', $lpjIds)->get();
+
+        // Check if all LPJs are from the same periode anggaran
+        $periodeAnggaranIds = $lpjs->pluck('pencairanDana.pengajuanDana.programKerja.periode_anggaran_id')
+            ->filter()
+            ->unique();
+
+        $periodeAnggaranIdsSub = $lpjs->pluck('pencairanDana.pengajuanDana.subProgram.periode_anggaran_id')
+            ->filter()
+            ->unique();
+
+        $allPeriodeIds = $periodeAnggaranIds->merge($periodeAnggaranIdsSub)->unique();
+
+        if ($allPeriodeIds->count() > 1) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Semua LPJ yang dipilih harus dari periode anggaran yang sama.',
+            ], 400);
+        }
+
+        // Calculate total
+        $totalSisaDana = $lpjs->sum('sisa_dana');
+
+        return response()->json([
+            'valid' => true,
+            'total_sisa_dana' => $totalSisaDana,
+            'periode_anggaran_id' => $allPeriodeIds->first(),
+            'lpjs' => $lpjs->map(function ($lpj) {
+                return [
+                    'id' => $lpj->id,
+                    'nomor_lpj' => $lpj->nomor_lpj,
+                    'uraian_kegiatan' => $lpj->uraian_kegiatan,
+                    'sisa_dana' => $lpj->sisa_dana,
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Show refund form from selected LPJs.
+     */
+    public function createFromSelection(Request $request): View
+    {
+        $validated = $request->validate([
+            'lpj_ids' => 'required|array|min:1',
+            'lpj_ids.*' => 'exists:laporan_pertanggung_jawabans,id',
+        ]);
+
+        $lpjIds = $validated['lpj_ids'];
+
+        // Get all selected LPJs
+        $lpjs = \App\Models\LaporanPertanggungJawaban::with([
+            'pencairanDana',
+            'pencairanDana.pengajuanDana',
+            'pencairanDana.pengajuanDana.divisi',
+            'pencairanDana.pengajuanDana.programKerja',
+            'pencairanDana.pengajuanDana.subProgram'
+        ])->whereIn('id', $lpjIds)->get();
+
+        // Get periode anggaran ID (should be same for all)
+        $periodeAnggaranId = $lpjs->first()?->pencairanDana?->pengajuanDana?->programKerja?->periode_anggaran_id
+            ?? $lpjs->first()?->pencairanDana?->pengajuanDana?->subProgram?->periode_anggaran_id;
+
+        $totalSisaDana = $lpjs->sum('sisa_dana');
+
+        // Get active company bank accounts
+        $rekeningPerusahaan = \App\Models\RekeningPerusahaan::active()
+            ->with('bank')
+            ->orderBy('is_default', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('refund.create-from-selection', compact(
+            'lpjs',
+            'periodeAnggaranId',
+            'totalSisaDana',
+            'rekeningPerusahaan'
+        ));
+    }
+
+    /**
+     * Store refund from selected LPJs.
+     */
+    public function storeFromSelection(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'lpj_ids' => 'required|array|min:1',
+            'lpj_ids.*' => 'exists:laporan_pertanggung_jawabans,id',
+            'tanggal_refund' => 'required|date',
+            'jumlah_refund' => 'required|numeric|min:0',
+            'metode_refund' => 'required|in:transfer,cash,potong_gaji,lainnya',
+            'alasan_refund' => 'required|string|max:1000',
+            'jenis_refund' => 'required|in:kelebihan,dana_kembali,batal,pengembalian lainnya',
+            'rekening_perusahaan_id' => 'required_if:metode_refund,transfer|exists:rekening_perusahaans,id',
+            'rekening_pengirim' => 'nullable|string|max:100',
+            'nama_pengirim' => 'nullable|string|max:255',
+            'bukti_transfer' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        $lpjIds = $validated['lpj_ids'];
+        unset($validated['lpj_ids']);
+
+        // Get LPJs
+        $lpjs = \App\Models\LaporanPertanggungJawaban::with([
+            'pencairanDana',
+            'pencairanDana.pengajuanDana'
+        ])->whereIn('id', $lpjIds)->get();
+
+        // Get periode anggaran ID and other IDs from first LPJ
+        $firstLpj = $lpjs->first();
+        $validated['periode_anggaran_id'] = $firstLpj?->pencairanDana?->pengajuanDana?->programKerja?->periode_anggaran_id
+            ?? $firstLpj?->pencairanDana?->pengajuanDana?->subProgram?->periode_anggaran_id;
+        $validated['pencairan_dana_id'] = $firstLpj?->pencairan_dana_id;
+        $validated['pengajuan_dana_id'] = $firstLpj?->pencairanDana?->pengajuan_dana_id;
+        $validated['lpj_id'] = null; // Not using single lpj_id anymore
+
+        try {
+            \DB::beginTransaction();
+
+            // Generate nomor refund
+            $validated['nomor_refund'] = \App\Services\NumberingService::generateNomorRefund();
+            $validated['status'] = 'draft';
+            $validated['created_by'] = auth()->id();
+
+            // Create refund
+            $refund = Refund::create($validated);
+
+            // Create refund details for each LPJ
+            foreach ($lpjs as $lpj) {
+                \App\Models\RefundDetail::create([
+                    'refund_id' => $refund->id,
+                    'lpj_id' => $lpj->id,
+                    'jumlah_refund' => $lpj->sisa_dana, // Full sisa dana
+                ]);
+            }
+
+            // Handle file upload if any
+            if ($request->hasFile('bukti_transfer')) {
+                $path = $request->file('bukti_transfer')->store('refund/bukti', 'public');
+                $refund->bukti_transfer = $path;
+                $refund->save();
+            }
+
+            \DB::commit();
+
+            return redirect()
+                ->route('refund.show', $refund)
+                ->with('success', 'Refund berhasil dibuat dari ' . $lpjs->count() . ' LPJ.');
+        } catch (\Exception $e) {
+            \DB::rollBack();
             return back()
                 ->withInput()
                 ->with('error', 'Gagal membuat refund: ' . $e->getMessage());
